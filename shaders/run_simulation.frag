@@ -109,4 +109,6 @@ void main() {
             error += (u - actual)*(u - actual);
         }
     }
+
+    error_texture = vec4(error);
 }

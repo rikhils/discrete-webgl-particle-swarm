@@ -3,10 +3,14 @@ require([
   'libs/Abubu.js',
   'text!data/zebrafish_onecl.txt',
   'text!shaders/run_simulation.frag',
+  'text!shaders/reduce_error_s1.frag',
+  'text!shaders/reduce_error_s2.frag',
 ], function(
   Abubu,
   ActualData,
   RunSimulationShader,
+  ReduceErrorS1Shader,
+  ReduceErrorS2Shader,
 ) {
   'use strict';
 
@@ -115,7 +119,7 @@ require([
   });
 
   // Solver for running a simulation once for each particle
-  var run_simulations = new Abubu.Solver({
+  var run_simulations_solver = new Abubu.Solver({
     fragmentShader: RunSimulationShader,
     uniforms: {
       in_particles_1: {
@@ -180,9 +184,52 @@ require([
   });
 
   //
+  // Solvers to find the global best simulation results
+  //
+
+  var reduced_error_1_texture = new Abubu.Float32Texture(particles_width, particles_height, {
+    pairable: true,
+  });
+
+  var reduced_error_2_texture = new Abubu.Float32Texture(particles_width, particles_height, {
+    pairable: true,
+  });
+
+  var reduce_error_1_solver = new Abubu.Solver({
+    fragmentShader: ReduceErrorS1Shader,
+    uniforms: {
+      error_texture: {
+        type: 't',
+        value: error_texture,
+      },
+    },
+    targets: {
+      reduced_error_1: {
+        location: 0,
+        target: reduced_error_1_texture,
+      },
+    },
+  });
+
+  var reduce_error_2_solver = new Abubu.Solver({
+    fragmentShader: ReduceErrorS2Shader,
+    uniforms: {
+      reduced_error_1: {
+        type: 't',
+        value: reduced_error_1_texture,
+      },
+    },
+    targets: {
+      reduced_error_2: {
+        location: 0,
+        target: reduced_error_2_texture,
+      },
+    },
+  });
+
+  //
   // Remaining work:
-  // * Actually run the simulation solver
-  // * Error aggregation to find global best
+  // * Actually run the simulation and error solvers
   // * Particle updates and local best tracking
   //
 });

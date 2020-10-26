@@ -5,12 +5,16 @@ require([
   'text!shaders/run_simulation.frag',
   'text!shaders/reduce_error_s1.frag',
   'text!shaders/reduce_error_s2.frag',
+  'text!shaders/update_velocities.frag',
+  'text!shaders/update_particles.frag',
 ], function(
   Abubu,
   ActualData,
   RunSimulationShader,
   ReduceErrorS1Shader,
   ReduceErrorS2Shader,
+  UpdateVelocitiesShader,
+  UpdateParticlesShader,
 ) {
   'use strict';
 
@@ -71,34 +75,20 @@ require([
     data_array[p++] = 0.0;
   }
 
+  //
+  // Textures
+  //
+
+  // The recorded data used to evaluate the correctness of simulation runs
+
   var data_texture = new Abubu.Float32Texture(data_length, 1, {
     pairable: true,
     data: data_array,
   });
 
-  //
-  // Environment for solver with default values
-  //
+  // These textures record the position (or particle values), velocity, and global best of each
+  // particle
 
-  var env = {
-    simulation: {
-      dt: 0.02,
-      period: 400.0,
-      stim_start: 2.0,
-      stim_end: 7.0,
-      stim_mag: 0.1,
-      num_beats: 1,
-      v_init: 1.0,
-      w_init: 1.0,
-    },
-  };
-
-  //
-  // Simulation running solver
-  //
-
-  // Textures to store the values for each particle. There are so many dimensions this needs to be
-  // split into multiple textures.
   var particles_texture_1 = new Abubu.Float32Texture(particles_width, particles_height, {
     pariable: true,
   });
@@ -112,11 +102,123 @@ require([
     pariable: true,
   });
 
-  // Texture to store the error value returned from one run of the simulation by the corresponding
-  // particle
+  var velocities_texture_1 = new Abubu.Float32Texture(particles_width, particles_height, {
+    pariable: true,
+  });
+  var velocities_texture_2 = new Abubu.Float32Texture(particles_width, particles_height, {
+    pariable: true,
+  });
+  var velocities_texture_3 = new Abubu.Float32Texture(particles_width, particles_height, {
+    pariable: true,
+  });
+  var velocities_texture_4 = new Abubu.Float32Texture(particles_width, particles_height, {
+    pariable: true,
+  });
+
+  var bests_texture_1 = new Abubu.Float32Texture(particles_width, particles_height, {
+    pariable: true,
+  });
+  var bests_texture_2 = new Abubu.Float32Texture(particles_width, particles_height, {
+    pariable: true,
+  });
+  var bests_texture_3 = new Abubu.Float32Texture(particles_width, particles_height, {
+    pariable: true,
+  });
+  var bests_texture_4 = new Abubu.Float32Texture(particles_width, particles_height, {
+    pariable: true,
+  });
+
+  // The out textures are used to get the values from updates
+
+  var particles_out_texture_1 = new Abubu.Float32Texture(particles_width, particles_height, {
+    pariable: true,
+  });
+  var particles_out_texture_2 = new Abubu.Float32Texture(particles_width, particles_height, {
+    pariable: true,
+  });
+  var particles_out_texture_3 = new Abubu.Float32Texture(particles_width, particles_height, {
+    pariable: true,
+  });
+  var particles_out_texture_4 = new Abubu.Float32Texture(particles_width, particles_height, {
+    pariable: true,
+  });
+
+  var velocities_out_texture_1 = new Abubu.Float32Texture(particles_width, particles_height, {
+    pariable: true,
+  });
+  var velocities_out_texture_2 = new Abubu.Float32Texture(particles_width, particles_height, {
+    pariable: true,
+  });
+  var velocities_out_texture_3 = new Abubu.Float32Texture(particles_width, particles_height, {
+    pariable: true,
+  });
+  var velocities_out_texture_4 = new Abubu.Float32Texture(particles_width, particles_height, {
+    pariable: true,
+  });
+
+  var bests_out_texture_1 = new Abubu.Float32Texture(particles_width, particles_height, {
+    pariable: true,
+  });
+  var bests_out_texture_2 = new Abubu.Float32Texture(particles_width, particles_height, {
+    pariable: true,
+  });
+  var bests_out_texture_3 = new Abubu.Float32Texture(particles_width, particles_height, {
+    pariable: true,
+  });
+  var bests_out_texture_4 = new Abubu.Float32Texture(particles_width, particles_height, {
+    pariable: true,
+  });
+
+  // The error textures are used to reduce the error quantities of each particles from each
+  // simulation run down to a global best.
+
   var error_texture = new Abubu.Float32Texture(particles_width, particles_height, {
     pariable: true,
   });
+
+  var reduced_error_1_texture = new Abubu.Float32Texture(particles_width, particles_height, {
+    pairable: true,
+  });
+
+  var reduced_error_2_texture = new Abubu.Float32Texture(particles_width, particles_height, {
+    pairable: true,
+  });
+
+  //
+  // Environment for solver with default values
+  //
+
+  // TODO: Make sure to set the correct values
+  var env = {
+    simulation: {
+      dt: 0.02,
+      period: 400.0,
+      stim_start: 2.0,
+      stim_end: 7.0,
+      stim_mag: 0.1,
+      num_beats: 1,
+      v_init: 1.0,
+      w_init: 1.0,
+    },
+    particles: {
+      omega: 0.0,
+      r_local: 0.0,
+      r_global: 0.0,
+      phi_local: 0.0,
+      phi_global: 0.0,
+      global_bests: [
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 0.0],
+      ],
+      learning_rate: 0.0,
+    },
+  };
+
+  //
+  // Simulation running solver
+  //
 
   // Solver for running a simulation once for each particle
   var run_simulations_solver = new Abubu.Solver({
@@ -187,14 +289,6 @@ require([
   // Solvers to find the global best simulation results
   //
 
-  var reduced_error_1_texture = new Abubu.Float32Texture(particles_width, particles_height, {
-    pairable: true,
-  });
-
-  var reduced_error_2_texture = new Abubu.Float32Texture(particles_width, particles_height, {
-    pairable: true,
-  });
-
   var reduce_error_1_solver = new Abubu.Solver({
     fragmentShader: ReduceErrorS1Shader,
     uniforms: {
@@ -228,8 +322,102 @@ require([
   });
 
   //
+  // Solvers to update the velocities
+  //
+
+  function makeVelocityUpdateSolver(pt, vt, bt, vto, num) {
+    return new Abubu.Solver({
+      fragmentShader: UpdateVelocitiesShader,
+      uniforms: {
+        positions_texture: {
+          type: 't',
+          value: pt,
+        },
+        velocities_texture: {
+          type: 't',
+          value: vt,
+        },
+        bests_texture: {
+          type: 't',
+          value: bt,
+        },
+        omega: {
+          type: 'f',
+          value: env.particles.omega,
+        },
+        r_local: {
+          type: 'f',
+          value: env.particles.r_local,
+        },
+        r_global: {
+          type: 'f',
+          value: env.particles.r_global,
+        },
+        phi_local: {
+          type: 'f',
+          value: env.particles.phi_local,
+        },
+        phi_global: {
+          type: 'f',
+          value: env.particles.phi_global,
+        },
+        global_best: {
+          type: 'v4',
+          value: env.particles.global_bests[num],
+        },
+      },
+      targets: {
+        new_velocity: {
+          location: 0,
+          target: vto,
+        },
+      },
+    });
+  }
+
+  var velocity_1_solver = makeVelocityUpdateSolver(particles_texture_1, velocities_texture_1, bests_texture_1, velocities_out_texture_1, 0);
+  var velocity_2_solver = makeVelocityUpdateSolver(particles_texture_2, velocities_texture_2, bests_texture_2, velocities_out_texture_2, 1);
+  var velocity_3_solver = makeVelocityUpdateSolver(particles_texture_3, velocities_texture_3, bests_texture_3, velocities_out_texture_3, 2);
+  var velocity_4_solver = makeVelocityUpdateSolver(particles_texture_4, velocities_texture_4, bests_texture_4, velocities_out_texture_4, 3);
+
+  //
+  // Solvers to update the positions
+  //
+
+  function makeParticleUpdateSolver(pt, vt, pto) {
+    return new Abubu.Solver({
+      fragmentShader: UpdateParticlesShader,
+      uniforms: {
+        positions_texture: {
+          type: 't',
+          value: pt,
+        },
+        velocities_texture: {
+          type: 't',
+          value: vt,
+        },
+        learning_rate: {
+          type: 'f',
+          value: env.particles.learning_rate,
+        },
+      },
+      targets: {
+        new_position: {
+          location: 0,
+          target: pto,
+        },
+      },
+    });
+  }
+
+  var position_1_solver = makeParticleUpdateSolver(particles_texture_1, velocities_texture_1, particles_out_texture_1);
+  var position_2_solver = makeParticleUpdateSolver(particles_texture_2, velocities_texture_2, particles_out_texture_2);
+  var position_3_solver = makeParticleUpdateSolver(particles_texture_3, velocities_texture_3, particles_out_texture_3);
+  var position_4_solver = makeParticleUpdateSolver(particles_texture_4, velocities_texture_4, particles_out_texture_4);
+
+  //
   // Remaining work:
-  // * Actually run the simulation and error solvers
-  // * Particle updates and local best tracking
+  // * Solvers to update local best and local best error
+  // * Actually run the solvers
   //
 });

@@ -89,6 +89,8 @@ require([
   // These textures record the position (or particle values), velocity, and global best of each
   // particle
 
+
+
   var particles_texture_1 = new Abubu.Float32Texture(particles_width, particles_height, {
     pariable: true,
   });
@@ -214,7 +216,48 @@ require([
       ],
       learning_rate: 0.0,
     },
+    velocity_update: {
+
+    },
   };
+
+// These should probably be in env?
+env.velocity_update.istate  = new Uint32Array(particles_width*particles_height*4);
+env.velocity_update.imat    = new Uint32Array(particles_width*particles_height*4);
+
+var p=0;
+var seed = 0;
+var tm = new Abubu.TinyMT({vmat:0});
+
+for(var j=0 ; j<particles_height ; j++){
+    for(var i=0 ; i<particles_width ; i++){
+        //  mat1            mat2            seed 
+        tm.mat[0] = i ;     tm.mat[1] = j ; tm.mat[3] = seed ;
+        tm.init() ;
+
+        for(var k=0 ; k<4 ; k++){
+            env.velocity_update.istate[p] = tm.state[k] ;  
+            env.velocity_update.imat[p] = tm.mat[k] ;  
+            p++ ;
+        }
+    }
+}
+
+// console.log(istate);
+
+// These should *definitely* live in env
+
+env.velocity_update.ftinymtState = new Abubu.Uint32Texture( particles_width, particles_height,
+        {data : env.velocity_update.istate ,pair : true } ) ;
+env.velocity_update.stinymtState = new Abubu.Uint32Texture( particles_width, particles_height,
+        {data : env.velocity_update.istate ,pair : true } ) ;
+
+// mat state for each point of the generator .............................
+env.velocity_update.tinymtMat = new Abubu.Uint32Texture( particles_width, particles_height ,
+        {data : env.velocity_update.imat } ) ;
+
+// console.log(env.velocity_update.ftinymtState);
+
 
   //
   // Simulation running solver

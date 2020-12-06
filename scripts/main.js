@@ -236,7 +236,7 @@ env.velocity_update.istate  = new Uint32Array(particles_width*particles_height*4
 env.velocity_update.imat    = new Uint32Array(particles_width*particles_height*4);
 
 var p=0;
-var seed = 0;
+var seed = Date.now();
 var tm = new Abubu.TinyMT({vmat:0});
 
 for(var j=0 ; j<particles_height ; j++){

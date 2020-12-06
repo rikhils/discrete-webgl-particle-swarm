@@ -6,7 +6,7 @@ precision highp isampler2D ;
 precision highp usampler2D ;
 
 uniform sampler2D positions_texture, velocities_texture, bests_texture;
-uniform usampler2D  itinymtState, itinymtmat;
+uniform usampler2D  itinymtState, itinymtMat;
 
 
 layout (location = 0) out vec4 new_velocity;

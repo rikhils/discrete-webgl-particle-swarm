@@ -388,7 +388,7 @@ env.velocity_update.tinymtMat = new Abubu.Uint32Texture( particles_width, partic
           type: 't',
           value: env.velocity_update.ftinymtState,
         },
-        itinymtmat: {
+        itinymtMat: {
           type: 't',
           value: env.velocity_update.tinymtMat,
         },

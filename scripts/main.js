@@ -30,34 +30,51 @@ require([
 
   var num_particles = particles_width * particles_height;
 
-  var bounds = {
-    trmin: 25,
-    trmax: 200,
-    tsimin: 10,
-    tsimax: 300,
-    twpmin: 50,
-    twpmax: 500,
-    tdmin: 0.15,
-    tdmax: 0.4,
-    tvpmin: 1,
-    tvpmax: 20,
-    tv1mmin: 10,
-    tv1mmax: 50,
-    tv2mmin: 500,
-    tv2mmax: 1500,
-    twmmin: 5,
-    twmmax: 100,
-    tomin: 5,
-    tomax: 50,
-    xkmin: 1,
-    xkmax: 15,
-    ucsimin: 0.2,
-    ucsimax: 0.9,
-    ucmin: 0.1,
-    ucmax: 0.25,
-    uvmin: 0.005,
-    uvmax: 0.05,
+  //
+  // Environment for solver with default values
+  //
+
+  var env = {
+    simulation: {
+      dt: 0.02,
+      period: 400.0,
+      stim_start: 2.0,
+      stim_end: 7.0,
+      stim_mag: 0.1,
+      num_beats: 1,
+      v_init: 1.0,
+      w_init: 1.0,
+    },
+    particles: {
+      phi_local: 2.05,
+      phi_global: 2.05,
+      global_bests: [
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 0.0, 0.0, 0.0],
+      ],
+      best_error_value: 1e10,
+      learning_rate: 0.0,
+      chi: [],
+    },
+    bounds: [
+      [[25, 200], [10, 300], [50, 500], [0.15, 0.4]],
+      [[1, 20], [10, 50], [500, 1500], [5, 100]],
+      [[5, 50], [1, 15], [0.2, 0.9], [0.1, 0.25]],
+      [[0.005, 0.05], [0, 0], [0, 0], [0, 0]],
+    ],
+    velocity_update: {
+
+    },
   };
+
+  var phi = env.particles.phi_global + env.particles.phi_local;
+  var chi = 0.05 * 2 / (phi - 2 + Math.sqrt(phi * (phi - 4)));
+
+  for (var i = 0; i < 4; ++i) {
+    env.particles.chi.push(env.bounds[i].map(([min, max]) => chi * (max + min)/2));
+  }
 
   //
   // Set up data used to evaluate the each simulation run
@@ -75,6 +92,39 @@ require([
     data_array[p++] = 0.0;
     data_array[p++] = 0.0;
     data_array[p++] = 0.0;
+  }
+
+  var init_array_1 = new Float32Array(num_particles * 4);
+  var init_array_2 = new Float32Array(num_particles * 4);
+  var init_array_3 = new Float32Array(num_particles * 4);
+  var init_array_4 = new Float32Array(num_particles * 4);
+
+  function random_init(i, j) {
+    var [min, max] = env.bounds[i][j];
+    return Math.random() * (max - min) + min;
+  }
+
+  var p = 0;
+  for (var i = 0; i < num_particles; ++i) {
+    init_array_1[p] = random_init(0, 0);
+    init_array_2[p] = random_init(1, 0);
+    init_array_3[p] = random_init(2, 0);
+    init_array_4[p++] = random_init(3, 0);
+
+    init_array_1[p] = random_init(0, 1);
+    init_array_2[p] = random_init(1, 1);
+    init_array_3[p] = random_init(2, 1);
+    init_array_4[p++] = 0;
+
+    init_array_1[p] = random_init(0, 2);
+    init_array_2[p] = random_init(1, 2);
+    init_array_3[p] = random_init(2, 2);
+    init_array_4[p++] = 0;
+
+    init_array_1[p] = random_init(0, 3);
+    init_array_2[p] = random_init(1, 3);
+    init_array_3[p] = random_init(2, 3);
+    init_array_4[p++] = 0;
   }
 
   //
@@ -95,15 +145,19 @@ require([
 
   var particles_texture_1 = new Abubu.Float32Texture(particles_width, particles_height, {
     pariable: true,
+    data: init_array_1,
   });
   var particles_texture_2 = new Abubu.Float32Texture(particles_width, particles_height, {
     pariable: true,
+    data: init_array_2,
   });
   var particles_texture_3 = new Abubu.Float32Texture(particles_width, particles_height, {
     pariable: true,
+    data: init_array_3,
   });
   var particles_texture_4 = new Abubu.Float32Texture(particles_width, particles_height, {
     pariable: true,
+    data: init_array_4,
   });
 
   var velocities_texture_1 = new Abubu.Float32Texture(particles_width, particles_height, {
@@ -180,7 +234,7 @@ require([
   var local_bests_error_texture = new Abubu.Float32Texture(particles_width, particles_height, {
     pariable: true,
   });
-  
+
   var local_bests_error_texture_out = new Abubu.Float32Texture(particles_width, particles_height, {
     pariable: true,
   });
@@ -198,39 +252,6 @@ require([
     pairable: true,
   });
 
-  //
-  // Environment for solver with default values
-  //
-
-  // TODO: Make sure to set the correct values
-  var env = {
-    simulation: {
-      dt: 0.02,
-      period: 400.0,
-      stim_start: 2.0,
-      stim_end: 7.0,
-      stim_mag: 0.1,
-      num_beats: 1,
-      v_init: 1.0,
-      w_init: 1.0,
-    },
-    particles: {
-      omega: 0.0,
-      phi_local: 0.0,
-      phi_global: 0.0,
-      global_bests: [
-        [0.0, 0.0, 0.0, 0.0],
-        [0.0, 0.0, 0.0, 0.0],
-        [0.0, 0.0, 0.0, 0.0],
-        [0.0, 0.0, 0.0, 0.0],
-      ],
-      learning_rate: 0.0,
-    },
-    velocity_update: {
-
-    },
-  };
-
 // These should probably be in env?
 env.velocity_update.istate  = new Uint32Array(particles_width*particles_height*4);
 env.velocity_update.imat    = new Uint32Array(particles_width*particles_height*4);
@@ -241,13 +262,13 @@ var tm = new Abubu.TinyMT({vmat:0});
 
 for(var j=0 ; j<particles_height ; j++){
     for(var i=0 ; i<particles_width ; i++){
-        //  mat1            mat2            seed 
+        //  mat1            mat2            seed
         tm.mat[0] = i ;     tm.mat[1] = j ; tm.mat[3] = seed ;
         tm.init() ;
 
         for(var k=0 ; k<4 ; k++){
-            env.velocity_update.istate[p] = tm.state[k] ;  
-            env.velocity_update.imat[p] = tm.mat[k] ;  
+            env.velocity_update.istate[p] = tm.state[k] ;
+            env.velocity_update.imat[p] = tm.mat[k] ;
             p++ ;
         }
     }
@@ -374,16 +395,16 @@ env.velocity_update.tinymtMat = new Abubu.Uint32Texture( particles_width, partic
     },
   });
 
-// 
+//
 //  Solvers to update the local best positions
-// 
+//
 
-  /* 
+  /*
 
   So, this is for updating the local best errors. As it stands, this will copy
 the new error value multiple times in the event that the new error is lower.
 However, I tend to think that this redundancy will still perform better than
-making a separate solver just to update the error? 
+making a separate solver just to update the error?
 
 */
   function makeUpdateLocalBestsSolver(lbt, cvt, new_lbt)
@@ -455,9 +476,9 @@ making a separate solver just to update the error?
           type: 't',
           value: env.velocity_update.tinymtMat,
         },
-        omega: {
-          type: 'f',
-          value: env.particles.omega,
+        chi: {
+          type: 'v4',
+          value: env.particles.chi[num],
         },
         phi_local: {
           type: 'f',
@@ -542,9 +563,67 @@ making a separate solver just to update the error?
   var velocities_3_copy = new Abubu.Copy(velocities_out_texture_3, velocities_texture_3);
   var velocities_4_copy = new Abubu.Copy(velocities_out_texture_4, velocities_texture_4);
 
-  //
-  // Remaining work:
-  // * Solvers to update local best and local best error
-  // * Actually run the solvers
-  //
+  function update_global_best() {
+    var [best_error, best_x_index, best_y_index] = reduced_error_2_texture.value.slice(-4, -1);
+
+    if (best_error < env.particles.best_error_value) {
+      var best_particle_index = 4 * (best_x_index * (particles_width) + best_y_index);
+
+      env.particles.global_bests[0] = particles_texture_1.value.slice(best_particle_index, best_particle_index + 4);
+      env.particles.global_bests[1] = particles_texture_2.value.slice(best_particle_index, best_particle_index + 4);
+      env.particles.global_bests[2] = particles_texture_3.value.slice(best_particle_index, best_particle_index + 4);
+      env.particles.global_bests[3] = particles_texture_4.value.slice(best_particle_index, best_particle_index + 4);
+
+      env.particles.best_error_value = best_error;
+    }
+
+    console.log("best error: " + best_error);
+  }
+
+  function run() {
+    run_simulations_solver.render();
+
+    reduce_error_1_solver.render();
+    reduce_error_2_solver.render();
+
+    update_global_best();
+
+    local_best_update_1_solver.render();
+    local_best_update_2_solver.render();
+    local_best_update_3_solver.render();
+    local_best_update_4_solver.render();
+
+    local_bests_1_copy.render();
+    local_bests_2_copy.render();
+    local_bests_3_copy.render();
+    local_bests_4_copy.render();
+
+    velocity_1_solver.render();
+    velocity_2_solver.render();
+    velocity_3_solver.render();
+    velocity_4_solver.render();
+
+    velocities_1_copy.render();
+    velocities_2_copy.render();
+    velocities_3_copy.render();
+    velocities_4_copy.render();
+
+    console.log(velocities_out_texture_1.value);
+
+    tinymt_copy.render();
+
+    position_1_solver.render();
+    position_2_solver.render();
+    position_3_solver.render();
+    position_4_solver.render();
+
+    positions_1_copy.render();
+    positions_2_copy.render();
+    positions_3_copy.render();
+    positions_4_copy.render();
+  }
+
+  for (var i = 0; i < 8; ++i) {
+    run();
+  }
 });

@@ -40,7 +40,8 @@ void main() {
     // PSO derived parameters
     int num_period = int(ceil(period/dt));
     float endtime = ceil(float(num_beats)*period);
-    int num_steps = int(ceil(endtime/dt));
+    // int num_steps = int(ceil(endtime/dt));
+    int num_steps = 1;
 
     // Get the relevant color from each texture
     vec4 particles_1 = texture(in_particles_1, cc);
@@ -90,7 +91,6 @@ void main() {
             // p false
             (1.0 - p)*u / TO_POS
             // p true
-            // TODO: Ask Elizabeth if there should be a u term here
             + p/TR_POS;
 
         float jsi = -w * (1.0 + TANH(XK_POS * (u-UCSI_POS))) / (2.0 * TSI_POS);
@@ -110,5 +110,5 @@ void main() {
         }
     }
 
-    error_texture = vec4(error);
+    error_texture = vec4(error, 0, 0, 0);
 }

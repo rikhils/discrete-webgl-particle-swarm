@@ -14,9 +14,8 @@ layout (location = 1) out uvec4 otinymtState;
 
 in vec2 cc;
 
-// uniform float omega, r_local, r_global, phi_local, phi_global;
-uniform float omega, phi_local, phi_global;
-uniform vec4 global_best;
+uniform float phi_local, phi_global;
+uniform vec4 chi, global_best;
 
 #define P0_POS positions.r
 #define P1_POS positions.g
@@ -38,6 +37,11 @@ uniform vec4 global_best;
 #define P2_GLOBAL_BEST global_best.b
 #define P3_GLOBAL_BEST global_best.a
 
+#define P0_CHI chi.r
+#define P1_CHI chi.g
+#define P2_CHI chi.b
+#define P3_CHI chi.a
+
 
 /*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
  * tinymt.glsl  :   a glsl file to be included the in the shaders
@@ -49,7 +53,7 @@ uniform vec4 global_best;
  */
 
 // global variables and the macros for the tinymt algorithm --------------
-uvec4 tinymtState, tinymtMat ; 
+uvec4 tinymtState, tinymtMat ;
 
 #define TINYMT32_SH0    1
 #define TINYMT32_SH1    10
@@ -66,7 +70,7 @@ uvec4 tinymtState, tinymtMat ;
  *========================================================================
  */
 void tinymtInit(){
-    // Initialize the random number states 
+    // Initialize the random number states
     tinymtState = texture( itinymtState, cc ) ;
     tinymtMat   = texture( itinymtMat,   cc ) ;
     return ;
@@ -124,7 +128,7 @@ uint  tinymtTemper() {
 }
 
 /*========================================================================
- * Get a random number using the tiny marsenne twister 
+ * Get a random number using the tiny marsenne twister
  *========================================================================
  */
 uint tinymtUrand(){
@@ -157,7 +161,7 @@ uint tinymtBinran(float p, uint npar){
         }
     }else{ /* for small probablities of p use a geometric distribution */
         isum = uint( floor ( log( 1. - tinymtRand() ) /
-                             log( 1. - p            )   ) ) ; 
+                             log( 1. - p            )   ) ) ;
     }
     return isum ;
 }
@@ -177,32 +181,25 @@ void main() {
     float r_local = tinymtRand();
 
 
-    float new_p0 = omega * P0_VEL
-        + phi_local * r_local * (P0_BEST - P0_POS)
-        + phi_global * r_global * (P0_GLOBAL_BEST - P0_POS);
+    float new_p0 = P0_CHI * (P0_VEL + phi_local * r_local * (P0_BEST - P0_POS) + phi_global * r_global * (P0_GLOBAL_BEST - P0_POS));
 
     r_local = tinymtRand();
     r_global = tinymtRand();
 
-    float new_p1 = omega * P1_VEL
-        + phi_local * r_local * (P1_BEST - P1_POS)
-        + phi_global * r_global * (P1_GLOBAL_BEST - P1_POS);
+    float new_p1 = P1_CHI * (P1_VEL + phi_local * r_local * (P1_BEST - P1_POS) + phi_global * r_global * (P1_GLOBAL_BEST - P1_POS));
 
     r_local = tinymtRand();
     r_global = tinymtRand();
 
 
-    float new_p2 = omega * P2_VEL
-        + phi_local * r_local * (P2_BEST - P2_POS)
-        + phi_global * r_global * (P2_GLOBAL_BEST - P2_POS);
+    float new_p2 = P2_CHI * (P2_VEL + phi_local * r_local * (P2_BEST - P2_POS) + phi_global * r_global * (P2_GLOBAL_BEST - P2_POS));
 
     r_local = tinymtRand();
     r_global = tinymtRand();
 
-    float new_p3 = omega * P3_VEL
-        + phi_local * r_local * (P3_BEST - P3_POS)
-        + phi_global * r_global * (P3_GLOBAL_BEST - P3_POS);
+    float new_p3 = P3_CHI * (P3_VEL + phi_local * r_local * (P3_BEST - P3_POS) + phi_global * r_global * (P3_GLOBAL_BEST - P3_POS));
 
+    // new_velocity = vec4(new_p0, new_p1, new_p2, new_p3);
     new_velocity = vec4(new_p0, new_p1, new_p2, new_p3);
     tinymtReturn();
 }

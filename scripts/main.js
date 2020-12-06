@@ -384,6 +384,14 @@ env.velocity_update.tinymtMat = new Abubu.Uint32Texture( particles_width, partic
           type: 't',
           value: bt,
         },
+        itinymtState: {
+          type: 't',
+          value: env.velocity_update.ftinymtState,
+        },
+        itinymtmat: {
+          type: 't',
+          value: env.velocity_update.tinymtMat,
+        },
         omega: {
           type: 'f',
           value: env.particles.omega,
@@ -413,6 +421,10 @@ env.velocity_update.tinymtMat = new Abubu.Uint32Texture( particles_width, partic
         new_velocity: {
           location: 0,
           target: vto,
+        },
+        otinymtState: {
+          location: 1,
+          target: env.velocity_update.stinymtState,
         },
       },
     });

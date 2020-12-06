@@ -7,6 +7,7 @@ require([
   'text!shaders/reduce_error_s2.frag',
   'text!shaders/update_velocities.frag',
   'text!shaders/update_particles.frag',
+  'text!shaders/update_local_bests.frag',
 ], function(
   Abubu,
   ActualData,
@@ -15,6 +16,7 @@ require([
   ReduceErrorS2Shader,
   UpdateVelocitiesShader,
   UpdateParticlesShader,
+  UpdateLocalBestsShader,
 ) {
   'use strict';
 
@@ -171,8 +173,18 @@ require([
     pariable: true,
   });
 
+
   // The error textures are used to reduce the error quantities of each particles from each
   // simulation run down to a global best.
+
+  var local_bests_error_texture = new Abubu.Float32Texture(particles_width, particles_height, {
+    pariable: true,
+  });
+  
+  var local_bests_error_texture_out = new Abubu.Float32Texture(particles_width, particles_height, {
+    pariable: true,
+  });
+
 
   var error_texture = new Abubu.Float32Texture(particles_width, particles_height, {
     pariable: true,
@@ -204,8 +216,6 @@ require([
     },
     particles: {
       omega: 0.0,
-      r_local: 0.0,
-      r_global: 0.0,
       phi_local: 0.0,
       phi_global: 0.0,
       global_bests: [
@@ -364,10 +374,63 @@ env.velocity_update.tinymtMat = new Abubu.Uint32Texture( particles_width, partic
     },
   });
 
+// 
+//  Solvers to update the local best positions
+// 
+
+  /* 
+
+  So, this is for updating the local best errors. As it stands, this will copy
+the new error value multiple times in the event that the new error is lower.
+However, I tend to think that this redundancy will still perform better than
+making a separate solver just to update the error? 
+
+*/
+  function makeUpdateLocalBestsSolver(lbt, cvt, new_lbt)
+  {
+    return new Abubu.Solver({
+      fragmentShader: UpdateLocalBestsShader,
+      uniforms:{
+        local_bests_texture: {
+          type: 't',
+          value: lbt,
+        },
+        local_bests_error_texture: {
+          type: 't',
+          value: local_bests_error_texture,
+        },
+        cur_vals_texture: {
+          type: 't',
+          value: cvt
+        },
+        cur_error_texture: {
+          type: 't',
+          value: error_texture,
+        },
+      },
+      targets: {
+        new_local_best: {
+          location: 0,
+          target: new_lbt,
+        },
+        new_local_best_error: {
+          location: 1,
+          target: local_bests_error_texture_out,
+        },
+      },
+    });
+  }
+
+  var local_best_update_1_solver = makeUpdateLocalBestsSolver(bests_texture_1, particles_texture_1, bests_out_texture_1);
+  var local_best_update_2_solver = makeUpdateLocalBestsSolver(bests_texture_2, particles_texture_2, bests_out_texture_2);
+  var local_best_update_3_solver = makeUpdateLocalBestsSolver(bests_texture_3, particles_texture_3, bests_out_texture_3);
+  var local_best_update_4_solver = makeUpdateLocalBestsSolver(bests_texture_4, particles_texture_4, bests_out_texture_4);
+
+
+
   //
   // Solvers to update the velocities
   //
-
   function makeVelocityUpdateSolver(pt, vt, bt, vto, num) {
     return new Abubu.Solver({
       fragmentShader: UpdateVelocitiesShader,
@@ -395,14 +458,6 @@ env.velocity_update.tinymtMat = new Abubu.Uint32Texture( particles_width, partic
         omega: {
           type: 'f',
           value: env.particles.omega,
-        },
-        r_local: {
-          type: 'f',
-          value: env.particles.r_local,
-        },
-        r_global: {
-          type: 'f',
-          value: env.particles.r_global,
         },
         phi_local: {
           type: 'f',
@@ -469,6 +524,23 @@ env.velocity_update.tinymtMat = new Abubu.Uint32Texture( particles_width, partic
   var position_2_solver = makeParticleUpdateSolver(particles_texture_2, velocities_texture_2, particles_out_texture_2);
   var position_3_solver = makeParticleUpdateSolver(particles_texture_3, velocities_texture_3, particles_out_texture_3);
   var position_4_solver = makeParticleUpdateSolver(particles_texture_4, velocities_texture_4, particles_out_texture_4);
+
+  var tinymt_copy = new Abubu.Copy(env.velocity_update.stinymtState, env.velocity_update.ftinymtState);
+
+  var local_bests_1_copy = new Abubu.Copy(bests_out_texture_1, bests_texture_1);
+  var local_bests_2_copy = new Abubu.Copy(bests_out_texture_2, bests_texture_2);
+  var local_bests_3_copy = new Abubu.Copy(bests_out_texture_3, bests_texture_3);
+  var local_bests_4_copy = new Abubu.Copy(bests_out_texture_4, bests_texture_4);
+
+  var positions_1_copy = new Abubu.Copy(particles_out_texture_1, particles_texture_1);
+  var positions_2_copy = new Abubu.Copy(particles_out_texture_2, particles_texture_1);
+  var positions_3_copy = new Abubu.Copy(particles_out_texture_3, particles_texture_1);
+  var positions_4_copy = new Abubu.Copy(particles_out_texture_4, particles_texture_1);
+
+  var velocities_1_copy = new Abubu.Copy(velocities_out_texture_1, velocities_texture_1);
+  var velocities_2_copy = new Abubu.Copy(velocities_out_texture_2, velocities_texture_2);
+  var velocities_3_copy = new Abubu.Copy(velocities_out_texture_3, velocities_texture_3);
+  var velocities_4_copy = new Abubu.Copy(velocities_out_texture_4, velocities_texture_4);
 
   //
   // Remaining work:

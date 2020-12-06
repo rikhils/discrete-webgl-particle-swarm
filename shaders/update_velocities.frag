@@ -14,7 +14,8 @@ layout (location = 1) out uvec4 otinymtState;
 
 in vec2 cc;
 
-uniform float omega, r_local, r_global, phi_local, phi_global;
+// uniform float omega, r_local, r_global, phi_local, phi_global;
+uniform float omega, phi_local, phi_global;
 uniform vec4 global_best;
 
 #define P0_POS positions.r
@@ -168,25 +169,40 @@ uint tinymtBinran(float p, uint npar){
 
 
 void main() {
+    tinymtInit();
     vec4 positions = texture(positions_texture, cc);
     vec4 velocities = texture(velocities_texture, cc);
     vec4 bests = texture(bests_texture, cc);
+    float r_global = tinymtRand();
+    float r_local = tinymtRand();
+
 
     float new_p0 = omega * P0_VEL
         + phi_local * r_local * (P0_BEST - P0_POS)
         + phi_global * r_global * (P0_GLOBAL_BEST - P0_POS);
 
+    r_local = tinymtRand();
+    r_global = tinymtRand();
+
     float new_p1 = omega * P1_VEL
         + phi_local * r_local * (P1_BEST - P1_POS)
         + phi_global * r_global * (P1_GLOBAL_BEST - P1_POS);
 
+    r_local = tinymtRand();
+    r_global = tinymtRand();
+
+
     float new_p2 = omega * P2_VEL
         + phi_local * r_local * (P2_BEST - P2_POS)
         + phi_global * r_global * (P2_GLOBAL_BEST - P2_POS);
+
+    r_local = tinymtRand();
+    r_global = tinymtRand();
 
     float new_p3 = omega * P3_VEL
         + phi_local * r_local * (P3_BEST - P3_POS)
         + phi_global * r_global * (P3_GLOBAL_BEST - P3_POS);
 
     new_velocity = vec4(new_p0, new_p1, new_p2, new_p3);
+    tinymtReturn();
 }

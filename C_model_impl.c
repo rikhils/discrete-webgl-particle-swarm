@@ -5,21 +5,22 @@
 #include <math.h>
 
 
-#define TR_POS 3.33
-#define TSI_POS 19.6
-#define TWP_POS 1250.0
-#define TD_POS 870.0
-#define TVP_POS 41.0
-#define TV1M_POS 0.25
-#define TV2M_POS 12.5
-#define TWM_POS 33.33
-#define TO_POS 29.0
+#define TR_POS 33.33
+#define TSI_POS 29.0
+#define TWP_POS 870.0
+#define TD_POS 0.25
+#define TVP_POS 3.33
+#define TV1M_POS 19.6
+#define TV2M_POS 1250.0
+#define TWM_POS 41.0
+#define TO_POS 12.5
 #define XK_POS 10.0
 #define UCSI_POS 0.85
 #define UC_POS 0.13
 #define UV_POS 0.04
 
 #define TANH(x) ((exp(2.0*(x)) - 1.0) / (exp(2.0*(x)) + 1.0))
+// #define TANH(x) tanh(x)
 
 int main(int argc, char const *argv[])
 {
@@ -40,6 +41,7 @@ int main(int argc, char const *argv[])
     stim_start = 2.0;
     stim_end = 7.0;
     stim_mag = 0.1;
+    // stim_mag = 1.0;
     num_beats = 1;
     v_init = 1.0;
     w_init = 1.0;
@@ -111,6 +113,7 @@ int main(int argc, char const *argv[])
         // if (mod(float(step_count), period/dt) > stim_start/dt && mod(float(step_count), period/dt) < stim_end/dt) {
         if(stimCheck > stim_start/dt && stimCheck < stim_end/dt)
         {
+            printf("Stimulus!\n");
             stim = stim_mag;
         }
 
@@ -123,7 +126,7 @@ int main(int argc, char const *argv[])
             // float actual = texelFetch(data_texture, ivec2(data_index++, 0), 0).r;
             // error += (u - actual)*(u - actual);
             fprintf(u_out, "%f\n", u);
-            printf("%f\n",error);
+            // printf("%f\n",error);
             error+=1;
         }
     }

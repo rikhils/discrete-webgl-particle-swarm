@@ -57,6 +57,8 @@ require([
       best_error_value: 1e10,
       learning_rate: 0.0,
       chi: [],
+      lower_bounds:[],
+      upper_bounds:[],
     },
     bounds: [
       [[25, 200], [10, 300], [50, 500], [0.15, 0.4]],
@@ -75,6 +77,25 @@ require([
   for (var i = 0; i < 4; ++i) {
     env.particles.chi.push(env.bounds[i].map(([min, max]) => chi * (max + min)/2));
   }
+
+  for(var i  =0; i < 4; i++)
+  {
+    var addArr_low = [];
+    var addArr_up = [];
+    for(var j = 0; j < 4; j++)
+    {
+      addArr_low.push(env.bounds[i][j][0]);
+      addArr_up.push(env.bounds[i][j][1]);
+    }
+    env.particles.lower_bounds.push(addArr_low);
+    env.particles.upper_bounds.push(addArr_up);
+  }
+  for(var i = 0; i < 4; i++)
+  {
+    console.log(env.particles.lower_bounds[i]);
+    console.log(env.particles.upper_bounds[i]);
+  }
+
 
   //
   // Set up data used to evaluate the each simulation run
@@ -515,7 +536,7 @@ making a separate solver just to update the error?
   // Solvers to update the positions
   //
 
-  function makeParticleUpdateSolver(pt, vt, pto) {
+  function makeParticleUpdateSolver(pt, vt, pto, num) {
     return new Abubu.Solver({
       fragmentShader: UpdateParticlesShader,
       uniforms: {
@@ -527,6 +548,22 @@ making a separate solver just to update the error?
           type: 't',
           value: vt,
         },
+        itinymtState: {
+          type: 't',
+          value: env.velocity_update.ftinymtState,
+        },
+        itinymtMat: {
+          type: 't',
+          value: env.velocity_update.tinymtMat,
+        },
+        lower_bounds: {
+          type: 'v4',
+          value: env.particles.lower_bounds[num],
+        },
+        upper_bounds: {
+          type: 'v4',
+          value: env.particles.upper_bounds[num],
+        },
         learning_rate: {
           type: 'f',
           value: env.particles.learning_rate,
@@ -537,14 +574,18 @@ making a separate solver just to update the error?
           location: 0,
           target: pto,
         },
+        otinymtState: {
+          location: 1,
+          target: env.velocity_update.stinymtState,
+        },
       },
     });
   }
 
-  var position_1_solver = makeParticleUpdateSolver(particles_texture_1, velocities_texture_1, particles_out_texture_1);
-  var position_2_solver = makeParticleUpdateSolver(particles_texture_2, velocities_texture_2, particles_out_texture_2);
-  var position_3_solver = makeParticleUpdateSolver(particles_texture_3, velocities_texture_3, particles_out_texture_3);
-  var position_4_solver = makeParticleUpdateSolver(particles_texture_4, velocities_texture_4, particles_out_texture_4);
+  var position_1_solver = makeParticleUpdateSolver(particles_texture_1, velocities_texture_1, particles_out_texture_1, 0);
+  var position_2_solver = makeParticleUpdateSolver(particles_texture_2, velocities_texture_2, particles_out_texture_2, 1);
+  var position_3_solver = makeParticleUpdateSolver(particles_texture_3, velocities_texture_3, particles_out_texture_3, 2);
+  var position_4_solver = makeParticleUpdateSolver(particles_texture_4, velocities_texture_4, particles_out_texture_4, 3);
 
   var tinymt_copy = new Abubu.Copy(env.velocity_update.stinymtState, env.velocity_update.ftinymtState);
 

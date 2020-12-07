@@ -687,4 +687,16 @@ making a separate solver just to update the error?
   for (var i = 0; i < 8; ++i) {
     run();
   }
+
+  var bestArr = [];
+  for(var i = 0; i < 4; i++)
+  {
+    for(var j= 0; i < 4; j++)
+    {
+      bestArr.push(env.particles.global_bests[i][j]);
+    }
+  }
+  console.log(bestArr);
+  console.log(env.particles.best_error_value);
+
 });

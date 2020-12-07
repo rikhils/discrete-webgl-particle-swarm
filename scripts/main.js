@@ -8,6 +8,7 @@ require([
   'text!shaders/update_velocities.frag',
   'text!shaders/update_particles.frag',
   'text!shaders/update_local_bests.frag',
+  'text!shaders/copy_uint_texture.frag'
 ], function(
   Abubu,
   ActualData,
@@ -17,6 +18,7 @@ require([
   UpdateVelocitiesShader,
   UpdateParticlesShader,
   UpdateLocalBestsShader,
+  CopyUIntTextureShader,
 ) {
   'use strict';
 
@@ -379,6 +381,25 @@ env.velocity_update.tinymtMat = new Abubu.Uint32Texture( particles_width, partic
     },
   });
 
+
+  var copy_tinymt_solver = new Abubu.Solver({
+    fragmentShader: CopyUIntTextureShader,
+    uniforms: {
+      src_texture: {
+        type: 't',
+        value: env.velocity_update.stinymtState,
+      },
+    },
+    targets: {
+      dest_texture: {
+        location: 0,
+        target: env.velocity_update.ftinymtState,
+      },
+    },
+  });
+
+
+
   //
   // Solvers to find the global best simulation results
   //
@@ -642,7 +663,10 @@ making a separate solver just to update the error?
     velocities_3_copy.render();
     velocities_4_copy.render();
 
-    tinymt_copy.render();
+    // console.log(velocities_texture_1.value);
+
+    // copy_tinymt_solver.render();
+    // tinymt_copy.render();
 
     position_1_solver.render();
     position_2_solver.render();
@@ -653,9 +677,22 @@ making a separate solver just to update the error?
     positions_2_copy.render();
     positions_3_copy.render();
     positions_4_copy.render();
-  }
 
-  for (var i = 0; i < 8; ++i) {
+    // tinymt_copy.render();
+    // copy_tinymt_solver.render();
+    // console.log(env.velocity_update.ftinymtState.value);
+  }
+  
+  velocity_1_solver.render();
+  console.log(env.velocity_update.ftinymtState.value);
+  console.log(env.velocity_update.stinymtState.value);
+
+  for (var i = 0; i < 0; ++i) {
     run();
   }
+  
+  copy_tinymt_solver.render();
+  console.log(env.velocity_update.ftinymtState.value);
+  console.log(env.velocity_update.stinymtState.value);
+
 });

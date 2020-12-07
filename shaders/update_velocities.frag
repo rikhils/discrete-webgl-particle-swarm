@@ -14,7 +14,7 @@ layout (location = 1) out uvec4 otinymtState;
 
 in vec2 cc;
 
-uniform float phi_local, phi_global;
+uniform float phi_local, phi_global, omega;
 uniform vec4 chi, global_best;
 
 #define P0_POS positions.r
@@ -181,23 +181,23 @@ void main() {
     float r_local = tinymtRand();
 
 
-    float new_p0 = P0_CHI * (P0_VEL + phi_local * r_local * (P0_BEST - P0_POS) + phi_global * r_global * (P0_GLOBAL_BEST - P0_POS));
+    float new_p0 = P0_CHI * (omega*P0_VEL + phi_local * r_local * (P0_BEST - P0_POS) + phi_global * r_global * (P0_GLOBAL_BEST - P0_POS));
 
     r_local = tinymtRand();
     r_global = tinymtRand();
 
-    float new_p1 = P1_CHI * (P1_VEL + phi_local * r_local * (P1_BEST - P1_POS) + phi_global * r_global * (P1_GLOBAL_BEST - P1_POS));
+    float new_p1 = P1_CHI * (omega*P1_VEL + phi_local * r_local * (P1_BEST - P1_POS) + phi_global * r_global * (P1_GLOBAL_BEST - P1_POS));
 
     r_local = tinymtRand();
     r_global = tinymtRand();
 
 
-    float new_p2 = P2_CHI * (P2_VEL + phi_local * r_local * (P2_BEST - P2_POS) + phi_global * r_global * (P2_GLOBAL_BEST - P2_POS));
+    float new_p2 = P2_CHI * (omega*P2_VEL + phi_local * r_local * (P2_BEST - P2_POS) + phi_global * r_global * (P2_GLOBAL_BEST - P2_POS));
 
     r_local = tinymtRand();
     r_global = tinymtRand();
 
-    float new_p3 = P3_CHI * (P3_VEL + phi_local * r_local * (P3_BEST - P3_POS) + phi_global * r_global * (P3_GLOBAL_BEST - P3_POS));
+    float new_p3 = P3_CHI * (omega*P3_VEL + phi_local * r_local * (P3_BEST - P3_POS) + phi_global * r_global * (P3_GLOBAL_BEST - P3_POS));
 
     // new_velocity = vec4(new_p0, new_p1, new_p2, new_p3);
     new_velocity = vec4(new_p0, new_p1, new_p2, new_p3);

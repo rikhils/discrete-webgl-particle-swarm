@@ -14,6 +14,7 @@ layout (location = 1) out uvec4 otinymtState;
 in vec2 cc;
 
 uniform vec4 lower_bounds, upper_bounds;
+uniform float learning_rate;
 
 #define D0_LOWER_BOUND lower_bounds.r
 #define D1_LOWER_BOUND lower_bounds.g
@@ -191,10 +192,10 @@ void main() {
     vec4 positions = texture(positions_texture, cc);
     vec4 velocities = texture(velocities_texture, cc);
 
-    float new_p0 = P0_POS + P0_VEL;
-    float new_p1 = P1_POS + P1_VEL;
-    float new_p2 = P2_POS + P2_VEL;
-    float new_p3 = P3_POS + P3_VEL;
+    float new_p0 = P0_POS + learning_rate * P0_VEL;
+    float new_p1 = P1_POS + learning_rate * P1_VEL;
+    float new_p2 = P2_POS + learning_rate * P2_VEL;
+    float new_p3 = P3_POS + learning_rate * P3_VEL;
 
 
     new_p0 = bounds_check(new_p0, D0_LOWER_BOUND, D0_UPPER_BOUND);

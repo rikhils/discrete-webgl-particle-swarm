@@ -60,6 +60,8 @@ require([
       chi: [],
       lower_bounds:[],
       upper_bounds:[],
+      learning_rate: 0.1,
+      omega: 0.05,
     },
     bounds: [
       [[25, 200], [10, 300], [50, 500], [0.15, 0.4]],
@@ -67,16 +69,14 @@ require([
       [[5, 50], [1, 15], [0.2, 0.9], [0.1, 0.25]],
       [[0.005, 0.05], [0, 0], [0, 0], [0, 0]],
     ],
-    velocity_update: {
-
-    },
+    velocity_update: {},
   };
 
   var phi = env.particles.phi_global + env.particles.phi_local;
   var chi = 0.05 * 2 / (phi - 2 + Math.sqrt(phi * (phi - 4)));
 
   for (var i = 0; i < 4; ++i) {
-    env.particles.chi.push(env.bounds[i].map(([min, max]) => chi * (max + min)/2));
+    env.particles.chi.push(env.bounds[i].map(([min, max]) => chi * (max - min)/2));
   }
 
   for(var i  =0; i < 4; i++)
@@ -91,12 +91,6 @@ require([
     env.particles.lower_bounds.push(addArr_low);
     env.particles.upper_bounds.push(addArr_up);
   }
-  for(var i = 0; i < 4; i++)
-  {
-    console.log(env.particles.lower_bounds[i]);
-    console.log(env.particles.upper_bounds[i]);
-  }
-
 
   //
   // Set up data used to evaluate the each simulation run
@@ -274,42 +268,42 @@ require([
     pairable: true,
   });
 
-// These should probably be in env?
-env.velocity_update.istate  = new Uint32Array(particles_width*particles_height*4);
-env.velocity_update.imat    = new Uint32Array(particles_width*particles_height*4);
+  env.velocity_update.istate  = new Uint32Array(particles_width*particles_height*4);
+  env.velocity_update.imat    = new Uint32Array(particles_width*particles_height*4);
 
-var p=0;
-var seed = Date.now();
-var tm = new Abubu.TinyMT({vmat:0});
+  var p=0;
+  var seed = Date.now();
+  var tm = new Abubu.TinyMT({vmat:0});
 
-for(var j=0 ; j<particles_height ; j++){
+  for(var j=0 ; j<particles_height ; j++){
     for(var i=0 ; i<particles_width ; i++){
-        //  mat1            mat2            seed
-        tm.mat[0] = i ;     tm.mat[1] = j ; tm.mat[3] = seed ;
-        tm.init() ;
+      //  mat1            mat2            seed
+      tm.mat[0] = i ;     tm.mat[1] = j ; tm.mat[3] = seed ;
+      tm.init() ;
 
-        for(var k=0 ; k<4 ; k++){
-            env.velocity_update.istate[p] = tm.state[k] ;
-            env.velocity_update.imat[p] = tm.mat[k] ;
-            p++ ;
-        }
+      for(var k=0 ; k<4 ; k++){
+        env.velocity_update.istate[p] = tm.state[k] ;
+        env.velocity_update.imat[p] = tm.mat[k] ;
+        p++ ;
+      }
     }
-}
+  }
 
-// console.log(istate);
+  env.velocity_update.ftinymtState = new Abubu.Uint32Texture(particles_width, particles_height, {
+    data: env.velocity_update.istate,
+    pairable : true,
+  });
 
-// These should *definitely* live in env
+  env.velocity_update.stinymtState = new Abubu.Uint32Texture(particles_width, particles_height, {
+    data: env.velocity_update.istate,
+    pairable: true,
+  });
 
-env.velocity_update.ftinymtState = new Abubu.Uint32Texture( particles_width, particles_height,
-        {data : env.velocity_update.istate ,pair : true } ) ;
-env.velocity_update.stinymtState = new Abubu.Uint32Texture( particles_width, particles_height,
-        {data : env.velocity_update.istate ,pair : true } ) ;
-
-// mat state for each point of the generator .............................
-env.velocity_update.tinymtMat = new Abubu.Uint32Texture( particles_width, particles_height ,
-        {data : env.velocity_update.imat } ) ;
-
-// console.log(env.velocity_update.ftinymtState);
+  // mat state for each point of the generator .............................
+  env.velocity_update.tinymtMat = new Abubu.Uint32Texture(particles_width, particles_height, {
+    data: env.velocity_update.imat,
+    pairable: true,
+  });
 
 
   //
@@ -382,21 +376,21 @@ env.velocity_update.tinymtMat = new Abubu.Uint32Texture( particles_width, partic
   });
 
 
-  var copy_tinymt_solver = new Abubu.Solver({
-    fragmentShader: CopyUIntTextureShader,
-    uniforms: {
-      src_texture: {
-        type: 't',
-        value: env.velocity_update.stinymtState,
-      },
-    },
-    targets: {
-      dest_texture: {
-        location: 0,
-        target: env.velocity_update.ftinymtState,
-      },
-    },
-  });
+  // var copy_tinymt_solver = new Abubu.Solver({
+  //   fragmentShader: CopyUIntTextureShader,
+  //   uniforms: {
+  //     src_texture: {
+  //       type: 't',
+  //       value: env.velocity_update.stinymtState,
+  //     },
+  //   },
+  //   targets: {
+  //     dest_texture: {
+  //       location: 0,
+  //       target: env.velocity_update.ftinymtState,
+  //     },
+  //   },
+  // });
 
 
 
@@ -533,6 +527,10 @@ making a separate solver just to update the error?
           type: 'v4',
           value: env.particles.global_bests[num],
         },
+        omega: {
+          type: 'f',
+          value: env.particles.omega,
+        },
       },
       targets: {
         new_velocity: {
@@ -584,6 +582,10 @@ making a separate solver just to update the error?
           type: 'v4',
           value: env.particles.upper_bounds[num],
         },
+        learning_rate: {
+          type: 'f',
+          value: env.particles.learning_rate,
+        },
       },
       targets: {
         new_position: {
@@ -624,7 +626,7 @@ making a separate solver just to update the error?
     var [best_error, best_x_index, best_y_index] = reduced_error_2_texture.value.slice(-4, -1);
 
     if (best_error < env.particles.best_error_value) {
-      var best_particle_index = 4 * (best_y_index * (particles_width) + best_x_index);
+      var best_particle_index = 4 * (best_y_index * particles_width + best_x_index);
 
       env.particles.global_bests[0] = particles_texture_1.value.slice(best_particle_index, best_particle_index + 4);
       env.particles.global_bests[1] = particles_texture_2.value.slice(best_particle_index, best_particle_index + 4);
@@ -654,45 +656,35 @@ making a separate solver just to update the error?
     local_bests_4_copy.render();
 
     velocity_1_solver.render();
+    env.velocity_update.ftinymtState.data = env.velocity_update.stinymtState.value;
     velocity_2_solver.render();
+    env.velocity_update.ftinymtState.data = env.velocity_update.stinymtState.value;
     velocity_3_solver.render();
+    env.velocity_update.ftinymtState.data = env.velocity_update.stinymtState.value;
     velocity_4_solver.render();
+    env.velocity_update.ftinymtState.data = env.velocity_update.stinymtState.value;
 
     velocities_1_copy.render();
     velocities_2_copy.render();
     velocities_3_copy.render();
     velocities_4_copy.render();
 
-    // console.log(velocities_texture_1.value);
-
-    // copy_tinymt_solver.render();
-    // tinymt_copy.render();
-
     position_1_solver.render();
+    env.velocity_update.ftinymtState.data = env.velocity_update.stinymtState.value;
     position_2_solver.render();
+    env.velocity_update.ftinymtState.data = env.velocity_update.stinymtState.value;
     position_3_solver.render();
+    env.velocity_update.ftinymtState.data = env.velocity_update.stinymtState.value;
     position_4_solver.render();
+    env.velocity_update.ftinymtState.data = env.velocity_update.stinymtState.value;
 
     positions_1_copy.render();
     positions_2_copy.render();
     positions_3_copy.render();
     positions_4_copy.render();
-
-    // tinymt_copy.render();
-    // copy_tinymt_solver.render();
-    // console.log(env.velocity_update.ftinymtState.value);
   }
-  
-  velocity_1_solver.render();
-  console.log(env.velocity_update.ftinymtState.value);
-  console.log(env.velocity_update.stinymtState.value);
 
-  for (var i = 0; i < 0; ++i) {
+  for (var i = 0; i < 8; ++i) {
     run();
   }
-  
-  copy_tinymt_solver.render();
-  console.log(env.velocity_update.ftinymtState.value);
-  console.log(env.velocity_update.stinymtState.value);
-
 });

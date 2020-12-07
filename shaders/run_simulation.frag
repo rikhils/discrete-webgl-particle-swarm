@@ -40,8 +40,7 @@ void main() {
     // PSO derived parameters
     int num_period = int(ceil(period/dt));
     float endtime = ceil(float(num_beats)*period);
-    // int num_steps = int(ceil(endtime/dt));
-    int num_steps = 1;
+    int num_steps = int(ceil(endtime/dt));
 
     // Get the relevant color from each texture
     vec4 particles_1 = texture(in_particles_1, cc);
@@ -97,7 +96,7 @@ void main() {
 
         // Apply stimulus
         float stim = 0.0;
-        if (mod(float(step_count), period/dt) < stim_start/dt && mod(float(step_count), period/dt) > stim_end/dt) {
+        if (mod(float(step_count), period/dt) > stim_start/dt && mod(float(step_count), period/dt) < stim_end/dt) {
             stim = stim_mag;
         }
 

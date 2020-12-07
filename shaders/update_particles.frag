@@ -9,8 +9,6 @@ layout (location = 0) out vec4 new_position;
 
 in vec2 cc;
 
-uniform float learning_rate;
-
 #define P0_POS positions.r
 #define P1_POS positions.g
 #define P2_POS positions.b
@@ -25,10 +23,10 @@ void main() {
     vec4 positions = texture(positions_texture, cc);
     vec4 velocities = texture(velocities_texture, cc);
 
-    float new_p0 = P0_POS + learning_rate * P0_VEL;
-    float new_p1 = P1_POS + learning_rate * P1_VEL;
-    float new_p2 = P2_POS + learning_rate * P2_VEL;
-    float new_p3 = P3_POS + learning_rate * P3_VEL;
+    float new_p0 = P0_POS + P0_VEL;
+    float new_p1 = P1_POS + P1_VEL;
+    float new_p2 = P2_POS + P2_VEL;
+    float new_p3 = P3_POS + P3_VEL;
 
     new_position = vec4(new_p0, new_p1, new_p2, new_p3);
 }

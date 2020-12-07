@@ -55,7 +55,6 @@ require([
         [0.0, 0.0, 0.0, 0.0],
       ],
       best_error_value: 1e10,
-      learning_rate: 0.0,
       chi: [],
     },
     bounds: [
@@ -527,10 +526,6 @@ making a separate solver just to update the error?
           type: 't',
           value: vt,
         },
-        learning_rate: {
-          type: 'f',
-          value: env.particles.learning_rate,
-        },
       },
       targets: {
         new_position: {
@@ -554,9 +549,9 @@ making a separate solver just to update the error?
   var local_bests_4_copy = new Abubu.Copy(bests_out_texture_4, bests_texture_4);
 
   var positions_1_copy = new Abubu.Copy(particles_out_texture_1, particles_texture_1);
-  var positions_2_copy = new Abubu.Copy(particles_out_texture_2, particles_texture_1);
-  var positions_3_copy = new Abubu.Copy(particles_out_texture_3, particles_texture_1);
-  var positions_4_copy = new Abubu.Copy(particles_out_texture_4, particles_texture_1);
+  var positions_2_copy = new Abubu.Copy(particles_out_texture_2, particles_texture_2);
+  var positions_3_copy = new Abubu.Copy(particles_out_texture_3, particles_texture_3);
+  var positions_4_copy = new Abubu.Copy(particles_out_texture_4, particles_texture_4);
 
   var velocities_1_copy = new Abubu.Copy(velocities_out_texture_1, velocities_texture_1);
   var velocities_2_copy = new Abubu.Copy(velocities_out_texture_2, velocities_texture_2);
@@ -567,7 +562,7 @@ making a separate solver just to update the error?
     var [best_error, best_x_index, best_y_index] = reduced_error_2_texture.value.slice(-4, -1);
 
     if (best_error < env.particles.best_error_value) {
-      var best_particle_index = 4 * (best_x_index * (particles_width) + best_y_index);
+      var best_particle_index = 4 * (best_y_index * (particles_width) + best_x_index);
 
       env.particles.global_bests[0] = particles_texture_1.value.slice(best_particle_index, best_particle_index + 4);
       env.particles.global_bests[1] = particles_texture_2.value.slice(best_particle_index, best_particle_index + 4);
@@ -576,8 +571,6 @@ making a separate solver just to update the error?
 
       env.particles.best_error_value = best_error;
     }
-
-    console.log("best error: " + best_error);
   }
 
   function run() {
@@ -607,8 +600,6 @@ making a separate solver just to update the error?
     velocities_2_copy.render();
     velocities_3_copy.render();
     velocities_4_copy.render();
-
-    console.log(velocities_out_texture_1.value);
 
     tinymt_copy.render();
 

@@ -691,7 +691,7 @@ making a separate solver just to update the error?
   var bestArr = [];
   for(var i = 0; i < 4; i++)
   {
-    for(var j= 0; i < 4; j++)
+    for(var j= 0; j < 4; j++)
     {
       bestArr.push(env.particles.global_bests[i][j]);
     }

@@ -103,11 +103,25 @@ require([
   // Pad out the extra pixel values. The data could be stored more densely by using the full pixel
   // value and by using a two-dimensional texture, but for now there is not enough to require that.
   var p = 0;
+  var actual_data_max = -10;
   for (var i = 0; i < data_length; ++i) {
-    data_array[p++] = parseFloat(actual_data[i].trim());
+    var actual_val = parseFloat(actual_data[i].trim());
+    data_array[p++] = actual_val;
     data_array[p++] = 0.0;
     data_array[p++] = 0.0;
     data_array[p++] = 0.0;
+
+    if(actual_val > actual_data_max)
+    {
+      actual_data_max = actual_val;
+    }
+  }
+
+  var p2 = 0;
+  for(var i = 0; i < data_length; i++)
+  {
+    data_array[p2++] /= actual_data_max;
+    p2 += 3;
   }
 
   var init_array_1 = new Float32Array(num_particles * 4);

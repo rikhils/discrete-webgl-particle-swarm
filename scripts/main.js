@@ -26,6 +26,8 @@ require([
   // Get canvas information
   //
 
+  var start_time = Date.now();
+
   var canvas_1 = document.getElementById('canvas_1');
   var particles_width = parseInt(canvas_1.getAttribute('width'));
   var particles_height = parseInt(canvas_1.getAttribute('height'));
@@ -723,6 +725,8 @@ making a separate solver just to update the error?
   }
   console.log(bestArr);
   console.log(env.particles.best_error_value);
-  console.log(local_bests_error_texture.value);
+  // console.log(local_bests_error_texture.value);
+
+  console.log("Elapsed time:\t" + (Date.now() - start_time)+ "ms.\n");
 
 });

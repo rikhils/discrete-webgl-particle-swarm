@@ -23,9 +23,10 @@
 % ucsi=0.85;
 % uc=0.13;
 % uv=0.04;
+tic
 stimmag=0.1;
 
-usave0 = load('20190828-conner/zebrafish_onecl.txt'); %400ms
+usave0 = load('../data/zebrafish_onecl.txt'); %400ms
 usave0 = usave0/max(usave0(:));
 
 tr_true = 33.33; tsi_true = 29; twp_true = 870; td_true = 0.25;
@@ -187,11 +188,12 @@ for k=1:particle_iterations
         end
     end
     
+    
 %    plot(t,usave,'k',t,vsave,'r','linewidth',2)
-    figure(1),subplot(2,1,1)
-    plot(tsave,usave0,'k',tsave,usave,'r','linewidth',2),ylim([-0.1 1.6])
-    xlabel('Time'),title(['iteration = ' num2str(k)])
-    drawnow
+    %figure(1),subplot(2,1,1)
+    %plot(tsave,usave0,'k',tsave,usave,'r','linewidth',2),ylim([-0.1 1.6])
+    %xlabel('Time'),title(['iteration = ' num2str(k)])
+    %drawnow
 %    q=input('press any key to continue')
 
     % second, measure distance as SSE for each particle
@@ -402,6 +404,7 @@ for k=1:particle_iterations
 %     plot(eps_particle,'ro'),hold on,plot(epsmax*ones(size(eps_particle)),'k'),plot(epsmin*ones(size(eps_particle)),'k'),hold off
     
 end
+toc
 
 fprintf('tr = %8.4f, tsi = %8.4f, twp=%8.4f, td = %8.4f\n',tr_global, tsi_global, twp_global,td_global)
 fprintf('tvp = %8.4f, tv1m = %8.4f, tv2m=%8.4f\n',tvp_global, tv1m_global, tv2m_global)

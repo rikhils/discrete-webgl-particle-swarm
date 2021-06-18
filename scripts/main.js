@@ -1,6 +1,7 @@
 /* global require */
 require([
   'libs/Abubu.js',
+  'scripts/graph',
   'text!data/zebrafish_onecl.txt',
   'text!shaders/run_simulation.frag',
   'text!shaders/reduce_error_s1.frag',
@@ -11,6 +12,7 @@ require([
   'text!shaders/copy_uint_texture.frag'
 ], function(
   Abubu,
+  Graph,
   ActualData,
   RunSimulationShader,
   ReduceErrorS1Shader,
@@ -33,6 +35,8 @@ require([
   var particles_height = parseInt(canvas_1.getAttribute('height'));
 
   var num_particles = particles_width * particles_height;
+
+  const graph = new Graph();
 
   //
   // Environment for solver with default values
@@ -729,4 +733,6 @@ making a separate solver just to update the error?
 
   console.log("Elapsed time:\t" + (Date.now() - start_time)+ "ms.\n");
 
+  // Graph the experimental data to show off graphing.
+  graph.runGraph(actual_data, [1.0, 0, 0]);
 });

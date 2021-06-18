@@ -4,6 +4,7 @@ require([
   'scripts/graph',
   'text!data/zebrafish_onecl.txt',
   'text!shaders/run_simulation.frag',
+  'text!shaders/run_final_simulation.frag',
   'text!shaders/reduce_error_s1.frag',
   'text!shaders/reduce_error_s2.frag',
   'text!shaders/update_velocities.frag',
@@ -15,6 +16,7 @@ require([
   Graph,
   ActualData,
   RunSimulationShader,
+  RunFinalSimulationShader,
   ReduceErrorS1Shader,
   ReduceErrorS2Shader,
   UpdateVelocitiesShader,
@@ -166,6 +168,11 @@ require([
   //
   // Textures
   //
+
+  // const num_steps = Math.floor(env.simulation.num_beats * env.simulation.period / env.simulation.dt);
+  const simulation_texture = new Abubu.Float32Texture(512, 1, {
+    pariable: true,
+  });
 
   // The recorded data used to evaluate the correctness of simulation runs
 
@@ -400,7 +407,6 @@ require([
       },
     },
   });
-
 
   // var copy_tinymt_solver = new Abubu.Solver({
   //   fragmentShader: CopyUIntTextureShader,
@@ -727,12 +733,122 @@ making a separate solver just to update the error?
       bestArr.push(env.particles.global_bests[i][j]);
     }
   }
+
+  const run_final_simulation_solver = new Abubu.Solver({
+    fragmentShader: RunFinalSimulationShader,
+    uniforms: {
+      dt: {
+        type: 'f',
+        value: env.simulation.dt,
+      },
+      period: {
+        type: 'f',
+        value: env.simulation.period,
+      },
+      stim_start: {
+        type: 'f',
+        value: env.simulation.stim_start,
+      },
+      stim_end: {
+        type: 'f',
+        value: env.simulation.stim_end,
+      },
+      stim_mag: {
+        type: 'f',
+        value: env.simulation.stim_mag,
+      },
+      num_beats: {
+        type: 'i',
+        value: env.simulation.num_beats,
+      },
+      v_init: {
+        type: 'f',
+        value: env.simulation.v_init,
+      },
+      w_init: {
+        type: 'f',
+        value: env.simulation.w_init,
+      },
+      TR_POS: {
+        type: 'f',
+        value: bestArr[0],
+      },
+      TSI_POS: {
+        type: 'f',
+        value: bestArr[1],
+      },
+      TWP_POS: {
+        type: 'f',
+        value: bestArr[2],
+      },
+      TD_POS: {
+        type: 'f',
+        value: bestArr[3],
+      },
+      TVP_POS: {
+        type: 'f',
+        value: bestArr[4],
+      },
+      TV1M_POS: {
+        type: 'f',
+        value: bestArr[5],
+      },
+      TV2M_POS: {
+        type: 'f',
+        value: bestArr[6],
+      },
+      TWM_POS: {
+        type: 'f',
+        value: bestArr[7],
+      },
+      TO_POS: {
+        type: 'f',
+        value: bestArr[8],
+      },
+      XK_POS: {
+        type: 'f',
+        value: bestArr[9],
+      },
+      UCSI_POS: {
+        type: 'f',
+        value: bestArr[10],
+      },
+      UC_POS: {
+        type: 'f',
+        value: bestArr[11],
+      },
+      UV_POS: {
+        type: 'f',
+        value: bestArr[12],
+      },
+    },
+    targets: {
+      simulation_texture: {
+        location: 0,
+        target: simulation_texture,
+      },
+    },
+  });
+
+  run_final_simulation_solver.render();
+  const simulation_data = new Float32Array(512);
+  for (let i = 0; i < 512; ++i) {
+    simulation_data[i] = simulation_texture.value[4*i];
+  }
+
   console.log(bestArr);
   console.log(env.particles.best_error_value);
   // console.log(local_bests_error_texture.value);
 
   console.log("Elapsed time:\t" + (Date.now() - start_time)+ "ms.\n");
 
+  const scale = [
+    Math.min(...actual_data, ...simulation_data),
+    Math.max(...actual_data, ...simulation_data),
+  ];
+
   // Graph the experimental data to show off graphing.
-  graph.runGraph(actual_data, [1.0, 0, 0]);
+  graph.clearGraph();
+  graph.runGraph(actual_data, [1, 0, 0], scale);
+  graph.runGraph(simulation_data, [0, 0, 1], scale);
 });

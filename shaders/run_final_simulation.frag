@@ -3,47 +3,24 @@
 precision highp float;
 precision highp int;
 
-uniform sampler2D in_particles_1, in_particles_2, in_particles_3, in_particles_4;
-uniform sampler2D data_texture;
-
-layout (location = 0) out vec4 error_texture;
+layout (location = 0) out vec4 simulation_texture;
 
 in vec2 cc;
 
-// Simulation parameters
 uniform float dt, period, stim_start, stim_end, stim_mag;
 uniform int num_beats;
 uniform float v_init, w_init;
 
-// Macros to get the particles from the textures
-#define TR_POS particles_1.r
-#define TSI_POS particles_1.g
-#define TWP_POS particles_1.b
-#define TD_POS particles_1.a
-
-#define TVP_POS particles_2.r
-#define TV1M_POS particles_2.g
-#define TV2M_POS particles_2.b
-#define TWM_POS particles_2.a
-
-#define TO_POS particles_3.r
-#define XK_POS particles_3.g
-#define UCSI_POS particles_3.b
-#define UC_POS particles_3.a
-
-#define UV_POS particles_4.r
+uniform float TR_POS, TSI_POS, TWP_POS, TD_POS,
+    TVP_POS, TV1M_POS, TV2M_POS, TWM_POS,
+    TO_POS, XK_POS, UCSI_POS, UC_POS,
+    UV_POS;
 
 void main() {
     // PSO derived parameters
     int num_period = int(ceil(period/dt));
     float endtime = ceil(float(num_beats)*period);
     int num_steps = int(ceil(endtime/dt));
-
-    // Get the relevant color from each texture
-    vec4 particles_1 = texture(in_particles_1, cc);
-    vec4 particles_2 = texture(in_particles_2, cc);
-    vec4 particles_3 = texture(in_particles_3, cc);
-    vec4 particles_4 = texture(in_particles_4, cc);
 
     // Initialize values for the simulation
     float u = 0.0;
@@ -53,6 +30,11 @@ void main() {
     float error = 0.0;
 
     int data_index = 0;
+
+    if (cc.x == 0.0) {
+        simulation_texture = vec4(u, 0, 0, 0);
+        return;
+    }
 
     // Run the simulation with the current swarm parameters
     for (int step_count = 1; step_count <= num_steps; ++step_count) {
@@ -99,12 +81,10 @@ void main() {
 
         u -= (jfi+jso+jsi-stim)*dt;
 
-        // Measure error
-        if (mod(float(step_count), round(1.0/dt)) == 0.0) {
-            float actual = texelFetch(data_texture, ivec2(data_index++, 0), 0).r;
-            error += (u - actual)*(u - actual);
+        if (float(step_count - 1) / float(num_steps - 1) >= cc.x) {
+            break;
         }
     }
 
-    error_texture = vec4(error, 0, 0, 0);
+    simulation_texture = vec4(u, 0, 0, 0);
 }

@@ -117,15 +117,20 @@ define('scripts/graph', [
      *   [a, b, c, ...] -> [0,a, 1,b, 2,c, ...]
      * and extract other useful information
      */
-    processGraphData(graph_points, color) {
+    processGraphData(graph_points, color, scale) {
       const gl = this.gl;
 
       const uniform_values = {};
 
       uniform_values.color = color;
       uniform_values.num_points = graph_points.length;
-      uniform_values.min_val = Math.min(...graph_points);
-      uniform_values.max_val = Math.max(...graph_points);
+      if (!scale) {
+        uniform_values.min_val = Math.min(...graph_points);
+        uniform_values.max_val = Math.max(...graph_points);
+      } else {
+        uniform_values.min_val = scale[0];
+        uniform_values.max_val = scale[1];
+      }
 
       const graph_array = new Float32Array(2 * uniform_values.num_points);
       for (let i = 0; i < uniform_values.num_points; ++i) {
@@ -141,23 +146,29 @@ define('scripts/graph', [
     }
 
     /*
-     * Render the graphing shader program.
+     * Clear the canvas.
      */
-    runGraph(graph_points, color) {
+    clearGraph() {
       const gl = this.gl;
 
-      const { graph_buffer, uniform_values } = this.processGraphData(graph_points, color);
+      gl.clearColor(1.0, 1.0, 1.0, 1.0);
+      gl.clearDepth(1.0);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    }
+
+    /*
+     * Render the graphing shader program.
+     */
+    runGraph(graph_points, color, scale) {
+      const gl = this.gl;
+
+      const { graph_buffer, uniform_values } = this.processGraphData(graph_points, color, scale);
 
       // No need to resize the canvas or set the viewport
 
       const { program, uniform_locations, set_uniforms } = this.info;
       gl.useProgram(program);
       set_uniforms(uniform_locations, uniform_values);
-
-      // Clear the canvas
-      gl.clearColor(1.0, 1.0, 1.0, 1.0);
-      gl.clearDepth(1.0);
-      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
       // This is purely 2D, so no need for depth test or face culling
 

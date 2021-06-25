@@ -40,6 +40,70 @@ require([
 
   const graph = new Graph();
 
+  // var fileIn = document.getElementById('my_file');
+  // var fr = new FileReader();
+  // fr.onload = function(e)
+  // {
+  //   alert(fr.result);
+  // };
+
+  // fileIn.onchange = function(event)
+  // {
+  //   fr.readAsText(event.target.files[0]);
+  // };
+
+
+const readUploadedFileAsText = (inputFile) => {
+  const temporaryFileReader = new FileReader();
+
+  return new Promise((resolve, reject) => {
+    temporaryFileReader.onerror = () => {
+      temporaryFileReader.abort();
+      reject(new DOMException("Problem parsing input file."));
+    };
+
+    temporaryFileReader.onload = () => {
+      resolve(temporaryFileReader.result);
+    };
+    temporaryFileReader.readAsText(inputFile);
+  });
+};
+
+const handleUpload = async (event) => {
+  const file = event.target.files[0];
+  // const fileContentDiv = document.querySelector('div#file-content')
+
+  try {
+    const fileContents = await readUploadedFileAsText(file)  
+    alert(fileContents);
+  } catch (e) {
+    alert(e.message);
+  }
+}
+
+document.querySelector('input#my_file').addEventListener('change', handleUpload)
+await handleUpload();
+console.log("Done!");
+
+
+
+  // fileIn.addEventListener("change", function ()
+  //   {
+  //     console.log(fileIn);
+  //     console.log(fileIn.value);
+  //     var fr = new FileReader();
+  //     fr.onload = new function(e)
+  //     {
+  //       console.log(e.target.result);
+  //     };
+  //     fr.readAsText(fileIn.value);
+  //     // console.log(fr.result);
+  //   }
+
+  //   );
+
+
+
   //
   // Environment for solver with default values
   //

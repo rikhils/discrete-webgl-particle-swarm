@@ -53,6 +53,8 @@ require([
   // };
 
 
+var RawText = null;
+
 const readUploadedFileAsText = (inputFile) => {
   const temporaryFileReader = new FileReader();
 
@@ -75,15 +77,22 @@ const handleUpload = async (event) => {
 
   try {
     const fileContents = await readUploadedFileAsText(file)  
-    alert(fileContents);
+    // alert(fileContents);
+    RawText = fileContents;
+    run_PSO();
+
   } catch (e) {
     alert(e.message);
   }
 }
 
 document.querySelector('input#my_file').addEventListener('change', handleUpload)
-await handleUpload();
-console.log("Done!");
+
+const btn = document.querySelector('button#PSO_button');
+
+btn.onclick = run_PSO;
+
+
 
 
 
@@ -107,6 +116,11 @@ console.log("Done!");
   //
   // Environment for solver with default values
   //
+
+  function run_PSO()
+  {
+
+    start_time = Date.now();
 
   var env = {
     simulation: {
@@ -144,6 +158,7 @@ console.log("Done!");
     velocity_update: {},
   };
 
+
   var phi = env.particles.phi_global + env.particles.phi_local;
   var chi = 0.05 * 2 / (phi - 2 + Math.sqrt(phi * (phi - 4)));
 
@@ -168,7 +183,9 @@ console.log("Done!");
   // Set up data used to evaluate the each simulation run
   //
 
-  var actual_data = ActualData.split('\n');
+  // console.log(RawText);
+  var actual_data = RawText.split('\n');
+  // var actual_data = ActualData.split('\n');
   var data_length = actual_data.length;
   var data_array = new Float32Array(data_length*4);
 
@@ -901,7 +918,7 @@ making a separate solver just to update the error?
   }
 
   console.log(bestArr);
-  console.log(env.particles.best_error_value);
+  console.log("Final best error: " + env.particles.best_error_value);
   // console.log(local_bests_error_texture.value);
 
   console.log("Elapsed time:\t" + (Date.now() - start_time)+ "ms.\n");
@@ -915,4 +932,8 @@ making a separate solver just to update the error?
   graph.clearGraph();
   graph.runGraph(actual_data, [1, 0, 0], scale);
   graph.runGraph(simulation_data, [0, 0, 1], scale);
+
+  };
+
+
 });

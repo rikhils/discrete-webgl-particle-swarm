@@ -209,6 +209,8 @@ btn.onclick = run_PSO;
   var p2 = 0;
   for(var i = 0; i < data_length; i++)
   {
+    // data_array[p2] /= actual_data_max;
+    // data_array[p2++] *= 1.0;
     data_array[p2++] /= actual_data_max;
     p2 += 3;
   }

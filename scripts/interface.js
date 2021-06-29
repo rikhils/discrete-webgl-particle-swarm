@@ -20,7 +20,7 @@ define('scripts/interface', [
       const bounds = env.bounds.flat(1);
 
       PsoInterface.paramList.forEach((param, idx) => {
-        const [max, min] = bounds[idx];
+        const [min, max] = bounds[idx];
         this[param + '_min'].value = min;
         this[param + '_max'].value = max;
       });

@@ -1,0 +1,21 @@
+body {
+  background-color: #fdf6e3;
+  color: #657b83;
+  font-family: "sans-serif";
+}
+
+div {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+.param_div {
+  display: grid;
+  grid-template-columns: max-content max-content max-content max-content max-content;
+  grid-column-gap: 2.5em;
+  grid-row-gap: 0.5em;
+}
+
+.param_div input[type=text] {
+  width: 5em;
+}

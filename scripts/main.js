@@ -2,10 +2,12 @@
 require([
   'libs/Abubu.js',
   'scripts/graph',
+  'scripts/interface',
   'scripts/pso',
 ], function(
   Abubu,
   Graph,
+  PsoInterface,
   Pso,
 ) {
   'use strict';
@@ -15,6 +17,9 @@ require([
 
   const pso = new Pso(particles_width, particles_height);
   const graph = new Graph();
+  const pso_interface = new PsoInterface();
+
+  pso_interface.displayEnv(Pso.getEnv());
 
   const readUploadedFileAsText = (inputFile) => {
     const temporaryFileReader = new FileReader();
@@ -65,6 +70,7 @@ require([
     }
 
     const bestArr = pso.getGlobalBests();
+    pso_interface.displayResults(bestArr);
     pso.setupFinalSimulationSolver(bestArr);
     const simulation_data = pso.runFinalSimulationSolver();
 

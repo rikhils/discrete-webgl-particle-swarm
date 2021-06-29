@@ -9,6 +9,10 @@ div {
   margin-bottom: 1em;
 }
 
+canvas {
+  border: 1px solid #657b83;
+}
+
 .param_div {
   display: grid;
   grid-template-columns: max-content max-content max-content max-content max-content;

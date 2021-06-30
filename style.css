@@ -13,6 +13,43 @@ canvas {
   border: 1px solid #657b83;
 }
 
+#graph_div {
+  display: grid;
+  grid-template-columns: max-content max-content;
+  grid-column-gap: 1em;
+}
+
+#graph_canvas {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+#yaxis {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+#ymin {
+  margin-top: auto;
+}
+
+#xaxis {
+  grid-column: 2;
+  grid-row: 2;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
+
+#xmax {
+  margin-left: auto;
+}
+
 .param_div {
   display: grid;
   grid-template-columns: max-content max-content max-content max-content max-content;

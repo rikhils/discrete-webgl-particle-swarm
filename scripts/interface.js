@@ -16,6 +16,10 @@ define('scripts/interface', [
       });
 
       this.fit_error = document.getElementById('fit_error');
+      this.xmin = document.getElementById('xmin');
+      this.xmax = document.getElementById('xmax');
+      this.ymin = document.getElementById('ymin');
+      this.ymax = document.getElementById('ymax');
     }
 
     displayBounds(env) {
@@ -51,6 +55,13 @@ define('scripts/interface', [
       }
 
       return bounds;
+    }
+
+    setAxes(xmin, xmax, ymin, ymax) {
+      this.xmin.innerHTML = xmin;
+      this.xmax.innerHTML = xmax;
+      this.ymin.innerHTML = ymin;
+      this.ymax.innerHTML = ymax;
     }
   };
 });

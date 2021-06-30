@@ -87,5 +87,7 @@ require([
     graph.clearGraph();
     graph.runGraph(actual_data, [1, 0, 0], scale);
     graph.runGraph(simulation_data, [0, 0, 1], scale);
+
+    pso_interface.setAxes(0, actual_data.length, scale[0], scale[1]);
   };
 });

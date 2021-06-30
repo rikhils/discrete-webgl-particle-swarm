@@ -14,9 +14,11 @@ define('scripts/interface', [
         this[param + '_max'] = document.getElementById(param + '_max');
         this[param + '_fit'] = document.getElementById(param + '_fit');
       });
+
+      this.fit_error = document.getElementById('fit_error');
     }
 
-    displayEnv(env) {
+    displayBounds(env) {
       const bounds = env.bounds.flat(1);
 
       PsoInterface.paramList.forEach((param, idx) => {
@@ -30,6 +32,25 @@ define('scripts/interface', [
       PsoInterface.paramList.forEach((param, idx) => {
         this[param + '_val'].value = bestArr[idx];
       });
+    }
+
+    displayError(error) {
+      this.fit_error.innerHTML = error;
+    }
+
+    getBounds() {
+      const bounds = [[], [], [], []];
+
+      PsoInterface.paramList.forEach((param, idx) => {
+        bounds[Math.floor(idx/4)].push([Number(this[param + '_min'].value), Number(this[param + '_max'].value)]);
+      });
+
+      // Fill out the remaining values
+      for (let i = 0; i < 3; ++i) {
+        bounds[3].push([0, 0]);
+      }
+
+      return bounds;
     }
   };
 });

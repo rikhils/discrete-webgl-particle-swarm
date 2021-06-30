@@ -65,9 +65,13 @@ define('scripts/pso', [
       };
     }
 
-    setupEnv() {
+    setupEnv(bounds) {
       this.env = Pso.getEnv();
       const env = this.env;
+
+      if (bounds) {
+        env.bounds = bounds;
+      }
 
       const phi = env.particles.phi_global + env.particles.phi_local;
       const chi = 0.05 * 2 / (phi - 2 + Math.sqrt(phi * (phi - 4)));

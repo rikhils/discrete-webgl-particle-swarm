@@ -117,9 +117,17 @@ define('scripts/pso', [
 
       for (let i = 0; i < data_length; ++i) {
         data_array[4*i] /= actual_data_max;
+        // data_array[4*i] *= 1.0;
       }
 
-      return [actual_data, data_array];
+      var first_compare_index = data_array.findIndex(function(number)
+      {
+        return number > 0.9;
+      });
+
+
+
+      return [actual_data, data_array.slice(first_compare_index)];
     }
 
     initializeParticles() {

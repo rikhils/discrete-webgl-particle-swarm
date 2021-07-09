@@ -79,6 +79,9 @@ require([
     pso.setupFinalSimulationSolver(bestArr);
     const simulation_data = pso.runFinalSimulationSolver();
 
+
+    
+
     const scale = [
       Math.min(...actual_data, ...simulation_data),
       Math.max(...actual_data, ...simulation_data),
@@ -89,5 +92,6 @@ require([
     graph.runGraph(simulation_data, [0, 0, 1], scale);
 
     pso_interface.setAxes(0, actual_data.length, scale[0], scale[1]);
+
   };
 });

@@ -122,12 +122,13 @@ define('scripts/pso', [
 
       var first_compare_index = data_array.findIndex(function(number)
       {
-        return number > 0.9;
+        return number > 0.15;
       });
 
 
+      return [actual_data.slice(first_compare_index), data_array.slice(first_compare_index)];
 
-      return [actual_data, data_array.slice(first_compare_index)];
+      // return [actual_data, data_array.slice(first_compare_index)];
     }
 
     initializeParticles() {

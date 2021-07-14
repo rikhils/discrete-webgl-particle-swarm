@@ -2,9 +2,13 @@
 define('scripts/graph', [
   'text!shaders/graph.vert',
   'text!shaders/graph.frag',
+  'text!shaders/grid.vert',
+  'text!shaders/grid.frag',
 ], function(
   GraphVertexShader,
   GraphFragmentShader,
+  GridVertexShader,
+  GridFragmentShader,
 ) {
   'use strict';
 
@@ -16,6 +20,19 @@ define('scripts/graph', [
       this.gl.getExtension('OES_texture_float_linear');
 
       this.info = this.setupGraph();
+      this.grid_info = this.setupGrid();
+      this.initGridVertexBuffer();
+    }
+
+    static gridLines() {
+      return [
+        -1, -0.5, 1, -0.5,
+        -1, 0, 1, 0,
+        -1, 0.5, 1, 0.5,
+        -0.5, -1, -0.5, 1,
+        0, -1, 0, 1,
+        0.5, -1, 0.5, 1,
+      ];
     }
 
     /*
@@ -89,6 +106,24 @@ define('scripts/graph', [
       return info;
     }
 
+    setupGrid() {
+      const gl = this.gl;
+
+      const info = {};
+
+      const uniforms = ['color'];
+
+      info.program = this.loadShaderProgram(GridVertexShader, GridFragmentShader);
+      gl.useProgram(info.program);
+
+      info.uniform_locations = uniforms.map(u => gl.getUniformLocation(info.program, u));
+      info.set_uniforms = (uniform_locations, uniform_values) => {
+        gl.uniform3fv(uniform_locations[0], uniform_values['color']);
+      };
+
+      return info;
+    }
+
     /*
      * Load the data to be graphed into the vertex array.
      */
@@ -106,6 +141,40 @@ define('scripts/graph', [
         false, // normalize
         0, // stride
         0, // offset
+      );
+
+      gl.enableVertexAttribArray(vertex_loc);
+      gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    }
+
+    initGridVertexBuffer() {
+      const gl = this.gl;
+
+      const grid_array = new Float32Array(Graph.gridLines());
+
+      const grid_buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, grid_buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, grid_array, gl.STATIC_DRAW, 0);
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+      this.grid_buffer = grid_buffer;
+    }
+
+    useGridVertexBuffer(program) {
+      const gl = this.gl;
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.grid_buffer);
+
+      const vertex_loc = gl.getAttribLocation(program, 'position');
+
+      gl.vertexAttribPointer(
+        vertex_loc,
+        2,
+        gl.FLOAT,
+        false,
+        0,
+        0,
       );
 
       gl.enableVertexAttribArray(vertex_loc);
@@ -154,6 +223,8 @@ define('scripts/graph', [
       gl.clearColor(1.0, 1.0, 1.0, 1.0);
       gl.clearDepth(1.0);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      // Ensure the grid is behind the graph lines
+      gl.enable(gl.DEPTH_TEST);
     }
 
     /*
@@ -175,6 +246,19 @@ define('scripts/graph', [
       this.useGraphVertexBuffer(program, graph_buffer);
 
       gl.drawArrays(gl.LINE_STRIP, 0, graph_points.length);
+
+      this.runGrid([0.8, 0.8, 0.8]);
+    }
+
+    runGrid(color) {
+      const gl = this.gl;
+
+      const { program, uniform_locations, set_uniforms } = this.grid_info;
+      gl.useProgram(program);
+      set_uniforms(uniform_locations, { color: color });
+
+      this.useGridVertexBuffer(program);
+      gl.drawArrays(gl.LINES, 0, Graph.gridLines().length/2);
     }
   };
 });

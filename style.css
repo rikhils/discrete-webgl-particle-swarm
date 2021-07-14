@@ -35,7 +35,7 @@ canvas {
   margin-bottom: 0;
 }
 
-#ymin {
+.auto-vertical {
   margin-top: auto;
 }
 
@@ -47,7 +47,7 @@ canvas {
   align-items: flex-start;
 }
 
-#xmax {
+.auto-horizontal {
   margin-left: auto;
 }
 

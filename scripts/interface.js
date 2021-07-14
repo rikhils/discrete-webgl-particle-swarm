@@ -54,8 +54,14 @@ define('scripts/interface', [
       this.normalization = document.getElementById('normalization');
       this.fit_error = document.getElementById('fit_error');
       this.xmin = document.getElementById('xmin');
+      this.x1 = document.getElementById('x1');
+      this.x2 = document.getElementById('x2');
+      this.x3 = document.getElementById('x3');
       this.xmax = document.getElementById('xmax');
       this.ymin = document.getElementById('ymin');
+      this.y1 = document.getElementById('y1');
+      this.y2 = document.getElementById('y2');
+      this.y3 = document.getElementById('y3');
       this.ymax = document.getElementById('ymax');
     }
 
@@ -100,9 +106,19 @@ define('scripts/interface', [
     }
 
     setAxes(xmin, xmax, ymin, ymax) {
+      const x_quart = (xmax - xmin) / 4;
+      const y_quart = (ymax - ymin) / 4;
+
       this.xmin.innerHTML = this.truncateString(xmin);
+      this.x1.innerHTML = this.truncateString(xmin + x_quart);
+      this.x2.innerHTML = this.truncateString(xmin + 2*x_quart);
+      this.x3.innerHTML = this.truncateString(xmin + 3*x_quart);
       this.xmax.innerHTML = this.truncateString(xmax);
+
       this.ymin.innerHTML = this.truncateString(ymin);
+      this.y1.innerHTML = this.truncateString(ymin + y_quart);
+      this.y2.innerHTML = this.truncateString(ymin + 2*y_quart);
+      this.y3.innerHTML = this.truncateString(ymin + 3*y_quart);
       this.ymax.innerHTML = this.truncateString(ymax);
     }
 

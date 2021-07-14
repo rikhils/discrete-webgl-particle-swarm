@@ -12,18 +12,111 @@
       <button name="button" id="PSO_button">Rerun PSO</button>
     </div>
 
-    <div id="graph_div">
-      <div id="yaxis">
-        <span id="ymax"></span>
-        <span id="ymin"></span>
+    <div class="flex-container">
+      <div id="graph_div">
+        <div id="yaxis">
+          <span id="ymax"></span>
+          <span id="ymin"></span>
+        </div>
+
+        <canvas id="graph_canvas" width=512 height=512></canvas>
+
+        <div id="xaxis">
+          <span id="xmin"></span>
+          <span id="xmax"></span>
+        </div>
       </div>
 
-      <canvas id="graph_canvas" width=512 height=512></canvas>
+      <div id="parameters" class="param_div">
+        <span>Parameter</span>
+        <span>Value</span>
+        <span>Minimum</span>
+        <span>Maximum</span>
+        <span>Fit?</span>
 
-      <div id="xaxis">
-        <span id="xmin"></span>
-        <span id="xmax"></span>
+        <span>TR</span>
+        <input id="tr_val" type="text">
+        <input id="tr_min" type="text">
+        <input id="tr_max" type="text">
+        <input id="tr_fit" type="checkbox" checked="true">
+
+        <span>TSI</span>
+        <input id="tsi_val" type="text">
+        <input id="tsi_min" type="text">
+        <input id="tsi_max" type="text">
+        <input id="tsi_fit" type="checkbox" checked="true">
+
+        <span>TWP</span>
+        <input id="twp_val" type="text">
+        <input id="twp_min" type="text">
+        <input id="twp_max" type="text">
+        <input id="twp_fit" type="checkbox" checked="true">
+
+        <span>TD</span>
+        <input id="td_val" type="text">
+        <input id="td_min" type="text">
+        <input id="td_max" type="text">
+        <input id="td_fit" type="checkbox" checked="true">
+
+        <span>TVP</span>
+        <input id="tvp_val" type="text">
+        <input id="tvp_min" type="text">
+        <input id="tvp_max" type="text">
+        <input id="tvp_fit" type="checkbox" checked="true">
+
+        <span>TV1M</span>
+        <input id="tv1m_val" type="text">
+        <input id="tv1m_min" type="text">
+        <input id="tv1m_max" type="text">
+        <input id="tv1m_fit" type="checkbox" checked="true">
+
+        <span>TV2M</span>
+        <input id="tv2m_val" type="text">
+        <input id="tv2m_min" type="text">
+        <input id="tv2m_max" type="text">
+        <input id="tv2m_fit" type="checkbox" checked="true">
+
+        <span>TWM</span>
+        <input id="twm_val" type="text">
+        <input id="twm_min" type="text">
+        <input id="twm_max" type="text">
+        <input id="twm_fit" type="checkbox" checked="true">
+
+        <span>TO</span>
+        <input id="to_val" type="text">
+        <input id="to_min" type="text">
+        <input id="to_max" type="text">
+        <input id="to_fit" type="checkbox" checked="true">
+
+        <span>XK</span>
+        <input id="xk_val" type="text">
+        <input id="xk_min" type="text">
+        <input id="xk_max" type="text">
+        <input id="xk_fit" type="checkbox" checked="true">
+
+        <span>UCSI</span>
+        <input id="ucsi_val" type="text">
+        <input id="ucsi_min" type="text">
+        <input id="ucsi_max" type="text">
+        <input id="ucsi_fit" type="checkbox" checked="true">
+
+        <span>UC</span>
+        <input id="uc_val" type="text">
+        <input id="uc_min" type="text">
+        <input id="uc_max" type="text">
+        <input id="uc_fit" type="checkbox" checked="true">
+
+        <span>UV</span>
+        <input id="uv_val" type="text">
+        <input id="uv_min" type="text">
+        <input id="uv_max" type="text">
+        <input id="uv_fit" type="checkbox" checked="true">
       </div>
+    </div>
+
+    <div>
+      <span>Normalize to</span>
+      <input id="normalization" type="text">
     </div>
 
     <div>
@@ -33,92 +126,6 @@
 
     <div>
       <button id="reset_bounds">Reset bounds</button>
-    </div>
-
-    <div id="parameters" class="param_div">
-      <span>Parameter</span>
-      <span>Value</span>
-      <span>Minimum</span>
-      <span>Maximum</span>
-      <span>Fit?</span>
-
-      <span>TR</span>
-      <input id="tr_val" type="text">
-      <input id="tr_min" type="text">
-      <input id="tr_max" type="text">
-      <input id="tr_fit" type="checkbox" checked="true">
-
-      <span>TSI</span>
-      <input id="tsi_val" type="text">
-      <input id="tsi_min" type="text">
-      <input id="tsi_max" type="text">
-      <input id="tsi_fit" type="checkbox" checked="true">
-
-      <span>TWP</span>
-      <input id="twp_val" type="text">
-      <input id="twp_min" type="text">
-      <input id="twp_max" type="text">
-      <input id="twp_fit" type="checkbox" checked="true">
-
-      <span>TD</span>
-      <input id="td_val" type="text">
-      <input id="td_min" type="text">
-      <input id="td_max" type="text">
-      <input id="td_fit" type="checkbox" checked="true">
-
-      <span>TVP</span>
-      <input id="tvp_val" type="text">
-      <input id="tvp_min" type="text">
-      <input id="tvp_max" type="text">
-      <input id="tvp_fit" type="checkbox" checked="true">
-
-      <span>TV1M</span>
-      <input id="tv1m_val" type="text">
-      <input id="tv1m_min" type="text">
-      <input id="tv1m_max" type="text">
-      <input id="tv1m_fit" type="checkbox" checked="true">
-
-      <span>TV2M</span>
-      <input id="tv2m_val" type="text">
-      <input id="tv2m_min" type="text">
-      <input id="tv2m_max" type="text">
-      <input id="tv2m_fit" type="checkbox" checked="true">
-
-      <span>TWM</span>
-      <input id="twm_val" type="text">
-      <input id="twm_min" type="text">
-      <input id="twm_max" type="text">
-      <input id="twm_fit" type="checkbox" checked="true">
-
-      <span>TO</span>
-      <input id="to_val" type="text">
-      <input id="to_min" type="text">
-      <input id="to_max" type="text">
-      <input id="to_fit" type="checkbox" checked="true">
-
-      <span>XK</span>
-      <input id="xk_val" type="text">
-      <input id="xk_min" type="text">
-      <input id="xk_max" type="text">
-      <input id="xk_fit" type="checkbox" checked="true">
-
-      <span>UCSI</span>
-      <input id="ucsi_val" type="text">
-      <input id="ucsi_min" type="text">
-      <input id="ucsi_max" type="text">
-      <input id="ucsi_fit" type="checkbox" checked="true">
-
-      <span>UC</span>
-      <input id="uc_val" type="text">
-      <input id="uc_min" type="text">
-      <input id="uc_max" type="text">
-      <input id="uc_fit" type="checkbox" checked="true">
-
-      <span>UV</span>
-      <input id="uv_val" type="text">
-      <input id="uv_min" type="text">
-      <input id="uv_max" type="text">
-      <input id="uv_fit" type="checkbox" checked="true">
     </div>
   </body>
 </html>

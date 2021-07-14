@@ -94,10 +94,12 @@ define('scripts/pso', [
       }
     }
 
-    readData(raw_text) {
+    readData(raw_text, normalize) {
       const actual_data = raw_text.split('\n');
       const data_length = actual_data.length;
       const data_array = new Float32Array(data_length*4);
+      const normalization = Number(normalize) || 1;
+
 
       // Pad out the extra pixel values. The data could be stored more densely by using the full pixel
       // value and by using a two-dimensional texture, but for now there is not enough to require that.
@@ -116,7 +118,8 @@ define('scripts/pso', [
       }
 
       for (let i = 0; i < data_length; ++i) {
-        data_array[4*i] /= actual_data_max;
+        data_array[4*i] *= normalization / actual_data_max;
+        actual_data[i] *= normalization / actual_data_max;
       }
 
       return [actual_data, data_array];

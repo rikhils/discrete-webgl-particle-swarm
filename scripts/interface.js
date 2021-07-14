@@ -51,6 +51,7 @@ define('scripts/interface', [
 
       });
 
+      this.normalization = document.getElementById('normalization');
       this.fit_error = document.getElementById('fit_error');
       this.xmin = document.getElementById('xmin');
       this.xmax = document.getElementById('xmax');
@@ -69,6 +70,8 @@ define('scripts/interface', [
           this[param + '_max'].value = max;
         }
       });
+
+      this.normalization.value = 1;
     }
 
     displayResults(bestArr) {
@@ -78,7 +81,7 @@ define('scripts/interface', [
     }
 
     displayError(error) {
-      this.fit_error.innerHTML = error;
+      this.fit_error.innerHTML = this.truncateString(error);
     }
 
     getBounds() {
@@ -97,10 +100,21 @@ define('scripts/interface', [
     }
 
     setAxes(xmin, xmax, ymin, ymax) {
-      this.xmin.innerHTML = xmin;
-      this.xmax.innerHTML = xmax;
-      this.ymin.innerHTML = ymin;
-      this.ymax.innerHTML = ymax;
+      this.xmin.innerHTML = this.truncateString(xmin);
+      this.xmax.innerHTML = this.truncateString(xmax);
+      this.ymin.innerHTML = this.truncateString(ymin);
+      this.ymax.innerHTML = this.truncateString(ymax);
+    }
+
+    truncateString(str) {
+      const str_array = String(str).split('.');
+
+      // If there is no decimal, do nothing
+      if (str_array.length <= 1) {
+        return str;
+      } else {
+        return str_array[0] + '.' + str_array[1].slice(0, 2);
+      }
     }
   };
 });

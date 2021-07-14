@@ -17,6 +17,7 @@ canvas {
   display: grid;
   grid-template-columns: max-content max-content;
   grid-column-gap: 1em;
+  margin-right: 2em;
 }
 
 #graph_canvas {
@@ -55,8 +56,14 @@ canvas {
   grid-template-columns: max-content max-content max-content max-content max-content;
   grid-column-gap: 2.5em;
   grid-row-gap: 0.5em;
+  padding-right: 2em;
 }
 
-.param_div input[type=text] {
+.param_div input[type=text], #normalization {
   width: 5em;
+}
+
+.flex-container {
+  display: flex;
+  justify-content: left;
 }

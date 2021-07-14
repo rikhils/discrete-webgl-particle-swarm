@@ -62,7 +62,7 @@ require([
     const start_time = Date.now();
 
     pso.setupEnv(pso_interface.getBounds());
-    const [actual_data, data_array] = pso.readData(raw_text);
+    const [actual_data, data_array] = pso.readData(raw_text, pso_interface.normalization.value);
     const init_arrays = pso.initializeParticles();
     pso.initializeTextures(data_array, init_arrays);
     // Re-running the setup every time could be replaced by updating the uniforms each time

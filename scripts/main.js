@@ -79,17 +79,22 @@ require([
     pso.setupFinalSimulationSolver(bestArr);
     const simulation_data = pso.runFinalSimulationSolver();
 
+    var align_index = simulation_data.findIndex(function(number)
+    {
+      return number > 0.15;
+    });
 
-    
+    const plotting_sim_data = simulation_data.slice(align_index);
+
 
     const scale = [
-      Math.min(...actual_data, ...simulation_data),
-      Math.max(...actual_data, ...simulation_data),
+      Math.min(...actual_data, ...plotting_sim_data),
+      Math.max(...actual_data, ...plotting_sim_data),
     ];
 
     graph.clearGraph();
     graph.runGraph(actual_data, [1, 0, 0], scale);
-    graph.runGraph(simulation_data, [0, 0, 1], scale);
+    graph.runGraph(plotting_sim_data, [0, 0, 1], scale);
 
     pso_interface.setAxes(0, actual_data.length, scale[0], scale[1]);
 

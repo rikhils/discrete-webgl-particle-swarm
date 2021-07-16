@@ -96,7 +96,19 @@ define('scripts/pso', [
 
     readData(raw_text, normalize) {
       const actual_data = raw_text.split('\n');
-      const data_length = actual_data.length;
+
+
+      let full_parsed_data = actual_data.map(x => parseFloat(x.trim()));      
+
+      var first_compare_index = full_parsed_data.findIndex(function(number)
+      {
+        return number > 0.15;
+      });
+
+
+      const left_trimmed_data = full_parsed_data.slice(first_compare_index);
+
+      const data_length = left_trimmed_data.length;
       const data_array = new Float32Array(data_length*4);
       const normalization = Number(normalize) || 1;
 
@@ -106,7 +118,7 @@ define('scripts/pso', [
       let p = 0;
       let actual_data_max = -10;
       for (let i = 0; i < data_length; ++i) {
-        const actual_val = parseFloat(actual_data[i].trim());
+        const actual_val = left_trimmed_data[i];
         data_array[p++] = actual_val;
         data_array[p++] = 0.0;
         data_array[p++] = 0.0;
@@ -122,7 +134,10 @@ define('scripts/pso', [
         actual_data[i] *= normalization / actual_data_max;
       }
 
-      return [actual_data, data_array];
+
+      return [actual_data.slice(first_compare_index), data_array];
+
+      // return [actual_data, data_array.slice(first_compare_index)];
     }
 
     initializeParticles() {

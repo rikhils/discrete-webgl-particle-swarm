@@ -31,6 +31,10 @@ void main() {
 
     int data_index = 0;
 
+    int start_comp = 0;
+    bool first_upstroke = false;
+    float last_aligned_u = -1.0;
+
     if (cc.x == 0.0) {
         simulation_texture = vec4(u, 0, 0, 0);
         return;
@@ -81,10 +85,24 @@ void main() {
 
         u -= (jfi+jso+jsi-stim)*dt;
 
+        if(!first_upstroke && u > 0.15)
+        {
+            first_upstroke = true;
+            start_comp = step_count;
+            error = 0.0;
+
+        }
+
+        if (first_upstroke && mod(float(step_count - start_comp), round(1.0/dt)) == 0.0) {
+            last_aligned_u = u;           
+        }
+
+
         if (float(step_count - 1) / float(num_steps - 1) >= cc.x) {
             break;
         }
     }
 
-    simulation_texture = vec4(u, 0, 0, 0);
+    simulation_texture = vec4(last_aligned_u, 0, 0, 0);
+    // simulation_texture = vec4(u, 0, 0, 0);
 }

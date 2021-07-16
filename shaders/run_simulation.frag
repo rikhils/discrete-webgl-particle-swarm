@@ -51,8 +51,12 @@ void main() {
     float w = w_init;
 
     float error = 0.0;
+    error = 10000000000.0;
 
     int data_index = 0;
+
+    int start_comp = 0;
+    bool first_upstroke = false;
 
     // Run the simulation with the current swarm parameters
     for (int step_count = 1; step_count <= num_steps; ++step_count) {
@@ -97,12 +101,24 @@ void main() {
             stim = stim_mag;
         }
 
+
+
+
         u -= (jfi+jso+jsi-stim)*dt;
 
+        if(!first_upstroke && u > 0.15)
+        {
+            first_upstroke = true;
+            start_comp = step_count;
+            error = 0.0;
+        }
+
+
+
         // Measure error
-        if (mod(float(step_count), round(1.0/dt)) == 0.0) {
+        if (first_upstroke && mod(float(step_count - start_comp), round(1.0/dt)) == 0.0) {
             float actual = texelFetch(data_texture, ivec2(data_index++, 0), 0).r;
-            error += (u - actual)*(u - actual);
+            error += (u - actual)*(u - actual);                
         }
     }
 

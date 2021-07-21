@@ -17,26 +17,24 @@ define('scripts/interface', [
         this[param + '_prev_min'] = -1;
         this[param + '_prev_max'] = -1;
 
-        // This is so dumb...
-        var outer_interface = this;
-        this[param + '_fit'].addEventListener('change', function() {
-          if(this.checked) {
-            outer_interface[param + '_val'].removeAttribute('readonly');
-            outer_interface[param + '_min'].removeAttribute('readonly');
-            outer_interface[param + '_max'].removeAttribute('readonly');
+        this[param + '_fit'].addEventListener('change', () => {
+          if (this[param + '_fit'].checked) {
+            this[param + '_val'].removeAttribute('readonly');
+            this[param + '_min'].removeAttribute('readonly');
+            this[param + '_max'].removeAttribute('readonly');
 
-            outer_interface[param + '_min'].value = outer_interface[param + '_prev_min'];
-            outer_interface[param + '_max'].value = outer_interface[param + '_prev_max'];
+            this[param + '_min'].value = this[param + '_prev_min'];
+            this[param + '_max'].value = this[param + '_prev_max'];
           } else {
-            outer_interface[param+'_prev_min'] = outer_interface[param + '_min'].value;
-            outer_interface[param + '_min'].value = outer_interface[param + '_val'].value;
+            this[param+'_prev_min'] = this[param + '_min'].value;
+            this[param + '_min'].value = this[param + '_val'].value;
 
-            outer_interface[param+'_prev_max'] = outer_interface[param + '_max'].value;
-            outer_interface[param + '_max'].value = outer_interface[param + '_val'].value;
+            this[param+'_prev_max'] = this[param + '_max'].value;
+            this[param + '_max'].value = this[param + '_val'].value;
 
-            outer_interface[param + '_val'].setAttribute('readonly', true);
-            outer_interface[param + '_min'].setAttribute('readonly', true);
-            outer_interface[param + '_max'].setAttribute('readonly', true);
+            this[param + '_val'].setAttribute('readonly', true);
+            this[param + '_min'].setAttribute('readonly', true);
+            this[param + '_max'].setAttribute('readonly', true);
           }
         });
       });
@@ -62,7 +60,7 @@ define('scripts/interface', [
       const bounds = env.bounds.flat(1);
 
       PsoInterface.paramList.forEach((param, idx) => {
-        if(this[param + '_fit'].checked)
+        if (this[param + '_fit'].checked)
         {
           const [min, max] = bounds[idx];
           this[param + '_min'].value = min;

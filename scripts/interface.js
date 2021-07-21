@@ -42,7 +42,10 @@ define('scripts/interface', [
       });
 
       this.normalization = document.getElementById('normalization');
+      this.data_dt = document.getElementById('data_dt');
+      this.data_cl = document.getElementById('data_cl');
       this.fit_error = document.getElementById('fit_error');
+
       this.xmin = document.getElementById('xmin');
       this.x1 = document.getElementById('x1');
       this.x2 = document.getElementById('x2');

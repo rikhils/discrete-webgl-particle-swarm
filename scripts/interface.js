@@ -40,7 +40,6 @@ define('scripts/interface', [
       });
 
       this.normalization = document.getElementById('normalization');
-      this.data_dt = document.getElementById('data_dt');
       this.data_cl = document.getElementById('data_cl');
       this.data_num_beats = document.getElementById('data_num_beats');
       this.fit_error = document.getElementById('fit_error');

@@ -10,7 +10,7 @@ div {
 }
 
 canvas {
-  border: 1px solid #657b83;
+  background-color: #ffffff;
 }
 
 #graph_div {
@@ -33,6 +33,7 @@ canvas {
   align-items: flex-end;
   margin-top: 0;
   margin-bottom: 0;
+  min-width: 3em;
 }
 
 .auto-vertical {

@@ -61,7 +61,7 @@ require([
   function run_PSO() {
     const start_time = Date.now();
 
-    pso.setupEnv(pso_interface.getBounds());
+    pso.setupEnv(pso_interface.getBounds(), pso_interface.data_cl.value, pso_interface.data_num_beats.value);
     const [actual_data, data_array] = pso.readData(raw_text, pso_interface.normalization.value);
     const init_arrays = pso.initializeParticles();
     pso.initializeTextures(data_array, init_arrays);
@@ -79,21 +79,21 @@ require([
     pso.setupFinalSimulationSolver(bestArr);
     const simulation_data = pso.runFinalSimulationSolver();
 
-    var align_index = simulation_data.findIndex(number => number > 0.15);
-
+    const align_index = simulation_data.findIndex(number => number > 0.15);
     const plotting_sim_data = simulation_data.slice(align_index);
-
 
     const scale = [
       Math.min(...actual_data, ...plotting_sim_data),
       Math.max(...actual_data, ...plotting_sim_data),
     ];
 
-    graph.clearGraph();
-    graph.runGraph(actual_data, [1, 0, 0], scale);
-    graph.runGraph(plotting_sim_data, [0, 0, 1], scale);
+    const num_points = Math.max(actual_data.length, plotting_sim_data.length);
 
-    pso_interface.setAxes(0, actual_data.length, scale[0], scale[1]);
+    graph.clearGraph();
+    graph.runGraph(actual_data, [1, 0, 0], num_points, scale);
+    graph.runGraph(plotting_sim_data, [0, 0, 1], num_points, scale);
+
+    pso_interface.setAxes(0, num_points, scale[0], scale[1]);
 
   };
 });

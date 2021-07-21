@@ -65,12 +65,20 @@ define('scripts/pso', [
       };
     }
 
-    setupEnv(bounds) {
+    setupEnv(bounds, cl, num_beats) {
       this.env = Pso.getEnv();
       const env = this.env;
 
       if (bounds) {
         env.bounds = bounds;
+      }
+
+      if (Number(cl)) {
+        env.simulation.period = Number(cl);
+      }
+
+      if (Number(num_beats)) {
+        env.simulation.num_beats = Number(num_beats);
       }
 
       const phi = env.particles.phi_global + env.particles.phi_local;
@@ -115,18 +123,13 @@ define('scripts/pso', [
       // value and by using a two-dimensional texture, but for now there is not enough to require that.
       let p = 0;
       for (let i = 0; i < data_length; ++i) {
-        const actual_val = left_trimmed_data[i];
-        data_array[p++] = actual_val;
+        data_array[p++] = left_trimmed_data[i];
         data_array[p++] = 0.0;
         data_array[p++] = 0.0;
         data_array[p++] = 0.0;
       }
 
-      for (let i = 0; i < actual_data.length; ++i) {
-        actual_data[i] *= normalization / maxVal;
-      }
-
-      return [actual_data.slice(first_compare_index), data_array];
+      return [left_trimmed_data, data_array];
     }
 
     initializeParticles() {
@@ -172,8 +175,10 @@ define('scripts/pso', [
       const particles_height = this.particles_height;
       const data_length = data_array.length / 4;
       const [init_array_1, init_array_2, init_array_3, init_array_4] = init_arrays;
+      const { num_beats, period } = this.env.simulation;
+      const simulation_length = Math.ceil(num_beats * period);
 
-      this.simulation_texture = new Abubu.Float32Texture(512, 1, {
+      this.simulation_texture = new Abubu.Float32Texture(simulation_length, 1, {
         pariable: true,
       });
 
@@ -818,10 +823,12 @@ define('scripts/pso', [
 
     runFinalSimulationSolver() {
       this.run_final_simulation_solver.render();
+      const texture_array = this.simulation_texture.value;
+      const simultation_length = texture_array.length / 4;
 
-      const simulation_data = new Float32Array(512);
-      for (let i = 0; i < 512; ++i) {
-        simulation_data[i] = this.simulation_texture.value[4*i];
+      const simulation_data = new Float32Array(simultation_length);
+      for (let i = 0; i < simultation_length; ++i) {
+        simulation_data[i] = texture_array[4*i];
       }
 
       return simulation_data;

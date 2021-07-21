@@ -186,13 +186,14 @@ define('scripts/graph', [
      *   [a, b, c, ...] -> [0,a, 1,b, 2,c, ...]
      * and extract other useful information
      */
-    processGraphData(graph_points, color, scale) {
+    processGraphData(graph_points, color, num_points, scale) {
       const gl = this.gl;
 
       const uniform_values = {};
 
       uniform_values.color = color;
-      uniform_values.num_points = graph_points.length;
+      uniform_values.num_points = num_points || graph_points.length;
+
       if (!scale) {
         uniform_values.min_val = Math.min(...graph_points);
         uniform_values.max_val = Math.max(...graph_points);
@@ -230,10 +231,10 @@ define('scripts/graph', [
     /*
      * Render the graphing shader program.
      */
-    runGraph(graph_points, color, scale) {
+    runGraph(graph_points, color, num_points, scale) {
       const gl = this.gl;
 
-      const { graph_buffer, uniform_values } = this.processGraphData(graph_points, color, scale);
+      const { graph_buffer, uniform_values } = this.processGraphData(graph_points, color, num_points, scale);
 
       // No need to resize the canvas or set the viewport
 

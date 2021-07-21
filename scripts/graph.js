@@ -241,8 +241,6 @@ define('scripts/graph', [
       gl.useProgram(program);
       set_uniforms(uniform_locations, uniform_values);
 
-      // This is purely 2D, so no need for depth test or face culling
-
       this.useGraphVertexBuffer(program, graph_buffer);
 
       gl.drawArrays(gl.LINE_STRIP, 0, graph_points.length);

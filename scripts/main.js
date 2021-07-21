@@ -65,7 +65,7 @@ require([
     const [actual_data, data_array] = pso.readData(raw_text, pso_interface.normalization.value);
     const init_arrays = pso.initializeParticles();
     pso.initializeTextures(data_array, init_arrays);
-    // Re-running the setup every time could be replaced by updating the uniforms each time
+    // Re-running the setup every time could be replaced by updating the uniforms
     pso.setupAllSolvers();
 
     for (let i = 0; i < 8; ++i) {
@@ -79,10 +79,7 @@ require([
     pso.setupFinalSimulationSolver(bestArr);
     const simulation_data = pso.runFinalSimulationSolver();
 
-    var align_index = simulation_data.findIndex(function(number)
-    {
-      return number > 0.15;
-    });
+    var align_index = simulation_data.findIndex(number => number > 0.15);
 
     const plotting_sim_data = simulation_data.slice(align_index);
 

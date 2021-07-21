@@ -20,35 +20,25 @@ define('scripts/interface', [
         // This is so dumb...
         var outer_interface = this;
         this[param + '_fit'].addEventListener('change', function() {
-            if(this.checked)
-            {
+          if(this.checked) {
+            outer_interface[param + '_val'].removeAttribute('readonly');
+            outer_interface[param + '_min'].removeAttribute('readonly');
+            outer_interface[param + '_max'].removeAttribute('readonly');
 
-              outer_interface[param + '_val'].removeAttribute('readonly');
-              outer_interface[param + '_min'].removeAttribute('readonly');
-              outer_interface[param + '_max'].removeAttribute('readonly');
+            outer_interface[param + '_min'].value = outer_interface[param + '_prev_min'];
+            outer_interface[param + '_max'].value = outer_interface[param + '_prev_max'];
+          } else {
+            outer_interface[param+'_prev_min'] = outer_interface[param + '_min'].value;
+            outer_interface[param + '_min'].value = outer_interface[param + '_val'].value;
 
+            outer_interface[param+'_prev_max'] = outer_interface[param + '_max'].value;
+            outer_interface[param + '_max'].value = outer_interface[param + '_val'].value;
 
-              outer_interface[param + '_min'].value = outer_interface[param + '_prev_min'];
-              outer_interface[param + '_max'].value = outer_interface[param + '_prev_max'];
-
-            }
-            else
-            {
-              outer_interface[param+'_prev_min'] = outer_interface[param + '_min'].value;
-              outer_interface[param + '_min'].value = outer_interface[param + '_val'].value;
-
-              outer_interface[param+'_prev_max'] = outer_interface[param + '_max'].value;
-              outer_interface[param + '_max'].value = outer_interface[param + '_val'].value;
-
-              outer_interface[param + '_val'].setAttribute('readonly', true);
-              outer_interface[param + '_min'].setAttribute('readonly', true);
-              outer_interface[param + '_max'].setAttribute('readonly', true);
-
-
-            }
-
+            outer_interface[param + '_val'].setAttribute('readonly', true);
+            outer_interface[param + '_min'].setAttribute('readonly', true);
+            outer_interface[param + '_max'].setAttribute('readonly', true);
+          }
         });
-
       });
 
       this.normalization = document.getElementById('normalization');

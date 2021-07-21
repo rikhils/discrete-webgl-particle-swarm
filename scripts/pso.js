@@ -96,9 +96,7 @@ define('scripts/pso', [
 
     readData(raw_text, normalize) {
       const split_data = raw_text.split('\n');
-      // const actual_data = raw_text.split('\n');
       const actual_data = split_data.filter(x => !(x.trim() === ""));
-
 
       const normalization = Number(normalize) || 1;
 
@@ -106,45 +104,29 @@ define('scripts/pso', [
       let maxVal = Math.max(...full_parsed_data);
       let full_normalized_data = full_parsed_data.map(x => (x * (normalization / maxVal)));
 
-
-      var first_compare_index = full_normalized_data.findIndex(function(number)
-      {
-        return number > 0.15;
-      });
-
-      console.log("Compare idx is "+first_compare_index)
+      var first_compare_index = full_normalized_data.findIndex(number => number > 0.15);
 
       const left_trimmed_data = full_normalized_data.slice(first_compare_index);
 
       const data_length = left_trimmed_data.length;
       const data_array = new Float32Array(data_length*4);
 
-
       // Pad out the extra pixel values. The data could be stored more densely by using the full pixel
       // value and by using a two-dimensional texture, but for now there is not enough to require that.
       let p = 0;
-      // let actual_data_max = -10;
       for (let i = 0; i < data_length; ++i) {
         const actual_val = left_trimmed_data[i];
         data_array[p++] = actual_val;
         data_array[p++] = 0.0;
         data_array[p++] = 0.0;
         data_array[p++] = 0.0;
-
-        // if (actual_val > actual_data_max) {
-        //   actual_data_max = actual_val;
-        // }
       }
 
       for (let i = 0; i < actual_data.length; ++i) {
-        // data_array[4*i] *= normalization / actual_data_max;
         actual_data[i] *= normalization / maxVal;
       }
 
-
       return [actual_data.slice(first_compare_index), data_array];
-
-      // return [actual_data, data_array.slice(first_compare_index)];
     }
 
     initializeParticles() {
@@ -287,7 +269,6 @@ define('scripts/pso', [
       this.bests_out_texture_4 = new Abubu.Float32Texture(particles_width, particles_height, {
         pariable: true,
       });
-
 
       // The error textures are used to reduce the error quantities of each particles from each
       // simulation run down to a global best.

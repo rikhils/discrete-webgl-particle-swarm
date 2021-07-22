@@ -10,6 +10,7 @@ in vec2 cc;
 uniform float dt, period, stim_start, stim_end, stim_mag;
 uniform int num_beats;
 uniform float v_init, w_init;
+uniform float align_thresh;
 
 uniform float TR_POS, TSI_POS, TWP_POS, TD_POS,
     TVP_POS, TV1M_POS, TV2M_POS, TWM_POS,
@@ -85,7 +86,7 @@ void main() {
 
         u -= (jfi+jso+jsi-stim)*dt;
 
-        if(!first_upstroke && u > 0.15)
+        if(!first_upstroke && u > align_thresh)
         {
             first_upstroke = true;
             start_comp = step_count;

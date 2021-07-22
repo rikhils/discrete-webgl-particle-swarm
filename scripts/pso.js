@@ -38,6 +38,7 @@ define('scripts/pso', [
           num_beats: 1,
           v_init: 1.0,
           w_init: 1.0,
+          align_thresh: 0.15,
         },
         particles: {
           phi_local: 2.05,
@@ -128,6 +129,10 @@ define('scripts/pso', [
         data_array[p++] = 0.0;
         data_array[p++] = 0.0;
       }
+
+      const delta = 0.001;
+
+      this.env.simulation.align_thresh = left_trimmed_data[0]-delta;
 
       return [left_trimmed_data, data_array];
     }
@@ -401,6 +406,10 @@ define('scripts/pso', [
           w_init: {
             type: 'f',
             value: env.simulation.w_init,
+          },
+          align_thresh: {
+            type: 'f',
+            value: env.simulation.align_thresh,
           },
         },
         targets: {
@@ -758,6 +767,10 @@ define('scripts/pso', [
           w_init: {
             type: 'f',
             value: env.simulation.w_init,
+          },
+          align_thresh: {
+            type: 'f',
+            value: env.simulation.align_thresh,
           },
           TR_POS: {
             type: 'f',

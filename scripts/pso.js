@@ -39,6 +39,7 @@ define('scripts/pso', [
           v_init: 1.0,
           w_init: 1.0,
           align_thresh: 0.15,
+          sample_rate: 1.0,
         },
         particles: {
           phi_local: 2.05,
@@ -66,7 +67,7 @@ define('scripts/pso', [
       };
     }
 
-    setupEnv(bounds, cl, num_beats) {
+    setupEnv(bounds, cl, num_beats, sample_rate) {
       this.env = Pso.getEnv();
       const env = this.env;
 
@@ -80,6 +81,11 @@ define('scripts/pso', [
 
       if (Number(num_beats)) {
         env.simulation.num_beats = Number(num_beats);
+      }
+
+      if(Number(sample_rate))
+      {
+        env.simulation.sample_rate = Number(sample_rate);
       }
 
       const phi = env.particles.phi_global + env.particles.phi_local;
@@ -410,6 +416,10 @@ define('scripts/pso', [
           align_thresh: {
             type: 'f',
             value: env.simulation.align_thresh,
+          },
+          sample_rate: {
+            type: 'f',
+            value: env.simulation.sample_rate,
           },
         },
         targets: {
@@ -771,6 +781,10 @@ define('scripts/pso', [
           align_thresh: {
             type: 'f',
             value: env.simulation.align_thresh,
+          },
+          sample_rate: {
+            type: 'f',
+            value: env.simulation.sample_rate,
           },
           TR_POS: {
             type: 'f',

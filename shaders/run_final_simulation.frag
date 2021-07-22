@@ -11,6 +11,7 @@ uniform float dt, period, stim_start, stim_end, stim_mag;
 uniform int num_beats;
 uniform float v_init, w_init;
 uniform float align_thresh;
+uniform float sample_rate;
 
 uniform float TR_POS, TSI_POS, TWP_POS, TD_POS,
     TVP_POS, TV1M_POS, TV2M_POS, TWM_POS,
@@ -27,6 +28,8 @@ void main() {
     float u = 0.0;
     float v = v_init;
     float w = w_init;
+
+    float compare_stride = round(sample_rate / dt);
 
     float error = 0.0;
 
@@ -94,7 +97,7 @@ void main() {
 
         }
 
-        if (first_upstroke && mod(float(step_count - start_comp), round(1.0/dt)) == 0.0) {
+        if (first_upstroke && mod(float(step_count - start_comp), compare_stride) == 0.0) {
             last_aligned_u = u;           
         }
 

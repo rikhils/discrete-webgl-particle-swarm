@@ -15,6 +15,7 @@ uniform float dt, period, stim_start, stim_end, stim_mag;
 uniform int num_beats;
 uniform float v_init, w_init;
 uniform float align_thresh;
+uniform float sample_rate;
 
 // Macros to get the particles from the textures
 #define TR_POS particles_1.r
@@ -50,6 +51,8 @@ void main() {
     float u = 0.0;
     float v = v_init;
     float w = w_init;
+
+    float compare_stride = round(sample_rate / dt);
 
     float error = 0.0;
     error = 10000000000.0;
@@ -117,7 +120,7 @@ void main() {
 
 
         // Measure error
-        if (first_upstroke && mod(float(step_count - start_comp), round(1.0/dt)) == 0.0) {
+        if (first_upstroke && mod(float(step_count - start_comp), compare_stride) == 0.0) {
             float actual = texelFetch(data_texture, ivec2(data_index++, 0), 0).r;
             error += (u - actual)*(u - actual);                
         }

@@ -186,8 +186,8 @@ define('scripts/pso', [
       const particles_height = this.particles_height;
       const data_length = data_array.length / 4;
       const [init_array_1, init_array_2, init_array_3, init_array_4] = init_arrays;
-      const { num_beats, period } = this.env.simulation;
-      const simulation_length = Math.ceil(num_beats * period);
+      const { num_beats, period, sample_rate } = this.env.simulation;
+      const simulation_length = Math.ceil(Math.ceil(num_beats * period) / sample_rate);
 
       this.simulation_texture = new Abubu.Float32Texture(simulation_length, 1, {
         pariable: true,

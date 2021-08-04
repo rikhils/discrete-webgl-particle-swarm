@@ -55,8 +55,17 @@ require([
     }
   };
 
+  function outer_display()
+  {
+    pso_interface.display_all_params(pso_interface);
+  }
+
+
   document.querySelector('input#my_file').addEventListener('change', handleUpload);
   document.querySelector('button#PSO_button').onclick = run_PSO;
+  // document.querySelector('button#disp_params_button').onclick = pso_interface.display_all_params(pso_interface);
+  document.querySelector('button#disp_params_button').onclick = outer_display;
+  // document.querySelector('button#disp_params_button').onclick = function() {alert("hello")};
 
   function run_PSO() {
     const start_time = Date.now();

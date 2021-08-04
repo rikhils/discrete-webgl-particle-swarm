@@ -7,6 +7,9 @@ define('scripts/interface', [
   return class PsoInterface {
     static paramList = ['tr', 'tsi', 'twp', 'td', 'tvp', 'tv1m', 'tv2m', 'twm', 'to', 'xk', 'ucsi', 'uc', 'uv'];
 
+
+
+
     constructor() {
       PsoInterface.paramList.forEach(param => {
         this[param + '_val'] = document.getElementById(param + '_val');
@@ -76,6 +79,16 @@ define('scripts/interface', [
       PsoInterface.paramList.forEach((param, idx) => {
         this[param + '_val'].value = bestArr[idx];
       });
+    }
+
+    display_all_params(real_interface)
+    {
+      var builder = "";
+      PsoInterface.paramList.forEach(param => {
+        builder = builder.concat(param + ":\t" + this[param + '_val'].value +"\n");
+        // builder = builder.concat(param + ":\t" + "test" +"\n");
+      });
+      prompt("(ctrl+c, Enter) to copy:",builder);
     }
 
     displayError(error) {

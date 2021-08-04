@@ -35,11 +35,27 @@ uniform float sample_rate;
 
 #define UV_POS particles_4.r
 
+float stim_f(const float t)
+{
+    const float stim_scale = 0.4;
+    const float stim_dur = 10.0;
+    const float offset_1 = 7.0;
+    const float offset_2 = offset_1 * 0.96;
+    const float t_scale = 0.725;
+
+    // return ( -stim_scale * ( t / t_scale - offset_1) / pow(1.0 + (t/t_scale - offset_2) , 4.0) );
+    return ( -stim_scale * ( t / t_scale - offset_1) / (1.0 + pow((t/t_scale - offset_2) , 4.0) ) );
+
+}
+
+
 void main() {
     // PSO derived parameters
     int num_period = int(ceil(period/dt));
     float endtime = ceil(float(num_beats)*period);
     int num_steps = int(ceil(endtime/dt));
+
+    const float stim_dur = 10.0;
 
     // Get the relevant color from each texture
     vec4 particles_1 = texture(in_particles_1, cc);
@@ -100,9 +116,16 @@ void main() {
         float jsi = -w * (1.0 + tanh(XK_POS * (u-UCSI_POS))) / (2.0 * TSI_POS);
 
         // Apply stimulus
+        // float stim = 0.0;
+        // if (mod(float(step_count), period/dt) > stim_start/dt && mod(float(step_count), period/dt) < stim_end/dt) {
+        //     stim = stim_mag;
+        // }
+
         float stim = 0.0;
-        if (mod(float(step_count), period/dt) > stim_start/dt && mod(float(step_count), period/dt) < stim_end/dt) {
-            stim = stim_mag;
+        float stim_step = mod(float(step_count), period/dt);
+        if(stim_step < stim_dur/dt)
+        {
+            stim = stim_f(stim_step * dt);
         }
 
 

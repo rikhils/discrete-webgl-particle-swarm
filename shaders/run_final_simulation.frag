@@ -18,11 +18,26 @@ uniform float TR_POS, TSI_POS, TWP_POS, TD_POS,
     TO_POS, XK_POS, UCSI_POS, UC_POS,
     UV_POS;
 
+
+float stim_f(const float t)
+{
+    const float stim_scale = 0.4;
+    const float stim_dur = 10.0;
+    const float offset_1 = 7.0;
+    const float offset_2 = offset_1 * 0.96;
+    const float t_scale = 0.725;
+
+    // return ( -stim_scale * ( t / t_scale - offset_1) / pow(1.0 + (t/t_scale - offset_2) , 4.0) );
+    return ( -stim_scale * ( t / t_scale - offset_1) / (1.0 + pow((t/t_scale - offset_2) , 4.0) ) );
+}
+
 void main() {
     // PSO derived parameters
     int num_period = int(ceil(period/dt));
     float endtime = ceil(float(num_beats)*period);
     int num_steps = int(ceil(endtime/dt));
+
+    const float stim_dur = 10.0;
 
     // Initialize values for the simulation
     float u = 0.0;
@@ -82,10 +97,18 @@ void main() {
         float jsi = -w * (1.0 + tanh(XK_POS * (u-UCSI_POS))) / (2.0 * TSI_POS);
 
         // Apply stimulus
+        // float stim = 0.0;
+        // if (mod(float(step_count), period/dt) > stim_start/dt && mod(float(step_count), period/dt) < stim_end/dt) {
+        //     stim = stim_mag;
+        // }
+
         float stim = 0.0;
-        if (mod(float(step_count), period/dt) > stim_start/dt && mod(float(step_count), period/dt) < stim_end/dt) {
-            stim = stim_mag;
+        float stim_step = mod(float(step_count), period/dt);
+        if(stim_step < (stim_dur/dt))
+        {
+            stim = stim_f(stim_step * dt);
         }
+
 
         u -= (jfi+jso+jsi-stim)*dt;
 

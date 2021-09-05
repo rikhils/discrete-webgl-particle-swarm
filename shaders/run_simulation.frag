@@ -48,6 +48,7 @@ float stim_f(const float t)
 
 }
 
+#define nx 10
 
 void main() {
     // PSO derived parameters
@@ -63,10 +64,16 @@ void main() {
     vec4 particles_3 = texture(in_particles_3, cc);
     vec4 particles_4 = texture(in_particles_4, cc);
 
+    float dx = 0.025;
+    float D = 0.0011/(dx * dx);
+
     // Initialize values for the simulation
-    float u = 0.0;
-    float v = v_init;
-    float w = w_init;
+    float [nx] u, v, w;
+    for (int i = 0; i < nx; ++i) {
+        u[i] = 0.0;
+        v[i] = v_init;
+        w[i] = w_init;
+    }
 
     float compare_stride = round(sample_rate / dt);
 
@@ -80,72 +87,82 @@ void main() {
 
     // Run the simulation with the current swarm parameters
     for (int step_count = 1; step_count <= num_steps; ++step_count) {
-        float p = u >= UC_POS ? 1.0 : 0.0;
-        float q = u >= UV_POS ? 1.0 : 0.0;
+        for (int ix = 0; ix < nx; ++ix) {
+            float p = u[ix] >= UC_POS ? 1.0 : 0.0;
+            float q = u[ix] >= UV_POS ? 1.0 : 0.0;
 
-        float dv =
-            // p false
-            (1.0 - p)*(1.0 - v) / (
-                // q false
-                (1.0 - q)*TV1M_POS
-                // q true
-                + q*TV2M_POS
-                )
-            // p true
-            - p*(v/TVP_POS);
+            float dv =
+                // p false
+                (1.0 - p)*(1.0 - v[ix]) / (
+                    // q false
+                    (1.0 - q)*TV1M_POS
+                    // q true
+                    + q*TV2M_POS
+                    )
+                // p true
+                - p*(v[ix]/TVP_POS);
 
-        float dw =
-            // p false
-            (1.0-p)*(1.0-w) / TWM_POS
-            // p true
-            - p*(w/TWP_POS);
+            float dw =
+                // p false
+                (1.0-p)*(1.0-w[ix]) / TWM_POS
+                // p true
+                - p*(w[ix]/TWP_POS);
 
-        v += dt*dv;
-        w += dt*dw;
+            v[ix] += dt*dv;
+            w[ix] += dt*dw;
 
-        float jfi =
-            // p true
-            p * -v * (u - UC_POS)*(1.0-u)/TD_POS;
+            float jfi =
+                // p true
+                p * -v[ix] * (u[ix] - UC_POS)*(1.0-u[ix])/TD_POS;
 
-        float jso =
-            // p false
-            (1.0 - p)*u / TO_POS
-            // p true
-            + p/TR_POS;
+            float jso =
+                // p false
+                (1.0 - p)*u[ix] / TO_POS
+                // p true
+                + p/TR_POS;
 
-        float jsi = -w * (1.0 + tanh(XK_POS * (u-UCSI_POS))) / (2.0 * TSI_POS);
+            float jsi = -w[ix] * (1.0 + tanh(XK_POS * (u[ix]-UCSI_POS))) / (2.0 * TSI_POS);
 
-        // Apply stimulus
-        // float stim = 0.0;
-        // if (mod(float(step_count), period/dt) > stim_start/dt && mod(float(step_count), period/dt) < stim_end/dt) {
-        //     stim = stim_mag;
-        // }
+            // Apply stimulus
+            // float stim = 0.0;
+            // if (mod(float(step_count), period/dt) > stim_start/dt && mod(float(step_count), period/dt) < stim_end/dt) {
+            //     stim = stim_mag;
+            // }
 
-        float stim = 0.0;
-        float stim_step = mod(float(step_count), period/dt);
-        if(stim_step < stim_dur/dt)
-        {
-            stim = stim_f(stim_step * dt);
+            float stim = 0.0;
+            float stim_step = mod(float(step_count), period/dt);
+            if(ix < 2 && stim_step < stim_dur/dt)
+            {
+                stim = stim_f(stim_step * dt);
+            }
+
+            float diff = 0.0;
+            if (nx > 1) {
+                diff -= 2.0 * u[ix];
+
+                if (ix == 0) {
+                    diff += 2.0 * u[ix+1];
+                } else if (ix == nx) {
+                    diff += 2.0 * u[ix-1];
+                } else {
+                    diff += u[ix+1] + u[ix-1];
+                }
+            }
+
+            u[ix] -= (jfi+jso+jsi-stim-D*diff)*dt;
         }
 
-
-
-
-        u -= (jfi+jso+jsi-stim)*dt;
-
-        if(!first_upstroke && u > align_thresh)
+        if(!first_upstroke && u[nx/2] > align_thresh)
         {
             first_upstroke = true;
             start_comp = step_count;
             error = 0.0;
         }
 
-
-
         // Measure error
         if (first_upstroke && mod(float(step_count - start_comp), compare_stride) == 0.0) {
             float actual = texelFetch(data_texture, ivec2(data_index++, 0), 0).r;
-            error += (u - actual)*(u - actual);                
+            error += (u[nx/2] - actual)*(u[nx/2] - actual);
         }
     }
 

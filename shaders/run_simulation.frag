@@ -68,11 +68,12 @@ void main() {
     float D = 0.0011/(dx * dx);
 
     // Initialize values for the simulation
-    float [nx] u, v, w;
+    float [nx] u, v, w, diff;
     for (int i = 0; i < nx; ++i) {
         u[i] = 0.0;
         v[i] = v_init;
         w[i] = w_init;
+        diff[i] = 0.0;
     }
 
     float compare_stride = round(sample_rate / dt);
@@ -136,20 +137,22 @@ void main() {
                 stim = stim_f(stim_step * dt);
             }
 
-            float diff = 0.0;
+            diff[ix] = stim - jfi - jso - jsi;
             if (nx > 1) {
-                diff -= 2.0 * u[ix];
+                diff[ix] -= D * 2.0 * u[ix];
 
                 if (ix == 0) {
-                    diff += 2.0 * u[ix+1];
+                    diff[ix] += D * 2.0 * u[ix+1];
                 } else if (ix == nx) {
-                    diff += 2.0 * u[ix-1];
+                    diff[ix] += D * 2.0 * u[ix-1];
                 } else {
-                    diff += u[ix+1] + u[ix-1];
+                    diff[ix] += D * (u[ix+1] + u[ix-1]);
                 }
             }
+        }
 
-            u[ix] -= (jfi+jso+jsi-stim-D*diff)*dt;
+        for (int i = 0; i < nx; ++i) {
+            u[i] += dt * diff[i];
         }
 
         if(!first_upstroke && u[nx/2] > align_thresh)

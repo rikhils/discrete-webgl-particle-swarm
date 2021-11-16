@@ -1,8 +1,10 @@
 /* global define */
 define('scripts/pso', [
   'libs/Abubu.js',
-  'text!shaders/run_simulation.frag',
-  'text!shaders/run_final_simulation.frag',
+  // 'text!shaders/run_simulation.frag',
+  // 'text!shaders/run_final_simulation.frag',
+  'text!shaders/run_simulation_0d.frag',
+  'text!shaders/run_final_simulation_0d.frag',
   'text!shaders/reduce_error_s1.frag',
   'text!shaders/reduce_error_s2.frag',
   'text!shaders/update_velocities.frag',

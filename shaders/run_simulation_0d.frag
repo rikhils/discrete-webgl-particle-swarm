@@ -145,7 +145,7 @@ void main() {
         // Measure error
         if (first_upstroke && mod(float(step_count - start_comp), compare_stride) == 0.0) {
             float actual = texelFetch(data_texture, ivec2(data_index++, 0), 0).r;
-            error += (u - actual)*(u - actual)/(period/10);                
+            error += (u - actual)*(u - actual);                
         }
     }
 

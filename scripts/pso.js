@@ -193,7 +193,7 @@ define('scripts/pso', [
     initializeTextures(data_arrays, init_arrays) {
       const particles_width = this.particles_width;
       const particles_height = this.particles_height;
-      const data_length = data_array.length / 4;
+      // const data_length = data_array.length / 4;
       const [init_array_1, init_array_2, init_array_3, init_array_4] = init_arrays;
       const { num_beats, period, sample_rate } = this.env.simulation;
       // const simulation_length = Math.ceil(Math.ceil(num_beats * period) / sample_rate);
@@ -211,7 +211,7 @@ define('scripts/pso', [
           );
 
         this.data_textures.push(
-            new Abubu.Float32Texture(data_length, 1, {
+            new Abubu.Float32Texture(data_arrays[i].length/4, 1, {
                     pairable: true,
                     data: data_arrays[i],
                   })
@@ -720,34 +720,39 @@ define('scripts/pso', [
 
 
 
-      let total_error_array = new Float32Array(particles_width * particles_height * 4);
-      for (let i = 0; i < particles_width * particles_height * 4; i += 4)
+      let total_error_array = new Float32Array(this.particles_width * this.particles_height * 4);
+      for (let i = 0; i < this.particles_width * this.particles_height * 4; i += 4)
       {
         total_error_array[i] = 0.0;
       }
 
       // this.run_simulations_solver.render();
 
+      // console.log(env.simulation.period.length);
+      // console.log(this.run_simulations_solvers);
       for (var i = 0; i < env.simulation.period.length; i++) {
-        
-          this.run_final_simulation_solvers[i].render();
 
-          for(let i = 0; i < particles_width * particles_height *4; i += 4)
+          console.log("Running solver...");
+          this.run_simulations_solvers[i].render();
+          console.log("Solver finished.");
+
+          for(let i = 0; i < this.particles_width * this.particles_height *4; i += 4)
           {
             total_error_array[i] += this.error_texture.value[i];
           }
 
       }
+      console.log(this.error_texture);
 
-      let total_error_texture = new Abubu.Float32Texture(particles_width, particles_height, {
+      let total_error_texture = new Abubu.Float32Texture(this.particles_width, this.particles_height, {
         pariable: true,
         data: total_error_array,
       });
 
-
       let total_error_copy = new Abubu.Copy(total_error_texture, this.error_texture);
       total_error_copy.render();
 
+      console.log(this.error_texture);
 
 
       this.reduce_error_1_solver.render();
@@ -931,7 +936,7 @@ define('scripts/pso', [
 
     runFinalSimulationSolver(cl_idx) {
       this.run_final_simulation_solvers[cl_idx].render();
-      const texture_array = this.simulation_textures[idx].value;
+      const texture_array = this.simulation_textures[cl_idx].value;
       const simultation_length = texture_array.length / 4;
 
       const simulation_data = new Float32Array(simultation_length);

@@ -48,6 +48,10 @@ require([
   let raw_text_1 = null;
   let raw_text_2 = null;
   let raw_text_3 = null;
+
+  let actual_data = [];
+  let data_arrays = [];
+
   const handleUpload = async (event) => {
     const file = event.target.files[0];
 
@@ -135,8 +139,8 @@ function plotCL_change(e)
     pso.setupEnv(pso_interface.getBounds(), cls, pso_interface.data_num_beats.value, pso_interface.data_sample_rate.value);
     // const [actual_data, data_array] = pso.readData(raw_text, pso_interface.normalization.value);
   
-    let actual_data = [];
-    let data_arrays = [];
+    actual_data = [];
+    data_arrays = [];
 
 
     let temp_actData = null;
@@ -161,7 +165,7 @@ function plotCL_change(e)
 
 
     const init_arrays = pso.initializeParticles();
-    pso.initializeTextures(data_array, init_arrays);
+    pso.initializeTextures(data_arrays, init_arrays);
     // Re-running the setup every time could be replaced by updating the uniforms
     pso.setupAllSolvers();
 
@@ -173,7 +177,7 @@ function plotCL_change(e)
     const bestArr = pso.getGlobalBests();
     pso_interface.displayResults(bestArr);
     pso_interface.displayError(pso.env.particles.best_error_value);
-    pso.setupFinalSimulationSolver(bestArr);
+    pso.setupFinalSimulationSolvers(bestArr);
 
 
     displayGraph(0);
@@ -197,7 +201,7 @@ function plotCL_change(e)
     // pso_interface.setAxes(0, num_points, scale[0], scale[1]);
 
   };
-});
+
 
 
 function displayGraph(cl_idx)
@@ -213,16 +217,21 @@ function displayGraph(cl_idx)
     const plotting_sim_data = simulation_data.slice(align_index);
 
     const scale = [
-      Math.min(...actual_data, ...plotting_sim_data),
-      Math.max(...actual_data, ...plotting_sim_data),
+      Math.min(...actual_data[cl_idx], ...plotting_sim_data),
+      Math.max(...actual_data[cl_idx], ...plotting_sim_data),
     ];
 
-    const num_points = Math.max(actual_data.length, plotting_sim_data.length);
+    const num_points = Math.max(actual_data[cl_idx].length, plotting_sim_data.length);
 
     graph.clearGraph();
-    graph.runGraph(actual_data, [1, 0, 0], num_points, scale);
+    graph.runGraph(actual_data[cl_idx], [1, 0, 0], num_points, scale);
     graph.runGraph(plotting_sim_data, [0, 0, 1], num_points, scale);
 
     pso_interface.setAxes(0, num_points, scale[0], scale[1]);
 
 }
+
+
+});
+
+

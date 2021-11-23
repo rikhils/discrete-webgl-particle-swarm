@@ -40,7 +40,7 @@ define('scripts/pso', [
           num_beats: 1,
           v_init: 1.0,
           w_init: 1.0,
-          align_thresh: 0.15,
+          align_thresh: [0.15],
           sample_rate: 1.0,
         },
         particles: {
@@ -69,7 +69,7 @@ define('scripts/pso', [
       };
     }
 
-    setupEnv(bounds, cl, num_beats, sample_rate) {
+    setupEnv(bounds, cls, num_beats, sample_rate) {
       this.env = Pso.getEnv();
       const env = this.env;
 
@@ -77,8 +77,15 @@ define('scripts/pso', [
         env.bounds = bounds;
       }
 
-      if (Number(cl)) {
-        env.simulation.period = Number(cl);
+      // if (Number(cl)) {
+      //   env.simulation.period = Number(cl);
+      // }
+
+      for (var i = 0; i < cls.length; i++) {
+        if(Number(cls[i]))
+        {
+          env.simulation.period.push(Number(cls[i]));
+        }
       }
 
       if (Number(num_beats)) {
@@ -140,7 +147,7 @@ define('scripts/pso', [
 
       const delta = 0.001;
 
-      this.env.simulation.align_thresh = left_trimmed_data[0]-delta;
+      this.env.simulation.align_thresh.push(left_trimmed_data[0]-delta);
 
       return [left_trimmed_data, data_array];
     }
@@ -196,7 +203,7 @@ define('scripts/pso', [
       this.data_textures = [];
 
       for (var i = 0; i < period.length; i++) {
-        simulation_lengths.push(Math.ceil(Math.ceil(num_beats * period[i]) / sample_rate);
+        simulation_lengths.push(Math.ceil(Math.ceil(num_beats * period[i]) / sample_rate));
         this.simulation_textures.push(
             new Abubu.Float32Texture(simulation_lengths[i], 1, {
         pariable: true,
@@ -458,7 +465,7 @@ define('scripts/pso', [
             target: this.error_texture,
           },
         },
-      });
+      }));
       }
     }
 
@@ -734,7 +741,7 @@ define('scripts/pso', [
 
       let total_error_texture = new Abubu.Float32Texture(particles_width, particles_height, {
         pariable: true,
-        data: total_error_array;
+        data: total_error_array,
       });
 
 

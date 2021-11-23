@@ -43,15 +43,18 @@ require([
   };
 
   let num_cyclelengths = 1;
+  let plotting_cycleclength = 1;
 
-  let raw_text = null;
+  let raw_text_1 = null;
+  let raw_text_2 = null;
+  let raw_text_3 = null;
   const handleUpload = async (event) => {
     const file = event.target.files[0];
 
     try {
       const fileContents = await readUploadedFileAsText(file);
-      raw_text = fileContents;
-      run_PSO();
+      raw_text_1 = fileContents;
+      // run_PSO();
     } catch (e) {
       alert(e.message);
     }
@@ -62,8 +65,8 @@ require([
 
     try {
       const fileContents = await readUploadedFileAsText(file);
-      raw_text = fileContents;
-      run_PSO();
+      raw_text_2 = fileContents;
+      // run_PSO();
     } catch (e) {
       alert(e.message);
     }
@@ -75,8 +78,8 @@ require([
 
     try {
       const fileContents = await readUploadedFileAsText(file);
-      raw_text = fileContents;
-      run_PSO();
+      raw_text_3 = fileContents;
+      // run_PSO();
     } catch (e) {
       alert(e.message);
     }
@@ -94,6 +97,14 @@ require([
     console.log(num_cyclelengths);
   }
 
+function plotCL_change(e)
+{
+  plotting_cycleclength = parseInt(e.target.value);
+  if(plotting_cycleclength <= num_cyclelengths)
+  {
+    displayGraph(plotting_cycleclength-1);
+  }
+}
 
   document.querySelector('input#my_file').addEventListener('change', handleUpload);
   document.querySelector('button#PSO_button').onclick = run_PSO;
@@ -101,12 +112,54 @@ require([
   document.querySelector('button#disp_params_button').onclick = outer_display;
   // document.querySelector('button#disp_params_button').onclick = function() {alert("hello")};
   document.querySelector('select#numCL_select').addEventListener('change',numCL_change);
+  document.querySelector('select#plot_CL_select').addEventListener('change',plotCL_change);
+
 
   function run_PSO() {
     const start_time = Date.now();
 
-    pso.setupEnv(pso_interface.getBounds(), pso_interface.data_cl.value, pso_interface.data_num_beats.value, pso_interface.data_sample_rate.value);
-    const [actual_data, data_array] = pso.readData(raw_text, pso_interface.normalization.value);
+    let cls = [];
+
+    switch(num_cyclelengths)
+    {
+      case 3:
+        cls.push(pso_interface.data_cl_3.value);
+      case 2:
+        cls.unshift(pso_interface.data_cl_2.value);
+      case 1:
+        cls.unshift(pso_interface.data_cl_1.value);
+        break;
+    }
+
+    // pso.setupEnv(pso_interface.getBounds(), pso_interface.data_cl.value, pso_interface.data_num_beats.value, pso_interface.data_sample_rate.value);
+    pso.setupEnv(pso_interface.getBounds(), cls, pso_interface.data_num_beats.value, pso_interface.data_sample_rate.value);
+    // const [actual_data, data_array] = pso.readData(raw_text, pso_interface.normalization.value);
+  
+    let actual_data = [];
+    let data_arrays = [];
+
+
+    let temp_actData = null;
+    let temp_data_array = null;
+
+    switch(num_cyclelengths)
+    {
+      case 3:
+        [temp_actData, temp_data_array] = pso.readData(raw_text_3, pso_interface.normalization.value);
+        actual_data.push(temp_actData);
+        data_arrays.push(temp_data_array);
+      case 2:
+        [temp_actData, temp_data_array] = pso.readData(raw_text_2, pso_interface.normalization.value);
+        actual_data.unshift(temp_actData);
+        data_arrays.unshift(temp_data_array);
+      case 1:
+        [temp_actData, temp_data_array] = pso.readData(raw_text_1, pso_interface.normalization.value);
+        actual_data.unshift(temp_actData);
+        data_arrays.unshift(temp_data_array);
+        break;
+    }    
+
+
     const init_arrays = pso.initializeParticles();
     pso.initializeTextures(data_array, init_arrays);
     // Re-running the setup every time could be replaced by updating the uniforms
@@ -121,7 +174,40 @@ require([
     pso_interface.displayResults(bestArr);
     pso_interface.displayError(pso.env.particles.best_error_value);
     pso.setupFinalSimulationSolver(bestArr);
-    const simulation_data = pso.runFinalSimulationSolver();
+
+
+    displayGraph(0);
+
+    // const simulation_data = pso.runFinalSimulationSolver();
+
+    // const align_index = simulation_data.findIndex(number => number > 0.15);
+    // const plotting_sim_data = simulation_data.slice(align_index);
+
+    // const scale = [
+    //   Math.min(...actual_data, ...plotting_sim_data),
+    //   Math.max(...actual_data, ...plotting_sim_data),
+    // ];
+
+    // const num_points = Math.max(actual_data.length, plotting_sim_data.length);
+
+    // graph.clearGraph();
+    // graph.runGraph(actual_data, [1, 0, 0], num_points, scale);
+    // graph.runGraph(plotting_sim_data, [0, 0, 1], num_points, scale);
+
+    // pso_interface.setAxes(0, num_points, scale[0], scale[1]);
+
+  };
+});
+
+
+function displayGraph(cl_idx)
+{
+
+    // const bestArr = pso.getGlobalBests();
+    // pso_interface.displayResults(bestArr);
+    // pso_interface.displayError(pso.env.particles.best_error_value);
+    // pso.setupFinalSimulationSolver(bestArr);
+    const simulation_data = pso.runFinalSimulationSolver(cl_idx);
 
     const align_index = simulation_data.findIndex(number => number > 0.15);
     const plotting_sim_data = simulation_data.slice(align_index);
@@ -139,5 +225,4 @@ require([
 
     pso_interface.setAxes(0, num_points, scale[0], scale[1]);
 
-  };
-});
+}

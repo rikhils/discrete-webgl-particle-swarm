@@ -8,7 +8,20 @@
   </head>
   <body>
     <div>
+
+      <label for="numCL_select">How many CLs to fit:</label>
+
+      <select name="numCLselector" id="numCL_select">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+      </select>
+
       <input type="file" id="my_file" name="data_to_fit">
+      <input type="file" id="my_file_2" name="data_to_fit_2">
+      <input type="file" id="my_file_3" name="data_to_fit_3">
+
+
       <button name="button" id="PSO_button">Rerun PSO</button>
       <button name="button" id="disp_params_button">Display Parameter Values</button>
     </div>
@@ -125,8 +138,16 @@
       <span>Normalize to</span>
       <input id="normalization" type="text">
 
-      <span>Cycle length</span>
+      <br>
+      <span>Cycle length 1</span>
       <input id="data_cl" type="text">
+
+      <span>Cycle length 2</span>
+      <input id="data_cl" type="text">
+
+      <span>Cycle length 3</span>
+      <input id="data_cl" type="text">
+      </br>
 
       <span>Number of beats</span>
       <input id="data_num_beats" type="text">

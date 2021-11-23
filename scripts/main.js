@@ -42,6 +42,8 @@ require([
     });
   };
 
+  let num_cyclelengths = 1;
+
   let raw_text = null;
   const handleUpload = async (event) => {
     const file = event.target.files[0];
@@ -55,9 +57,41 @@ require([
     }
   };
 
+  const handleUpload_2 = async (event) => {
+    const file = event.target.files[0];
+
+    try {
+      const fileContents = await readUploadedFileAsText(file);
+      raw_text = fileContents;
+      run_PSO();
+    } catch (e) {
+      alert(e.message);
+    }
+  };
+
+
+    const handleUpload_3 = async (event) => {
+    const file = event.target.files[0];
+
+    try {
+      const fileContents = await readUploadedFileAsText(file);
+      raw_text = fileContents;
+      run_PSO();
+    } catch (e) {
+      alert(e.message);
+    }
+  };
+
+
   function outer_display()
   {
     pso_interface.display_all_params(pso_interface);
+  }
+
+  function numCL_change(e)
+  {
+    num_cyclelengths = parseInt(e.target.value);
+    console.log(num_cyclelengths);
   }
 
 
@@ -66,6 +100,7 @@ require([
   // document.querySelector('button#disp_params_button').onclick = pso_interface.display_all_params(pso_interface);
   document.querySelector('button#disp_params_button').onclick = outer_display;
   // document.querySelector('button#disp_params_button').onclick = function() {alert("hello")};
+  document.querySelector('select#numCL_select').addEventListener('change',numCL_change);
 
   function run_PSO() {
     const start_time = Date.now();

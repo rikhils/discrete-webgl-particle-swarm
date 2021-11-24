@@ -40,7 +40,7 @@ define('scripts/pso', [
           num_beats: 1,
           v_init: 1.0,
           w_init: 1.0,
-          align_thresh: [0.15],
+          align_thresh: [],
           sample_rate: 1.0,
         },
         particles: {
@@ -152,7 +152,7 @@ define('scripts/pso', [
 
       const delta = 0.001;
 
-      this.env.simulation.align_thresh.push(left_trimmed_data[0]-delta);
+      this.env.simulation.align_thresh.unshift(left_trimmed_data[0]-delta);
 
       return [left_trimmed_data, data_array];
     }
@@ -732,7 +732,7 @@ define('scripts/pso', [
     runOneIteration() {
       const env = this.env;
 
-
+      console.log(env.simulation.align_thresh);
 
       let total_error_array = new Float32Array(this.particles_width * this.particles_height * 4);
       for (let i = 0; i < this.particles_width * this.particles_height * 4; i += 4)
@@ -753,7 +753,7 @@ define('scripts/pso', [
 
           for(let j = 0; j < this.particles_width * this.particles_height *4; j += 4)
           {
-            total_error_array[j] += this.error_textures[i].value[j];
+            total_error_array[j] += this.error_textures[i].value[j]  / (env.simulation.period[i] / 10.0);
           }
 
       }

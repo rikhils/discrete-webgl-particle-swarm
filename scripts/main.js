@@ -111,6 +111,8 @@ function plotCL_change(e)
 }
 
   document.querySelector('input#my_file').addEventListener('change', handleUpload);
+  document.querySelector('input#my_file_2').addEventListener('change', handleUpload_2);
+  document.querySelector('input#my_file_3').addEventListener('change', handleUpload_3);
   document.querySelector('button#PSO_button').onclick = run_PSO;
   // document.querySelector('button#disp_params_button').onclick = pso_interface.display_all_params(pso_interface);
   document.querySelector('button#disp_params_button').onclick = outer_display;

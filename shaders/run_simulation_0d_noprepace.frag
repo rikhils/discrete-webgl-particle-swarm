@@ -3,24 +3,37 @@
 precision highp float;
 precision highp int;
 
-layout (location = 0) out vec4 simulation_texture;
+uniform sampler2D in_particles_1, in_particles_2, in_particles_3, in_particles_4;
+uniform sampler2D data_texture;
+
+layout (location = 0) out vec4 error_texture;
 
 in vec2 cc;
 
+// Simulation parameters
 uniform float dt, period, stim_start, stim_end, stim_mag;
 uniform int num_beats;
 uniform float v_init, w_init;
 uniform float align_thresh;
 uniform float sample_rate;
 
-uniform float TR_POS, TSI_POS, TWP_POS, TD_POS,
-    TVP_POS, TV1M_POS, TV2M_POS, TWM_POS,
-    TO_POS, XK_POS, UCSI_POS, UC_POS,
-    UV_POS;
+// Macros to get the particles from the textures
+#define TR_POS particles_1.r
+#define TSI_POS particles_1.g
+#define TWP_POS particles_1.b
+#define TD_POS particles_1.a
 
+#define TVP_POS particles_2.r
+#define TV1M_POS particles_2.g
+#define TV2M_POS particles_2.b
+#define TWM_POS particles_2.a
 
-#define PRE_PACING_BEATS 4
+#define TO_POS particles_3.r
+#define XK_POS particles_3.g
+#define UCSI_POS particles_3.b
+#define UC_POS particles_3.a
 
+#define UV_POS particles_4.r
 
 float stim_f(const float t)
 {
@@ -32,18 +45,23 @@ float stim_f(const float t)
 
     // return ( -stim_scale * ( t / t_scale - offset_1) / pow(1.0 + (t/t_scale - offset_2) , 4.0) );
     return ( -stim_scale * ( t / t_scale - offset_1) / (1.0 + pow((t/t_scale - offset_2) , 4.0) ) );
+
 }
+
 
 void main() {
     // PSO derived parameters
     int num_period = int(ceil(period/dt));
-    int total_beats = PRE_PACING_BEATS + num_beats;
-    float endtime = ceil(float(total_beats)*period);
-    float pre_pace_endtime = ceil(float(PRE_PACING_BEATS)*period);
-    int pre_pace_steps = int(ceil(pre_pace_endtime/dt));
+    float endtime = ceil(float(num_beats)*period);
     int num_steps = int(ceil(endtime/dt));
 
     const float stim_dur = 10.0;
+
+    // Get the relevant color from each texture
+    vec4 particles_1 = texture(in_particles_1, cc);
+    vec4 particles_2 = texture(in_particles_2, cc);
+    vec4 particles_3 = texture(in_particles_3, cc);
+    vec4 particles_4 = texture(in_particles_4, cc);
 
     // Initialize values for the simulation
     float u = 0.0;
@@ -53,17 +71,12 @@ void main() {
     float compare_stride = round(sample_rate / dt);
 
     float error = 0.0;
+    error = 10000000000.0;
 
     int data_index = 0;
 
     int start_comp = 0;
     bool first_upstroke = false;
-    float last_aligned_u = -1.0;
-
-    if (cc.x == 0.0) {
-        simulation_texture = vec4(u, 0, 0, 0);
-        return;
-    }
 
     // Run the simulation with the current swarm parameters
     for (int step_count = 1; step_count <= num_steps; ++step_count) {
@@ -110,32 +123,32 @@ void main() {
 
         float stim = 0.0;
         float stim_step = mod(float(step_count), period/dt);
-        if(stim_step < (stim_dur/dt))
+        if(stim_step < stim_dur/dt)
         {
             stim = stim_f(stim_step * dt);
         }
 
 
+
+
         u -= (jfi+jso+jsi-stim)*dt;
 
-        if(step_count > pre_pace_steps && !first_upstroke && u > align_thresh)
+        if(!first_upstroke && u > align_thresh)
         {
             first_upstroke = true;
             start_comp = step_count;
             error = 0.0;
-
         }
 
+
+
+        // Measure error
         if (first_upstroke && mod(float(step_count - start_comp), compare_stride) == 0.0) {
-            last_aligned_u = u;           
-        }
-
-
-        if (float( (step_count - pre_pace_steps) - 1) / float((num_steps - pre_pace_steps) - 1) >= cc.x) {
-            break;
+            float actual = texelFetch(data_texture, ivec2(data_index++, 0), 0).r;
+            error += (u - actual)*(u - actual);                
         }
     }
 
-    simulation_texture = vec4(last_aligned_u, 0, 0, 0);
-    // simulation_texture = vec4(u, 0, 0, 0);
+    error_texture = vec4(error, 0, 0, 0);
+    // error_texture = vec4(16,0,0,0);
 }

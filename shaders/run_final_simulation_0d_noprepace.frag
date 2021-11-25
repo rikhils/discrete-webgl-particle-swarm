@@ -19,9 +19,6 @@ uniform float TR_POS, TSI_POS, TWP_POS, TD_POS,
     UV_POS;
 
 
-#define PRE_PACING_BEATS 4
-
-
 float stim_f(const float t)
 {
     const float stim_scale = 0.4;
@@ -37,10 +34,7 @@ float stim_f(const float t)
 void main() {
     // PSO derived parameters
     int num_period = int(ceil(period/dt));
-    int total_beats = PRE_PACING_BEATS + num_beats;
-    float endtime = ceil(float(total_beats)*period);
-    float pre_pace_endtime = ceil(float(PRE_PACING_BEATS)*period);
-    int pre_pace_steps = int(ceil(pre_pace_endtime/dt));
+    float endtime = ceil(float(num_beats)*period);
     int num_steps = int(ceil(endtime/dt));
 
     const float stim_dur = 10.0;
@@ -118,7 +112,7 @@ void main() {
 
         u -= (jfi+jso+jsi-stim)*dt;
 
-        if(step_count > pre_pace_steps && !first_upstroke && u > align_thresh)
+        if(!first_upstroke && u > align_thresh)
         {
             first_upstroke = true;
             start_comp = step_count;
@@ -131,7 +125,7 @@ void main() {
         }
 
 
-        if (float( (step_count - pre_pace_steps) - 1) / float((num_steps - pre_pace_steps) - 1) >= cc.x) {
+        if (float(step_count - 1) / float(num_steps - 1) >= cc.x) {
             break;
         }
     }

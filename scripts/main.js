@@ -173,7 +173,7 @@ function plotCL_change(e)
     // Re-running the setup every time could be replaced by updating the uniforms
     pso.setupAllSolvers();
 
-    for (let i = 0; i < 8; ++i) {
+    for (let i = 0; i < 32; ++i) {
       console.log(pso.env.particles.best_error_value);
       pso.runOneIteration();
     }

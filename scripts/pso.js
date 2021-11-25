@@ -738,16 +738,16 @@ define('scripts/pso', [
       }
       else if (this.env.simulation.period.length == 2)
       {
-        console.log(this.error_textures[0]);
-        console.log(this.error_textures[1]);
-        console.log(this.error_texture);
+        // console.log(this.error_textures[0]);
+        // console.log(this.error_textures[1]);
+        // console.log(this.error_texture);
         
         this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[0], 1.0/this.env.simulation.period[0], this.error_textures[1],
               1.0/this.env.simulation.period[0], this.error_texture));
         
-        this.errorSumSolvers[0].render();
-        console.log("Ran summation!!");
-        console.log(this.error_texture);
+        // this.errorSumSolvers[0].render();
+        // console.log("Ran summation!!");
+        // console.log(this.error_texture);
 
       }
       else
@@ -861,9 +861,9 @@ define('scripts/pso', [
       // console.log(this.run_simulations_solvers);
       for (let i = 0; i < env.simulation.period.length; i++) {
 
-          console.log("Running solver...");
+          // console.log("Running solver...");
           this.run_simulations_solvers[i].render();
-          console.log("Solver finished.");
+          // console.log("Solver finished.");
           // console.log(this.error_textures[i]);
       }
 

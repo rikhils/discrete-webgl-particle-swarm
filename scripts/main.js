@@ -126,6 +126,8 @@ function plotCL_change(e)
 
     let cls = [];
 
+    document.getElementById('plot_CL_select').selectedIndex = 0;
+
     switch(num_cyclelengths)
     {
       case 3:

@@ -7,6 +7,8 @@ in vec2 cc;
 
 uniform sampler2D add_texture_1, add_texture_2;
 
+uniform float weight_1, weight_2;
+
 layout (location = 0) out vec4 summed_texture;
 
 #define A1_R_VAL add1.r
@@ -24,13 +26,13 @@ void main() {
     vec4 add1 = texture(add_texture_1, cc);
     vec4 add2 = texture(add_texture_2, cc);
 
-    float newR = A1_R_VAL + A2_R_VAL;
+    float newR = (weight_1 * A1_R_VAL) + (weight_2 * A2_R_VAL);
 
-    float newG = A1_G_VAL + A2_G_VAL;
+    float newG = (weight_1 * A1_G_VAL) + (weight_2 * A2_G_VAL);
 
-    float newB = A1_B_VAL + A2_B_VAL;
+    float newB = (weight_1 * A1_B_VAL) + (weight_2 * A2_B_VAL);
 
-    float newA = A1_A_VAL + A2_A_VAL;
+    float newA = (weight_1 * A1_A_VAL) + (weight_2 * A2_A_VAL);
 
 
     summed_texture = vec4(newR, newG, newB, newA);

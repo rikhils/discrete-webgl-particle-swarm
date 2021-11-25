@@ -696,7 +696,7 @@ define('scripts/pso', [
     setupErrorSumSolvers() {
       const env = this.env;
 
-      const makeErrorSumSolver = (errt1, errt2, errtarget) => {
+      const makeErrorSumSolver = (errt1, weight1, errt2, weight2, errtarget) => {
         return new Abubu.Solver({
           fragmentShader: SumFloat32Shader,
           uniforms: {
@@ -708,6 +708,14 @@ define('scripts/pso', [
               type: 't',
               value: errt2,
             },
+            weight_1: {
+              type: 'f',
+              value: weight1,
+            },
+            weight_2: {
+              type: 'f',
+              value: weight2,
+            },            
           },
           targets: {
             summed_texture: {
@@ -733,7 +741,10 @@ define('scripts/pso', [
         console.log(this.error_textures[0]);
         console.log(this.error_textures[1]);
         console.log(this.error_texture);
-        this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[0], this.error_textures[1], this.error_texture));
+        
+        this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[0], 1.0/this.env.simulation.period[0], this.error_textures[1],
+              1.0/this.env.simulation.period[0], this.error_texture));
+        
         this.errorSumSolvers[0].render();
         console.log("Ran summation!!");
         console.log(this.error_texture);
@@ -742,29 +753,34 @@ define('scripts/pso', [
       else
       {
         partity_boy = 0;
-        this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[0],this.error_textures[1], this.error_sum_texture_0));
+   
+
+        this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[0], 1.0/this.env.simulation.period[0], this.error_textures[1], 
+          1.0/this.env.simulation.period[1], this.error_sum_texture_0));
+   
+
         var err_idx = 0;
         var err_lim = this.env.simulation.period.length;
         for (err_idx = 2; err_idx < (err_lim-1); i++) 
         {
           if(partity_boy & 1)
           {
-            this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[err_idx], this.error_sum_texture_1, this.error_sum_texture_0));
+            this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[err_idx], 1.0/this.env.simulation.period[err_idx], this.error_sum_texture_1, 1.0, this.error_sum_texture_0));
           }
           else
           {
-            this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[err_idx], this.error_sum_texture_0, this.error_sum_texture_1));
+            this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[err_idx], 1.0/this.env.simulation.period[err_idx], this.error_sum_texture_0, 1.0, this.error_sum_texture_1));
           }
 
           partity_boy |= 1;
         }
         if(partity_boy & 1)
         {
-          this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[err_idx], this.error_sum_texture_1, this.error_texture));
+          this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[err_idx], 1.0/this.env.simulation.period[err_idx], this.error_sum_texture_1, 1.0, this.error_texture));
         }
         else
         {
-          this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[err_idx], this.error_sum_texture_0, this.error_texture));
+          this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[err_idx], 1.0/this.env.simulation.period[err_idx], this.error_sum_texture_0, 1.0, this.error_texture));
         }
 
       }

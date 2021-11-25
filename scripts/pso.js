@@ -10,6 +10,7 @@ define('scripts/pso', [
   'text!shaders/update_velocities.frag',
   'text!shaders/update_particles.frag',
   'text!shaders/update_local_bests.frag',
+  'text!shaders/sum_Float32.frag',
 ], function(
   Abubu,
   RunSimulationShader,
@@ -19,6 +20,7 @@ define('scripts/pso', [
   UpdateVelocitiesShader,
   UpdateParticlesShader,
   UpdateLocalBestsShader,
+  SumFloat32Shader,
 ) {
   'use strict';
 
@@ -351,6 +353,14 @@ define('scripts/pso', [
         pariable: true,
       });
 
+      this.error_sum_texture_0 = new Abubu.Float32Texture(particles_width, particles_height, {
+        pariable: true,
+      });
+
+
+      this.error_sum_texture_1 = new Abubu.Float32Texture(particles_width, particles_height, {
+        pariable: true,
+      });
 
       this.reduced_error_1_texture = new Abubu.Float32Texture(particles_width, particles_height, {
         pairable: true,
@@ -682,6 +692,85 @@ define('scripts/pso', [
       this.position_4_solver = makeParticleUpdateSolver(this.particles_texture_4, this.velocities_texture_4, this.particles_out_texture_4, 3);
     }
 
+
+    setupErrorSumSolvers() {
+      const env = this.env;
+
+      const makeErrorSumSolver = (errt1, errt2, errtarget) => {
+        return new Abubu.Solver({
+          fragmentShader: SumFloat32Shader,
+          uniforms: {
+            add_texture_1: {
+              type: 't',
+              value: errt1,
+            },
+            add_texture_2: {
+              type: 't',
+              value: errt2,
+            },
+          },
+          targets: {
+            summed_texture: {
+              location: 0,
+              target: errtarget,
+            },
+          },
+        });
+      };
+
+
+
+      this.errorSumSolvers = [];
+
+      if(this.env.simulation.period.length == 1)
+      {
+        this.errorSumSolvers.push(
+            new Abubu.Copy(this.error_textures[0], this.error_texture)
+          );
+      }
+      else if (this.env.simulation.period.length == 2)
+      {
+        console.log(this.error_textures[0]);
+        console.log(this.error_textures[1]);
+        console.log(this.error_texture);
+        this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[0], this.error_textures[1], this.error_texture));
+        this.errorSumSolvers[0].render();
+        console.log("Ran summation!!");
+        console.log(this.error_texture);
+
+      }
+      else
+      {
+        partity_boy = 0;
+        this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[0],this.error_textures[1], this.error_sum_texture_0));
+        var err_idx = 0;
+        var err_lim = this.env.simulation.period.length;
+        for (err_idx = 2; err_idx < (err_lim-1); i++) 
+        {
+          if(partity_boy & 1)
+          {
+            this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[err_idx], this.error_sum_texture_1, this.error_sum_texture_0));
+          }
+          else
+          {
+            this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[err_idx], this.error_sum_texture_0, this.error_sum_texture_1));
+          }
+
+          partity_boy |= 1;
+        }
+        if(partity_boy & 1)
+        {
+          this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[err_idx], this.error_sum_texture_1, this.error_texture));
+        }
+        else
+        {
+          this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[err_idx], this.error_sum_texture_0, this.error_texture));
+        }
+
+      }
+    }
+
+
     setupCopySolvers() {
       this.tinymt_copy = new Abubu.Copy(this.env.velocity_update.stinymtState, this.env.velocity_update.ftinymtState);
 
@@ -710,6 +799,16 @@ define('scripts/pso', [
       this.setupVelocityUpdateSolvers();
       this.setupPositionUpdateSolvers();
       this.setupCopySolvers();
+      this.setupErrorSumSolvers();
+    }
+
+
+    accumulateError()
+    {
+      for (var i = 0; i < this.errorSumSolvers.length; i++) 
+      {
+        this.errorSumSolvers[i].render();
+      }
     }
 
     updateGlobalBest() {
@@ -732,13 +831,13 @@ define('scripts/pso', [
     runOneIteration() {
       const env = this.env;
 
-      console.log(env.simulation.align_thresh);
+      // console.log(env.simulation.align_thresh);
 
-      let total_error_array = new Float32Array(this.particles_width * this.particles_height * 4);
-      for (let i = 0; i < this.particles_width * this.particles_height * 4; i += 4)
-      {
-        total_error_array[i] = 0.0;
-      }
+      // let total_error_array = new Float32Array(this.particles_width * this.particles_height * 4);
+      // for (let i = 0; i < this.particles_width * this.particles_height * 4; i += 4)
+      // {
+        // total_error_array[i] = 0.0;
+      // }
 
       // this.run_simulations_solver.render();
 
@@ -749,22 +848,10 @@ define('scripts/pso', [
           console.log("Running solver...");
           this.run_simulations_solvers[i].render();
           console.log("Solver finished.");
-          console.log(this.error_textures[i]);
-
-          for(let j = 0; j < this.particles_width * this.particles_height *4; j += 4)
-          {
-            total_error_array[j] += this.error_textures[i].value[j]  / (env.simulation.period[i] / 10.0);
-          }
-
+          // console.log(this.error_textures[i]);
       }
 
-      let total_error_texture = new Abubu.Float32Texture(this.particles_width, this.particles_height, {
-        pariable: true,
-        data: total_error_array,
-      });
-
-      let total_error_copy = new Abubu.Copy(total_error_texture, this.error_texture);
-      total_error_copy.render();
+      this.accumulateError();
 
 
 

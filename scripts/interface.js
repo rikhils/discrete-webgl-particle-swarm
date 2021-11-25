@@ -94,7 +94,8 @@ define('scripts/interface', [
     }
 
     displayError(error) {
-      this.fit_error.innerHTML = this.truncateString(error);
+      // this.fit_error.innerHTML = this.truncateString(error);
+      this.fit_error.innerHTML = (Number.parseFloat(error).toPrecision(4)).toString();
     }
 
     getBounds() {

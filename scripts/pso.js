@@ -752,7 +752,7 @@ define('scripts/pso', [
       }
       else
       {
-        partity_boy = 0;
+        let partity_boy = 0;
    
 
         this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[0], 1.0/this.env.simulation.period[0], this.error_textures[1], 

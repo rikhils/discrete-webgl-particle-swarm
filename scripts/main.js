@@ -186,6 +186,9 @@ function plotCL_change(e)
 
     displayGraph(0);
 
+    console.log("Execution time (ms):");
+    console.log(Date.now() - start_time);
+
     // const simulation_data = pso.runFinalSimulationSolver();
 
     // const align_index = simulation_data.findIndex(number => number > 0.15);

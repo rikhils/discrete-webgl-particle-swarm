@@ -8,7 +8,7 @@ layout (location = 0) out vec4 simulation_texture;
 in vec2 cc;
 
 uniform float dt, period, stim_start, stim_end, stim_mag;
-uniform int num_beats;
+uniform int num_beats, pre_beats;
 uniform float v_init, w_init;
 uniform float align_thresh;
 uniform float sample_interval;
@@ -17,10 +17,6 @@ uniform float TR_POS, TSI_POS, TWP_POS, TD_POS,
     TVP_POS, TV1M_POS, TV2M_POS, TWM_POS,
     TO_POS, XK_POS, UCSI_POS, UC_POS,
     UV_POS;
-
-
-#define PRE_PACING_BEATS 4
-
 
 float stim_f(const float t)
 {
@@ -37,9 +33,9 @@ float stim_f(const float t)
 void main() {
     // PSO derived parameters
     int num_period = int(ceil(period/dt));
-    int total_beats = PRE_PACING_BEATS + num_beats;
+    int total_beats = pre_beats + num_beats;
     float endtime = ceil(float(total_beats)*period);
-    float pre_pace_endtime = ceil(float(PRE_PACING_BEATS)*period);
+    float pre_pace_endtime = ceil(float(pre_beats)*period);
     int pre_pace_steps = int(ceil(pre_pace_endtime/dt));
     int num_steps = int(ceil(endtime/dt));
 

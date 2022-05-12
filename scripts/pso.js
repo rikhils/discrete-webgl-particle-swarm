@@ -40,6 +40,7 @@ define('scripts/pso', [
           stim_end: 7.0,
           stim_mag: 0.1,
           num_beats: 1,
+          pre_beats: 4,
           v_init: 1.0,
           w_init: 1.0,
           align_thresh: [],
@@ -71,7 +72,7 @@ define('scripts/pso', [
       };
     }
 
-    setupEnv(bounds, cls, num_beats, sample_interval) {
+    setupEnv(bounds, cls, pre_beats, num_beats, sample_interval) {
       this.env = Pso.getEnv();
       const env = this.env;
 
@@ -97,6 +98,10 @@ define('scripts/pso', [
 
       if (Number(num_beats)) {
         env.simulation.num_beats = Number(num_beats);
+      }
+
+      if (Number(pre_beats)) {
+        env.simulation.pre_beats = Number(pre_beats);
       }
 
       if(Number(sample_interval))
@@ -964,6 +969,10 @@ define('scripts/pso', [
                   num_beats: {
                     type: 'i',
                     value: env.simulation.num_beats,
+                  },
+                  pre_beats: {
+                    type: 'i',
+                    value: env.simulation.pre_beats,
                   },
                   v_init: {
                     type: 'f',

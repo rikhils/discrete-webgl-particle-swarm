@@ -48,6 +48,16 @@ canvas {
   align-items: flex-start;
 }
 
+#xlabel {
+  grid-column: 2;
+  grid-row: 3;
+  margin-top: auto;
+  margin-bottom: auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
 .auto-horizontal {
   margin-left: auto;
 }
@@ -58,6 +68,7 @@ canvas {
   grid-column-gap: 2.5em;
   grid-row-gap: 0.5em;
   padding-right: 2em;
+  margin-bottom: auto;
 }
 
 .param_div input[type=text] {

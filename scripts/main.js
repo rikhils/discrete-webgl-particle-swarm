@@ -229,8 +229,8 @@ function plotCL_change(e)
     const num_points = Math.max(actual_data[cl_idx].length, plotting_sim_data.length);
 
     graph.clearGraph();
-    graph.runGraph(actual_data[cl_idx], [1, 0, 0], num_points, scale);
-    graph.runGraph(plotting_sim_data, [0, 0, 1], num_points, scale);
+    graph.runGraph(actual_data[cl_idx], [0, 0, 0], num_points, scale);
+    graph.runGraph(plotting_sim_data, [1, 0, 0], num_points, scale);
 
     pso_interface.setAxes(0, num_points * interval, scale[0], scale[1]);
 }

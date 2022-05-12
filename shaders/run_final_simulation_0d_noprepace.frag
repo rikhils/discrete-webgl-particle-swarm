@@ -11,7 +11,7 @@ uniform float dt, period, stim_start, stim_end, stim_mag;
 uniform int num_beats;
 uniform float v_init, w_init;
 uniform float align_thresh;
-uniform float sample_rate;
+uniform float sample_interval;
 
 uniform float TR_POS, TSI_POS, TWP_POS, TD_POS,
     TVP_POS, TV1M_POS, TV2M_POS, TWM_POS,
@@ -44,7 +44,7 @@ void main() {
     float v = v_init;
     float w = w_init;
 
-    float compare_stride = round(sample_rate / dt);
+    float compare_stride = round(sample_interval / dt);
 
     float error = 0.0;
 

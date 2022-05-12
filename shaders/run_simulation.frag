@@ -15,7 +15,7 @@ uniform float dt, period, stim_start, stim_end, stim_mag;
 uniform int num_beats;
 uniform float v_init, w_init;
 uniform float align_thresh;
-uniform float sample_rate;
+uniform float sample_interval;
 
 // Macros to get the particles from the textures
 #define TR_POS particles_1.r
@@ -76,7 +76,7 @@ void main() {
         diff[i] = 0.0;
     }
 
-    float compare_stride = round(sample_rate / dt);
+    float compare_stride = round(sample_interval / dt);
 
     float error = 0.0;
     error = 10000000000.0;

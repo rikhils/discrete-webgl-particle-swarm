@@ -43,7 +43,7 @@ define('scripts/pso', [
           v_init: 1.0,
           w_init: 1.0,
           align_thresh: [],
-          sample_rate: 1.0,
+          sample_interval: 1.0,
         },
         particles: {
           phi_local: 2.05,
@@ -71,7 +71,7 @@ define('scripts/pso', [
       };
     }
 
-    setupEnv(bounds, cls, num_beats, sample_rate) {
+    setupEnv(bounds, cls, num_beats, sample_interval) {
       this.env = Pso.getEnv();
       const env = this.env;
 
@@ -99,9 +99,9 @@ define('scripts/pso', [
         env.simulation.num_beats = Number(num_beats);
       }
 
-      if(Number(sample_rate))
+      if(Number(sample_interval))
       {
-        env.simulation.sample_rate = Number(sample_rate);
+        env.simulation.sample_interval = Number(sample_interval);
       }
 
       const phi = env.particles.phi_global + env.particles.phi_local;
@@ -202,8 +202,8 @@ define('scripts/pso', [
       const particles_height = this.particles_height;
       // const data_length = data_array.length / 4;
       const [init_array_1, init_array_2, init_array_3, init_array_4] = init_arrays;
-      const { num_beats, period, sample_rate } = this.env.simulation;
-      // const simulation_length = Math.ceil(Math.ceil(num_beats * period) / sample_rate);
+      const { num_beats, period, sample_interval } = this.env.simulation;
+      // const simulation_length = Math.ceil(Math.ceil(num_beats * period) / sample_interval);
 
       let simulation_lengths = [];
       this.simulation_textures = [];
@@ -213,7 +213,7 @@ define('scripts/pso', [
 
       console.log("Period length is "+period.length);
       for (var i = 0; i < period.length; i++) {
-        simulation_lengths.push(Math.ceil(Math.ceil(num_beats * period[i]) / sample_rate));
+        simulation_lengths.push(Math.ceil(Math.ceil(num_beats * period[i]) / sample_interval));
         this.simulation_textures.push(
             new Abubu.Float32Texture(simulation_lengths[i], 1, {
         pariable: true,
@@ -478,9 +478,9 @@ define('scripts/pso', [
             type: 'f',
             value: env.simulation.align_thresh[i],
           },
-          sample_rate: {
+          sample_interval: {
             type: 'f',
-            value: env.simulation.sample_rate,
+            value: env.simulation.sample_interval,
           },
         },
         targets: {
@@ -977,9 +977,9 @@ define('scripts/pso', [
                     type: 'f',
                     value: env.simulation.align_thresh[i],
                   },
-                  sample_rate: {
+                  sample_interval: {
                     type: 'f',
-                    value: env.simulation.sample_rate,
+                    value: env.simulation.sample_interval,
                   },
                   TR_POS: {
                     type: 'f',

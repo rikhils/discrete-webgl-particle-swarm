@@ -139,8 +139,8 @@ function plotCL_change(e)
         break;
     }
 
-    // pso.setupEnv(pso_interface.getBounds(), pso_interface.data_cl.value, pso_interface.data_num_beats.value, pso_interface.data_sample_rate.value);
-    pso.setupEnv(pso_interface.getBounds(), cls, pso_interface.data_num_beats.value, pso_interface.data_sample_rate.value);
+    // pso.setupEnv(pso_interface.getBounds(), pso_interface.data_cl.value, pso_interface.data_num_beats.value, pso_interface.data_sample_interval.value);
+    pso.setupEnv(pso_interface.getBounds(), cls, pso_interface.data_num_beats.value, pso_interface.data_sample_interval.value);
     // const [actual_data, data_array] = pso.readData(raw_text, pso_interface.normalization.value);
   
     actual_data = [];

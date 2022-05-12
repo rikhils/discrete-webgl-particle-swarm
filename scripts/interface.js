@@ -47,7 +47,7 @@ define('scripts/interface', [
       this.data_cl_2 = document.getElementById('data_cl_2');
       this.data_cl_3 = document.getElementById('data_cl_3');
       this.data_num_beats = document.getElementById('data_num_beats');
-      this.data_sample_rate = document.getElementById('data_sample_rate');
+      this.data_sample_interval = document.getElementById('data_sample_interval');
       this.fit_error = document.getElementById('fit_error');
 
       this.xmin = document.getElementById('xmin');

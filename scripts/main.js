@@ -184,7 +184,7 @@ function plotCL_change(e)
     pso.setupFinalSimulationSolvers(bestArr);
 
 
-    displayGraph(0);
+    displayGraph(0, Number(pso_interface.data_sample_interval.value));
 
     console.log("Execution time (ms):");
     console.log(Date.now() - start_time);
@@ -211,9 +211,7 @@ function plotCL_change(e)
 
 
 
-function displayGraph(cl_idx)
-{
-
+  function displayGraph(cl_idx, interval) {
     // const bestArr = pso.getGlobalBests();
     // pso_interface.displayResults(bestArr);
     // pso_interface.displayError(pso.env.particles.best_error_value);
@@ -234,8 +232,7 @@ function displayGraph(cl_idx)
     graph.runGraph(actual_data[cl_idx], [1, 0, 0], num_points, scale);
     graph.runGraph(plotting_sim_data, [0, 0, 1], num_points, scale);
 
-    pso_interface.setAxes(0, num_points, scale[0], scale[1]);
-
+    pso_interface.setAxes(0, num_points * interval, scale[0], scale[1]);
 }
 
 

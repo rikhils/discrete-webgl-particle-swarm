@@ -142,7 +142,7 @@ function plotCL_change(e)
     // pso.setupEnv(pso_interface.getBounds(), pso_interface.data_cl.value, pso_interface.data_num_beats.value, pso_interface.data_sample_interval.value);
     pso.setupEnv(pso_interface.getBounds(), cls, pso_interface.data_pre_beats.value, pso_interface.data_num_beats.value, pso_interface.data_sample_interval.value);
     // const [actual_data, data_array] = pso.readData(raw_text, pso_interface.normalization.value);
-  
+
     actual_data = [];
     data_arrays = [];
 
@@ -165,7 +165,7 @@ function plotCL_change(e)
         actual_data.unshift(temp_actData);
         data_arrays.unshift(temp_data_array);
         break;
-    }    
+    }
 
 
     const init_arrays = pso.initializeParticles();
@@ -181,7 +181,6 @@ function plotCL_change(e)
     const bestArr = pso.getGlobalBests();
     pso_interface.displayResults(bestArr);
     pso_interface.displayError(pso.env.particles.best_error_value);
-    pso.setupFinalSimulationSolvers(bestArr);
 
 
     displayGraph(0, Number(pso_interface.data_sample_interval.value));

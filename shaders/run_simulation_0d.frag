@@ -80,6 +80,7 @@ void main() {
 
     int start_comp = 0;
     bool first_upstroke = false;
+    float saved_value = -1.0;
 
     // Run the simulation with the current swarm parameters
     for (int step_count = 1; step_count <= num_steps; ++step_count) {
@@ -148,10 +149,13 @@ void main() {
         // Measure error
         if (first_upstroke && mod(float(step_count - start_comp), compare_stride) == 0.0) {
             float actual = texelFetch(data_texture, ivec2(data_index++, 0), 0).r;
-            error += (u - actual)*(u - actual);                
+            error += (u - actual)*(u - actual);
+        }
+
+        if (float( (step_count - pre_pace_steps) - 1) / float((num_steps - pre_pace_steps) - 1) <= cc.x) {
+            saved_value = u;
         }
     }
 
-    error_texture = vec4(error, 0, 0, 0);
-    // error_texture = vec4(16,0,0,0);
+    error_texture = vec4(error, saved_value, 0, 0);
 }

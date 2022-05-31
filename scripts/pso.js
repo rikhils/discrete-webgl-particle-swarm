@@ -1,10 +1,7 @@
 /* global define */
 define('scripts/pso', [
   'libs/Abubu.js',
-  // 'text!shaders/run_simulation.frag',
-  // 'text!shaders/run_final_simulation.frag',
   'text!shaders/run_simulation_0d.frag',
-  'text!shaders/run_final_simulation_0d.frag',
   'text!shaders/reduce_error_s1.frag',
   'text!shaders/reduce_error_s2.frag',
   'text!shaders/update_velocities.frag',
@@ -14,7 +11,6 @@ define('scripts/pso', [
 ], function(
   Abubu,
   RunSimulationShader,
-  RunFinalSimulationShader,
   ReduceErrorS1Shader,
   ReduceErrorS2Shader,
   UpdateVelocitiesShader,
@@ -210,7 +206,7 @@ define('scripts/pso', [
       const { num_beats, period, sample_interval } = this.env.simulation;
       // const simulation_length = Math.ceil(Math.ceil(num_beats * period) / sample_interval);
 
-      let simulation_lengths = [];
+      this.simulation_lengths = [];
       this.simulation_textures = [];
       this.data_textures = [];
 
@@ -218,10 +214,10 @@ define('scripts/pso', [
 
       console.log("Period length is "+period.length);
       for (var i = 0; i < period.length; i++) {
-        simulation_lengths.push(Math.ceil(Math.ceil(num_beats * period[i]) / sample_interval));
+        this.simulation_lengths.push(Math.ceil(Math.ceil(num_beats * period[i]) / sample_interval));
         this.simulation_textures.push(
-            new Abubu.Float32Texture(simulation_lengths[i], 1, {
-        pariable: true,
+            new Abubu.Float32Texture(this.simulation_lengths[i], 1, {
+        pairable: true,
              })
           );
 
@@ -234,13 +230,13 @@ define('scripts/pso', [
 
         this.error_textures.push(
             new Abubu.Float32Texture(particles_width, particles_height, {
-              pariable: true,
+              pairable: true,
             })
           );
       }
 
       // this.simulation_texture = new Abubu.Float32Texture(simulation_length, 1, {
-      //   pariable: true,
+      //   pairable: true,
       // });
 
       // The recorded data used to evaluate the correctness of simulation runs
@@ -253,87 +249,87 @@ define('scripts/pso', [
       // particle
 
       this.particles_texture_1 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
         data: init_array_1,
       });
       this.particles_texture_2 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
         data: init_array_2,
       });
       this.particles_texture_3 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
         data: init_array_3,
       });
       this.particles_texture_4 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
         data: init_array_4,
       });
 
       this.velocities_texture_1 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
       });
       this.velocities_texture_2 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
       });
       this.velocities_texture_3 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
       });
       this.velocities_texture_4 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
       });
 
       this.bests_texture_1 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
       });
       this.bests_texture_2 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
       });
       this.bests_texture_3 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
       });
       this.bests_texture_4 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
       });
 
       // The out textures are used to get the values from updates
 
       this.particles_out_texture_1 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
       });
       this.particles_out_texture_2 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
       });
       this.particles_out_texture_3 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
       });
       this.particles_out_texture_4 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
       });
 
       this.velocities_out_texture_1 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
       });
       this.velocities_out_texture_2 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
       });
       this.velocities_out_texture_3 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
       });
       this.velocities_out_texture_4 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
       });
 
       this.bests_out_texture_1 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
       });
       this.bests_out_texture_2 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
       });
       this.bests_out_texture_3 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
       });
       this.bests_out_texture_4 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
       });
 
       // The error textures are used to reduce the error quantities of each particles from each
@@ -345,26 +341,26 @@ define('scripts/pso', [
       }
 
       this.local_bests_error_texture = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
         data: local_error_init,
       });
 
       this.local_bests_error_texture_out = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
       });
 
 
       this.error_texture = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
       });
 
       this.error_sum_texture_0 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
       });
 
 
       this.error_sum_texture_1 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pariable: true,
+        pairable: true,
       });
 
       this.reduced_error_1_texture = new Abubu.Float32Texture(particles_width, particles_height, {
@@ -720,7 +716,7 @@ define('scripts/pso', [
             weight_2: {
               type: 'f',
               value: weight2,
-            },            
+            },
           },
           targets: {
             summed_texture: {
@@ -746,10 +742,10 @@ define('scripts/pso', [
         // console.log(this.error_textures[0]);
         // console.log(this.error_textures[1]);
         // console.log(this.error_texture);
-        
+
         this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[0], 1.0/this.env.simulation.period[0], this.error_textures[1],
               1.0/this.env.simulation.period[0], this.error_texture));
-        
+
         // this.errorSumSolvers[0].render();
         // console.log("Ran summation!!");
         // console.log(this.error_texture);
@@ -758,15 +754,15 @@ define('scripts/pso', [
       else
       {
         let partity_boy = 0;
-   
 
-        this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[0], 1.0/this.env.simulation.period[0], this.error_textures[1], 
+
+        this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[0], 1.0/this.env.simulation.period[0], this.error_textures[1],
           1.0/this.env.simulation.period[1], this.error_sum_texture_0));
-   
+
 
         var err_idx = 0;
         var err_lim = this.env.simulation.period.length;
-        for (err_idx = 2; err_idx < (err_lim-1); i++) 
+        for (err_idx = 2; err_idx < (err_lim-1); i++)
         {
           if(partity_boy & 1)
           {
@@ -826,7 +822,7 @@ define('scripts/pso', [
 
     accumulateError()
     {
-      for (var i = 0; i < this.errorSumSolvers.length; i++) 
+      for (var i = 0; i < this.errorSumSolvers.length; i++)
       {
         this.errorSumSolvers[i].render();
       }
@@ -934,139 +930,39 @@ define('scripts/pso', [
       return bestArr;
     }
 
-    setupFinalSimulationSolvers(bestArr) {
-      const env = this.env;
+    setPositionsToGlobalBest(cl_idx) {
+      const texsize = this.simulation_lengths[cl_idx]*4;
 
-      this.run_final_simulation_solvers = [];
+      for (let i = 0; i < 4; ++i) {
+        const particles_array = new Float32Array(texsize);
 
-      for (var i = 0; i < env.simulation.period.length; i++) {
-        
-        this.run_final_simulation_solvers.push(
+        for (let j = 0; j < texsize; j += 4) {
+          for (let k = 0; k < 4; ++k) {
+            particles_array[j+k] = this.env.particles.global_bests[i][k];
+          }
+        }
 
-            new Abubu.Solver({
-                fragmentShader: RunFinalSimulationShader,
-                uniforms: {
-                  dt: {
-                    type: 'f',
-                    value: env.simulation.dt,
-                  },
-                  period: {
-                    type: 'f',
-                    value: env.simulation.period[i],
-                  },
-                  stim_start: {
-                    type: 'f',
-                    value: env.simulation.stim_start,
-                  },
-                  stim_end: {
-                    type: 'f',
-                    value: env.simulation.stim_end,
-                  },
-                  stim_mag: {
-                    type: 'f',
-                    value: env.simulation.stim_mag,
-                  },
-                  num_beats: {
-                    type: 'i',
-                    value: env.simulation.num_beats,
-                  },
-                  pre_beats: {
-                    type: 'i',
-                    value: env.simulation.pre_beats,
-                  },
-                  v_init: {
-                    type: 'f',
-                    value: env.simulation.v_init,
-                  },
-                  w_init: {
-                    type: 'f',
-                    value: env.simulation.w_init,
-                  },
-                  align_thresh: {
-                    type: 'f',
-                    value: env.simulation.align_thresh[i],
-                  },
-                  sample_interval: {
-                    type: 'f',
-                    value: env.simulation.sample_interval,
-                  },
-                  TR_POS: {
-                    type: 'f',
-                    value: bestArr[0],
-                  },
-                  TSI_POS: {
-                    type: 'f',
-                    value: bestArr[1],
-                  },
-                  TWP_POS: {
-                    type: 'f',
-                    value: bestArr[2],
-                  },
-                  TD_POS: {
-                    type: 'f',
-                    value: bestArr[3],
-                  },
-                  TVP_POS: {
-                    type: 'f',
-                    value: bestArr[4],
-                  },
-                  TV1M_POS: {
-                    type: 'f',
-                    value: bestArr[5],
-                  },
-                  TV2M_POS: {
-                    type: 'f',
-                    value: bestArr[6],
-                  },
-                  TWM_POS: {
-                    type: 'f',
-                    value: bestArr[7],
-                  },
-                  TO_POS: {
-                    type: 'f',
-                    value: bestArr[8],
-                  },
-                  XK_POS: {
-                    type: 'f',
-                    value: bestArr[9],
-                  },
-                  UCSI_POS: {
-                    type: 'f',
-                    value: bestArr[10],
-                  },
-                  UC_POS: {
-                    type: 'f',
-                    value: bestArr[11],
-                  },
-                  UV_POS: {
-                    type: 'f',
-                    value: bestArr[12],
-                  },
-                },
-                targets: {
-                  simulation_texture: {
-                    location: 0,
-                    target: this.simulation_textures[i],
-                  },
-                },
-              })
-
-          );
-
+        this["particles_texture_" + (i+1)] = new Abubu.Float32Texture(this.simulation_lengths[cl_idx], 1, {
+          pairable: true,
+          data: particles_array,
+        });
       }
 
-
-      // this.run_final_simulation_solver = ;
+      this.error_textures[cl_idx] = new Abubu.Float32Texture(this.simulation_lengths[cl_idx], 1, {
+        pairable: true,
+      });
     }
 
     runFinalSimulationSolver(cl_idx) {
-      this.run_final_simulation_solvers[cl_idx].render();
-      const texture_array = this.simulation_textures[cl_idx].value;
-      const simultation_length = texture_array.length / 4;
+      this.setPositionsToGlobalBest(cl_idx);
+      this.setupRunSimulationSolvers();
+      this.run_simulations_solvers[cl_idx].render();
+      const texture_array = this.error_textures[cl_idx].value;
+      const simulation_length = texture_array.length/4;
 
-      const simulation_data = new Float32Array(simultation_length);
-      for (let i = 0; i < simultation_length; ++i) {
-        simulation_data[i] = texture_array[4*i];
+      const simulation_data = new Float32Array(simulation_length);
+      for (let i = 0; i < simulation_length; ++i) {
+        simulation_data[i] = texture_array[4*i+1];
       }
 
       return simulation_data;

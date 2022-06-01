@@ -146,7 +146,7 @@ void main() {
         // Measure error
         if (first_upstroke && mod(float(step_count - start_comp), compare_stride) == 0.0) {
             float actual = texelFetch(data_texture, ivec2(data_index++, 0), 0).r;
-            error += (u - actual)*(u - actual);                
+            error += (u - actual)*(u - actual);
         }
 
         if (float( (step_count - pre_pace_steps) - 1) / float((num_steps - pre_pace_steps) - 1) <= cc.x) {
@@ -154,5 +154,5 @@ void main() {
         }
     }
 
-    error_texture = vec4(error, saved_value, 0, 0);
+    error_texture = vec4(error, saved_value, 0, 1.0/period);
 }

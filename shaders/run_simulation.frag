@@ -174,5 +174,5 @@ void main() {
         }
     }
 
-    error_texture = vec4(error, saved_value, 0, 0);
+    error_texture = vec4(error, saved_value, 0, 1.0/period);
 }

@@ -1,22 +1,28 @@
 /* global define */
 define('scripts/pso', [
   'libs/Abubu.js',
+  'scripts/gl_helper',
+  'text!shaders/copy.frag',
+  'text!shaders/copy_uint_texture.frag',
+  'text!shaders/default.vert',
   'text!shaders/run_simulation_0d.frag',
   'text!shaders/reduce_error_s1.frag',
   'text!shaders/reduce_error_s2.frag',
   'text!shaders/update_velocities.frag',
   'text!shaders/update_particles.frag',
   'text!shaders/update_local_bests.frag',
-  'text!shaders/sum_Float32.frag',
 ], function(
   Abubu,
+  GlHelper,
+  CopyShader,
+  CopyUintShader,
+  DefaultVertexShader,
   RunSimulationShader,
   ReduceErrorS1Shader,
   ReduceErrorS2Shader,
   UpdateVelocitiesShader,
   UpdateParticlesShader,
   UpdateLocalBestsShader,
-  SumFloat32Shader,
 ) {
   'use strict';
 
@@ -25,6 +31,12 @@ define('scripts/pso', [
       this.particles_width = particles_width;
       this.particles_height = particles_height;
       this.num_particles = particles_width * particles_height;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = this.particles_width;
+      canvas.height = this.particles_height;
+
+      this.gl_helper = new GlHelper(canvas);
     }
 
     static getEnv() {
@@ -199,6 +211,7 @@ define('scripts/pso', [
     }
 
     initializeTextures(data_arrays, init_arrays) {
+      const gl_helper = this.gl_helper;
       const particles_width = this.particles_width;
       const particles_height = this.particles_height;
       // const data_length = data_array.length / 4;
@@ -206,170 +219,66 @@ define('scripts/pso', [
       const { num_beats, period, sample_interval } = this.env.simulation;
       // const simulation_length = Math.ceil(Math.ceil(num_beats * period) / sample_interval);
 
-      this.simulation_lengths = [];
-      this.simulation_textures = [];
-      this.data_textures = [];
+      const zero_array = new Float32Array(particles_width*particles_height*4);
 
+      this.simulation_lengths = [];
+      this.data_textures = [];
       this.error_textures = [];
 
       console.log("Period length is "+period.length);
       for (var i = 0; i < period.length; i++) {
         this.simulation_lengths.push(Math.ceil(Math.ceil(num_beats * period[i]) / sample_interval));
-        this.simulation_textures.push(
-            new Abubu.Float32Texture(this.simulation_lengths[i], 1, {
-        pairable: true,
-             })
-          );
-
-        this.data_textures.push(
-            new Abubu.Float32Texture(data_arrays[i].length/4, 1, {
-                    pairable: true,
-                    data: data_arrays[i],
-                  })
-          );
-
-        this.error_textures.push(
-            new Abubu.Float32Texture(particles_width, particles_height, {
-              pairable: true,
-            })
-          );
+        this.data_textures.push(gl_helper.loadFloatTexture(data_arrays[i].length/4, 1, data_arrays[i]));
       }
 
-      // this.simulation_texture = new Abubu.Float32Texture(simulation_length, 1, {
-      //   pairable: true,
-      // });
+      this.particles_texture_1 = gl_helper.loadFloatTexture(particles_width, particles_height, init_array_1);
+      this.particles_texture_2 = gl_helper.loadFloatTexture(particles_width, particles_height, init_array_2);
+      this.particles_texture_3 = gl_helper.loadFloatTexture(particles_width, particles_height, init_array_3);
+      this.particles_texture_4 = gl_helper.loadFloatTexture(particles_width, particles_height, init_array_4);
 
-      // The recorded data used to evaluate the correctness of simulation runs
-      // this.data_texture = new Abubu.Float32Texture(data_length, 1, {
-      //   pairable: true,
-      //   data: data_array,
-      // });
+      this.velocities_texture_1 = gl_helper.loadFloatTexture(particles_width, particles_height, zero_array);
+      this.velocities_texture_2 = gl_helper.loadFloatTexture(particles_width, particles_height, zero_array);
+      this.velocities_texture_3 = gl_helper.loadFloatTexture(particles_width, particles_height, zero_array);
+      this.velocities_texture_4 = gl_helper.loadFloatTexture(particles_width, particles_height, zero_array);
 
-      // These textures record the position (or particle values), velocity, and global best of each
-      // particle
+      this.bests_texture_1 = gl_helper.loadFloatTexture(particles_width, particles_height, zero_array);
+      this.bests_texture_2 = gl_helper.loadFloatTexture(particles_width, particles_height, zero_array);
+      this.bests_texture_3 = gl_helper.loadFloatTexture(particles_width, particles_height, zero_array);
+      this.bests_texture_4 = gl_helper.loadFloatTexture(particles_width, particles_height, zero_array);
 
-      this.particles_texture_1 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-        data: init_array_1,
-      });
-      this.particles_texture_2 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-        data: init_array_2,
-      });
-      this.particles_texture_3 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-        data: init_array_3,
-      });
-      this.particles_texture_4 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-        data: init_array_4,
-      });
+      this.particles_out_texture_1 = gl_helper.loadFloatTexture(particles_width, particles_height, null);
+      this.particles_out_texture_2 = gl_helper.loadFloatTexture(particles_width, particles_height, null);
+      this.particles_out_texture_3 = gl_helper.loadFloatTexture(particles_width, particles_height, null);
+      this.particles_out_texture_4 = gl_helper.loadFloatTexture(particles_width, particles_height, null);
 
-      this.velocities_texture_1 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-      });
-      this.velocities_texture_2 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-      });
-      this.velocities_texture_3 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-      });
-      this.velocities_texture_4 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-      });
+      this.velocities_out_texture_1 = gl_helper.loadFloatTexture(particles_width, particles_height, null);
+      this.velocities_out_texture_2 = gl_helper.loadFloatTexture(particles_width, particles_height, null);
+      this.velocities_out_texture_3 = gl_helper.loadFloatTexture(particles_width, particles_height, null);
+      this.velocities_out_texture_4 = gl_helper.loadFloatTexture(particles_width, particles_height, null);
 
-      this.bests_texture_1 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-      });
-      this.bests_texture_2 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-      });
-      this.bests_texture_3 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-      });
-      this.bests_texture_4 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-      });
-
-      // The out textures are used to get the values from updates
-
-      this.particles_out_texture_1 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-      });
-      this.particles_out_texture_2 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-      });
-      this.particles_out_texture_3 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-      });
-      this.particles_out_texture_4 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-      });
-
-      this.velocities_out_texture_1 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-      });
-      this.velocities_out_texture_2 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-      });
-      this.velocities_out_texture_3 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-      });
-      this.velocities_out_texture_4 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-      });
-
-      this.bests_out_texture_1 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-      });
-      this.bests_out_texture_2 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-      });
-      this.bests_out_texture_3 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-      });
-      this.bests_out_texture_4 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-      });
+      this.bests_out_texture_1 = gl_helper.loadFloatTexture(particles_width, particles_height, null);
+      this.bests_out_texture_2 = gl_helper.loadFloatTexture(particles_width, particles_height, null);
+      this.bests_out_texture_3 = gl_helper.loadFloatTexture(particles_width, particles_height, null);
+      this.bests_out_texture_4 = gl_helper.loadFloatTexture(particles_width, particles_height, null);
 
       // The error textures are used to reduce the error quantities of each particles from each
       // simulation run down to a global best.
       const local_error_init = new Float32Array(particles_width * particles_height * 4);
-      for (let i = 0; i < particles_width * particles_height * 4; i += 4)
-      {
+      for (let i = 0; i < particles_width * particles_height * 4; i += 4) {
         local_error_init[i] = 100000.0;
       }
 
-      this.local_bests_error_texture = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-        data: local_error_init,
-      });
+      this.local_bests_error_texture = gl_helper.loadFloatTexture(particles_width, particles_height, local_error_init);
+      this.local_bests_error_texture_out = gl_helper.loadFloatTexture(particles_width, particles_height, null);
 
-      this.local_bests_error_texture_out = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-      });
+      this.error_texture = gl_helper.loadFloatTexture(particles_width, particles_height, null);
+      this.simulation_texture = gl_helper.loadFloatTexture(this.simulation_lengths[0], 1, null);
 
+      this.error_sum_texture_0 = gl_helper.loadFloatTexture(particles_width, particles_height, null);
+      this.error_sum_texture_1 = gl_helper.loadFloatTexture(particles_width, particles_height, null);
 
-      this.error_texture = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-      });
-
-      this.error_sum_texture_0 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-      });
-
-
-      this.error_sum_texture_1 = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-      });
-
-      this.reduced_error_1_texture = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-      });
-
-      this.reduced_error_2_texture = new Abubu.Float32Texture(particles_width, particles_height, {
-        pairable: true,
-      });
+      this.reduced_error_1_texture = gl_helper.loadFloatTexture(particles_width, particles_height, null);
+      this.reduced_error_2_texture = gl_helper.loadFloatTexture(particles_width, particles_height, null);
 
       const env = this.env;
 
@@ -393,529 +302,276 @@ define('scripts/pso', [
         }
       }
 
-      env.velocity_update.ftinymtState = new Abubu.Uint32Texture(particles_width, particles_height, {
-        data: env.velocity_update.istate,
-        pairable : true,
-      });
-
-      env.velocity_update.stinymtState = new Abubu.Uint32Texture(particles_width, particles_height, {
-        data: env.velocity_update.istate,
-        pairable: true,
-      });
-
+      env.velocity_update.ftinymtState = gl_helper.loadUintTexture(particles_width, particles_height, env.velocity_update.istate);
+      env.velocity_update.stinymtState = gl_helper.loadUintTexture(particles_width, particles_height, env.velocity_update.istate);
       // mat state for each point of the generator .............................
-      env.velocity_update.tinymtMat = new Abubu.Uint32Texture(particles_width, particles_height, {
-        data: env.velocity_update.imat,
-        pairable: true,
-      });
+      env.velocity_update.tinymtMat = gl_helper.loadUintTexture(particles_width, particles_height, env.velocity_update.imat);
     }
 
-    setupRunSimulationSolvers() {
-      const env = this.env;
-
-      const numCLs = env.simulation.period.length;
-
-      this.run_simulations_solvers = [];
-
-
-      for (var i = 0; i < numCLs; i++)
-      {
-        this.run_simulations_solvers.push(new Abubu.Solver({
-        fragmentShader: RunSimulationShader,
-        uniforms: {
-          in_particles_1: {
-            type: 't',
-            value: this.particles_texture_1,
-          },
-          in_particles_2: {
-            type: 't',
-            value: this.particles_texture_2,
-          },
-          in_particles_3: {
-            type: 't',
-            value: this.particles_texture_3,
-          },
-          in_particles_4: {
-            type: 't',
-            value: this.particles_texture_4,
-          },
-          data_texture: {
-            type: 't',
-            value: this.data_textures[i],
-          },
-          dt: {
-            type: 'f',
-            value: env.simulation.dt,
-          },
-          period: {
-            type: 'f',
-            value: env.simulation.period[i],
-          },
-          stim_start: {
-            type: 'f',
-            value: env.simulation.stim_start,
-          },
-          stim_end: {
-            type: 'f',
-            value: env.simulation.stim_end,
-          },
-          stim_mag: {
-            type: 'f',
-            value: env.simulation.stim_mag,
-          },
-          num_beats: {
-            type: 'i',
-            value: env.simulation.num_beats,
-          },
-          v_init: {
-            type: 'f',
-            value: env.simulation.v_init,
-          },
-          w_init: {
-            type: 'f',
-            value: env.simulation.w_init,
-          },
-          align_thresh: {
-            type: 'f',
-            value: env.simulation.align_thresh[i],
-          },
-          sample_interval: {
-            type: 'f',
-            value: env.simulation.sample_interval,
-          },
-        },
-        targets: {
-          error_texture: {
-            location: 0,
-            target: this.error_textures[i],
-          },
-        },
-      }));
-      }
-    }
-
-    setupReduceErrorSolvers() {
-      this.reduce_error_1_solver = new Abubu.Solver({
-        fragmentShader: ReduceErrorS1Shader,
-        uniforms: {
-          error_texture: {
-            type: 't',
-            value: this.error_texture,
-          },
-        },
-        targets: {
-          reduced_error_1: {
-            location: 0,
-            target: this.reduced_error_1_texture,
-          },
-        },
-      });
-
-      this.reduce_error_2_solver = new Abubu.Solver({
-        fragmentShader: ReduceErrorS2Shader,
-        uniforms: {
-          reduced_error_1: {
-            type: 't',
-            value: this.reduced_error_1_texture,
-          },
-        },
-        targets: {
-          reduced_error_2: {
-            location: 0,
-            target: this.reduced_error_2_texture,
-          },
-        },
-      });
-    }
-
-    setupLocalBestUpdateSolvers() {
-      // For why this should be an arrow function, read:
-      // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Functions#no_separate_this
-      const makeUpdateLocalBestsSolver = (lbt, cvt, new_lbt) => {
-        return new Abubu.Solver({
-          fragmentShader: UpdateLocalBestsShader,
-          uniforms:{
-            local_bests_texture: {
-              type: 't',
-              value: lbt,
-            },
-            local_bests_error_texture: {
-              type: 't',
-              value: this.local_bests_error_texture,
-            },
-            cur_vals_texture: {
-              type: 't',
-              value: cvt
-            },
-            cur_error_texture: {
-              type: 't',
-              value: this.error_texture,
-            },
-          },
-          targets: {
-            new_local_best: {
-              location: 0,
-              target: new_lbt,
-            },
-            new_local_best_error: {
-              location: 1,
-              target: this.local_bests_error_texture_out,
-            },
-          },
-        });
+    getDefaultShaderMap() {
+      const makeUpdateLocalBestsSolver = (num) => {
+        return {
+          vert: DefaultVertexShader,
+          frag: UpdateLocalBestsShader,
+          uniforms: [
+            ['local_bests_texture', 'tex', () => this['bests_texture_' + num]],
+            ['local_bests_error_texture', 'tex', () => this.local_bests_error_texture],
+            ['cur_vals_texture', 'tex', () => this['particles_texture_' + num]],
+            ['cur_error_texture', 'tex', () => this.error_texture],
+          ],
+          out: [this['bests_out_texture_' + num], this.local_bests_error_texture_out],
+          run: this.gl_helper.runProgram,
+        };
       };
 
-      this.local_best_update_1_solver = makeUpdateLocalBestsSolver(this.bests_texture_1, this.particles_texture_1, this.bests_out_texture_1);
-      this.local_best_update_2_solver = makeUpdateLocalBestsSolver(this.bests_texture_2, this.particles_texture_2, this.bests_out_texture_2);
-      this.local_best_update_3_solver = makeUpdateLocalBestsSolver(this.bests_texture_3, this.particles_texture_3, this.bests_out_texture_3);
-      this.local_best_update_4_solver = makeUpdateLocalBestsSolver(this.bests_texture_4, this.particles_texture_4, this.bests_out_texture_4);
-    }
-
-    setupVelocityUpdateSolvers() {
-      const env = this.env;
-
-      const makeVelocityUpdateSolver = (pt, vt, bt, vto, num) => {
-        return new Abubu.Solver({
-          fragmentShader: UpdateVelocitiesShader,
-          uniforms: {
-            positions_texture: {
-              type: 't',
-              value: pt,
-            },
-            velocities_texture: {
-              type: 't',
-              value: vt,
-            },
-            bests_texture: {
-              type: 't',
-              value: bt,
-            },
-            itinymtState: {
-              type: 't',
-              value: env.velocity_update.ftinymtState,
-            },
-            itinymtMat: {
-              type: 't',
-              value: env.velocity_update.tinymtMat,
-            },
-            chi: {
-              type: 'v4',
-              value: env.particles.chi[num],
-            },
-            phi_local: {
-              type: 'f',
-              value: env.particles.phi_local,
-            },
-            phi_global: {
-              type: 'f',
-              value: env.particles.phi_global,
-            },
-            global_best: {
-              type: 'v4',
-              value: env.particles.global_bests[num],
-            },
-            omega: {
-              type: 'f',
-              value: env.particles.omega,
-            },
-          },
-          targets: {
-            new_velocity: {
-              location: 0,
-              target: vto,
-            },
-            otinymtState: {
-              location: 1,
-              target: env.velocity_update.stinymtState,
-            },
-          },
-        });
+      const makeVelocityUpdateSolver = (num) => {
+        return {
+          vert: DefaultVertexShader,
+          frag: UpdateVelocitiesShader,
+          uniforms: [
+            ['positions_texture', 'tex', () => this['particles_texture_' + num]],
+            ['velocities_texture', 'tex', () => this['velocities_texture_' + num]],
+            ['bests_texture', 'tex', () => this['bests_texture_' + num]],
+            ['itinymtState', 'tex', () => this.env.velocity_update.ftinymtState],
+            ['itinymtMat', 'tex', () => this.env.velocity_update.itinymtMat],
+            ['chi', '4fv', () => this.env.particles.chi[num-1]],
+            ['phi_local', '1f', () => this.env.particles.phi_local],
+            ['phi_global', '1f', () => this.env.particles.phi_global],
+            ['global_best', '4fv', () => this.env.particles.global_bests[num-1]],
+            ['omega', '1f', () => this.env.particles.omega],
+          ],
+          out: [this['velocities_out_texture_' + num], this.env.velocity_update.stinymtState],
+          run: this.gl_helper.runProgram,
+        };
       };
 
-      this.velocity_1_solver = makeVelocityUpdateSolver(this.particles_texture_1, this.velocities_texture_1, this.bests_texture_1, this.velocities_out_texture_1, 0);
-      this.velocity_2_solver = makeVelocityUpdateSolver(this.particles_texture_2, this.velocities_texture_2, this.bests_texture_2, this.velocities_out_texture_2, 1);
-      this.velocity_3_solver = makeVelocityUpdateSolver(this.particles_texture_3, this.velocities_texture_3, this.bests_texture_3, this.velocities_out_texture_3, 2);
-      this.velocity_4_solver = makeVelocityUpdateSolver(this.particles_texture_4, this.velocities_texture_4, this.bests_texture_4, this.velocities_out_texture_4, 3);
-    }
-
-    setupPositionUpdateSolvers() {
-      const env = this.env;
-
-      const makeParticleUpdateSolver = (pt, vt, pto, num) => {
-        return new Abubu.Solver({
-          fragmentShader: UpdateParticlesShader,
-          uniforms: {
-            positions_texture: {
-              type: 't',
-              value: pt,
-            },
-            velocities_texture: {
-              type: 't',
-              value: vt,
-            },
-            itinymtState: {
-              type: 't',
-              value: env.velocity_update.ftinymtState,
-            },
-            itinymtMat: {
-              type: 't',
-              value: env.velocity_update.tinymtMat,
-            },
-            lower_bounds: {
-              type: 'v4',
-              value: env.particles.lower_bounds[num],
-            },
-            upper_bounds: {
-              type: 'v4',
-              value: env.particles.upper_bounds[num],
-            },
-            learning_rate: {
-              type: 'f',
-              value: env.particles.learning_rate,
-            },
-          },
-          targets: {
-            new_position: {
-              location: 0,
-              target: pto,
-            },
-            otinymtState: {
-              location: 1,
-              target: env.velocity_update.stinymtState,
-            },
-          },
-        });
+      const makeParticleUpdateSolver = (num) => {
+        return {
+          vert: DefaultVertexShader,
+          frag: UpdateParticlesShader,
+          uniforms: [
+            ['positions_texture', 'tex', () => this['particles_texture_' + num]],
+            ['velocities_texture', 'tex', () => this['velocities_texture_' + num]],
+            ['itinymtState', 'tex', () => this.env.velocity_update.ftinymtState],
+            ['itinymtMat', 'tex', () => this.env.velocity_update.itinymtMat],
+            ['lower_bounds', '4fv', () => this.env.particles.lower_bounds[num-1]],
+            ['upper_bounds', '4fv', () => this.env.particles.upper_bounds[num-1]],
+            ['learning_rate', '1f', () => this.env.particles.learning_rate],
+          ],
+          out: [this['particles_out_texture_' + num], this.env.velocity_update.stinymtState],
+          run: this.gl_helper.runProgram,
+        };
       };
 
-      this.position_1_solver = makeParticleUpdateSolver(this.particles_texture_1, this.velocities_texture_1, this.particles_out_texture_1, 0);
-      this.position_2_solver = makeParticleUpdateSolver(this.particles_texture_2, this.velocities_texture_2, this.particles_out_texture_2, 1);
-      this.position_3_solver = makeParticleUpdateSolver(this.particles_texture_3, this.velocities_texture_3, this.particles_out_texture_3, 2);
-      this.position_4_solver = makeParticleUpdateSolver(this.particles_texture_4, this.velocities_texture_4, this.particles_out_texture_4, 3);
-    }
-
-
-    setupErrorSumSolvers() {
-      const env = this.env;
-
-      const makeErrorSumSolver = (errt1, weight1, errt2, weight2, errtarget) => {
-        return new Abubu.Solver({
-          fragmentShader: SumFloat32Shader,
-          uniforms: {
-            add_texture_1: {
-              type: 't',
-              value: errt1,
-            },
-            add_texture_2: {
-              type: 't',
-              value: errt2,
-            },
-            weight_1: {
-              type: 'f',
-              value: weight1,
-            },
-            weight_2: {
-              type: 'f',
-              value: weight2,
-            },
-          },
-          targets: {
-            summed_texture: {
-              location: 0,
-              target: errtarget,
-            },
-          },
-        });
+      const makeCopySolver = (original, copy) => {
+        return {
+          vert: DefaultVertexShader,
+          frag: CopyShader,
+          uniforms: [
+            ['original', 'tex', () => this[original]],
+          ],
+          out: [this[copy]],
+          run: this.gl_helper.runProgram,
+        };
       };
 
+      return {
+        run_simulation: {
+          vert: DefaultVertexShader,
+          frag: RunSimulationShader,
+          uniforms: [
+            ['in_particles_1', 'tex', () => this.particles_texture_1],
+            ['in_particles_2', 'tex', () => this.particles_texture_2],
+            ['in_particles_3', 'tex', () => this.particles_texture_3],
+            ['in_particles_4', 'tex', () => this.particles_texture_4],
+            ['data_texture', 'tex', (cl_idx) => this.data_textures[cl_idx]],
+            ['dt', '1f', () => this.env.simulation.dt],
+            ['period', '1f', (cl_idx) => this.env.simulation.period[cl_idx]],
+            ['stim_start', '1f', () => this.env.simulation.stim_start],
+            ['stim_end', '1f', () => this.env.simulation.stim_end],
+            ['stim_mag', '1f', () => this.env.simulation.stim_mag],
+            ['num_beats', '1i', () => this.env.simulation.num_beats],
+            ['v_init', '1f', () => this.env.simulation.v_init],
+            ['w_init', '1f', () => this.env.simulation.w_init],
+            ['align_thresh', '1f', (cl_idx) => this.env.simulation.align_thresh[cl_idx]],
+            ['sample_interval', '1f', () => this.env.simulation.sample_interval],
+          ],
+          out: [this.error_texture],
+          run: this.gl_helper.runSimulation,
+        },
 
+        run_final_simulation: {
+          vert: DefaultVertexShader,
+          frag: RunSimulationShader,
+          uniforms: [
+            ['in_particles_1', 'tex', () => this.final_particles_texture_1],
+            ['in_particles_2', 'tex', () => this.final_particles_texture_2],
+            ['in_particles_3', 'tex', () => this.final_particles_texture_3],
+            ['in_particles_4', 'tex', () => this.final_particles_texture_4],
+            ['data_texture', 'tex', (cl_idx) => this.data_textures[cl_idx]],
+            ['dt', '1f', () => this.env.simulation.dt],
+            ['period', '1f', (cl_idx) => this.env.simulation.period[cl_idx]],
+            ['stim_start', '1f', () => this.env.simulation.stim_start],
+            ['stim_end', '1f', () => this.env.simulation.stim_end],
+            ['stim_mag', '1f', () => this.env.simulation.stim_mag],
+            ['num_beats', '1i', () => this.env.simulation.num_beats],
+            ['v_init', '1f', () => this.env.simulation.v_init],
+            ['w_init', '1f', () => this.env.simulation.w_init],
+            ['align_thresh', '1f', (cl_idx) => this.env.simulation.align_thresh[cl_idx]],
+            ['sample_interval', '1f', () => this.env.simulation.sample_interval],
+          ],
+          out: [this.simulation_texture],
+          run: this.gl_helper.runFinal,
+        },
 
-      this.errorSumSolvers = [];
+        reduce_error_1: {
+          vert: DefaultVertexShader,
+          frag: ReduceErrorS1Shader,
+          uniforms: [
+            ['error_texture', 'tex', () => this.error_texture],
+          ],
+          out: [this.reduced_error_1_texture],
+          run: this.gl_helper.runProgram,
+        },
 
-      if(this.env.simulation.period.length == 1)
-      {
-        this.errorSumSolvers.push(
-            new Abubu.Copy(this.error_textures[0], this.error_texture)
-          );
-      }
-      else if (this.env.simulation.period.length == 2)
-      {
-        // console.log(this.error_textures[0]);
-        // console.log(this.error_textures[1]);
-        // console.log(this.error_texture);
+        reduce_error_2: {
+          vert: DefaultVertexShader,
+          frag: ReduceErrorS2Shader,
+          uniforms: [
+            ['reduced_error_1', 'tex', () => this.reduced_error_1_texture],
+          ],
+          out: [this.reduced_error_2_texture],
+          run: this.gl_helper.runProgram,
+        },
 
-        this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[0], 1.0/this.env.simulation.period[0], this.error_textures[1],
-              1.0/this.env.simulation.period[0], this.error_texture));
+        tinymt_copy: {
+          vert: DefaultVertexShader,
+          frag: CopyUintShader,
+          uniforms: [
+            ['original', 'tex', () => this.env.velocity_update.stinymtState],
+          ],
+          out: [this.env.velocity_update.ftinymtState],
+          run: this.gl_helper.runProgram,
+        },
 
-        // this.errorSumSolvers[0].render();
-        // console.log("Ran summation!!");
-        // console.log(this.error_texture);
+        local_best_update_1: makeUpdateLocalBestsSolver(1),
+        local_best_update_2: makeUpdateLocalBestsSolver(2),
+        local_best_update_3: makeUpdateLocalBestsSolver(3),
+        local_best_update_4: makeUpdateLocalBestsSolver(4),
 
-      }
-      else
-      {
-        let partity_boy = 0;
+        velocity_1: makeVelocityUpdateSolver(1),
+        velocity_2: makeVelocityUpdateSolver(2),
+        velocity_3: makeVelocityUpdateSolver(3),
+        velocity_4: makeVelocityUpdateSolver(4),
 
+        position_1: makeParticleUpdateSolver(1),
+        position_2: makeParticleUpdateSolver(2),
+        position_3: makeParticleUpdateSolver(3),
+        position_4: makeParticleUpdateSolver(4),
 
-        this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[0], 1.0/this.env.simulation.period[0], this.error_textures[1],
-          1.0/this.env.simulation.period[1], this.error_sum_texture_0));
+        local_bests_1_copy: makeCopySolver('bests_out_texture_1', 'bests_texture_1'),
+        local_bests_2_copy: makeCopySolver('bests_out_texture_2', 'bests_texture_2'),
+        local_bests_3_copy: makeCopySolver('bests_out_texture_3', 'bests_texture_3'),
+        local_bests_4_copy: makeCopySolver('bests_out_texture_4', 'bests_texture_4'),
 
+        local_error_copy: makeCopySolver('local_bests_error_texture_out', 'local_bests_error_texture'),
 
-        var err_idx = 0;
-        var err_lim = this.env.simulation.period.length;
-        for (err_idx = 2; err_idx < (err_lim-1); i++)
-        {
-          if(partity_boy & 1)
-          {
-            this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[err_idx], 1.0/this.env.simulation.period[err_idx], this.error_sum_texture_1, 1.0, this.error_sum_texture_0));
-          }
-          else
-          {
-            this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[err_idx], 1.0/this.env.simulation.period[err_idx], this.error_sum_texture_0, 1.0, this.error_sum_texture_1));
-          }
+        positions_1_copy: makeCopySolver('particles_out_texture_1', 'particles_texture_1'),
+        positions_2_copy: makeCopySolver('particles_out_texture_2', 'particles_texture_2'),
+        positions_3_copy: makeCopySolver('particles_out_texture_3', 'particles_texture_3'),
+        positions_4_copy: makeCopySolver('particles_out_texture_4', 'particles_texture_4'),
 
-          partity_boy |= 1;
-        }
-        if(partity_boy & 1)
-        {
-          this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[err_idx], 1.0/this.env.simulation.period[err_idx], this.error_sum_texture_1, 1.0, this.error_texture));
-        }
-        else
-        {
-          this.errorSumSolvers.push(makeErrorSumSolver(this.error_textures[err_idx], 1.0/this.env.simulation.period[err_idx], this.error_sum_texture_0, 1.0, this.error_texture));
-        }
-
-      }
-    }
-
-
-    setupCopySolvers() {
-      this.tinymt_copy = new Abubu.Copy(this.env.velocity_update.stinymtState, this.env.velocity_update.ftinymtState);
-
-      this.local_bests_1_copy = new Abubu.Copy(this.bests_out_texture_1, this.bests_texture_1);
-      this.local_bests_2_copy = new Abubu.Copy(this.bests_out_texture_2, this.bests_texture_2);
-      this.local_bests_3_copy = new Abubu.Copy(this.bests_out_texture_3, this.bests_texture_3);
-      this.local_bests_4_copy = new Abubu.Copy(this.bests_out_texture_4, this.bests_texture_4);
-
-      this.local_error_copy = new Abubu.Copy(this.local_bests_error_texture_out, this.local_bests_error_texture);
-
-      this.positions_1_copy = new Abubu.Copy(this.particles_out_texture_1, this.particles_texture_1);
-      this.positions_2_copy = new Abubu.Copy(this.particles_out_texture_2, this.particles_texture_2);
-      this.positions_3_copy = new Abubu.Copy(this.particles_out_texture_3, this.particles_texture_3);
-      this.positions_4_copy = new Abubu.Copy(this.particles_out_texture_4, this.particles_texture_4);
-
-      this.velocities_1_copy = new Abubu.Copy(this.velocities_out_texture_1, this.velocities_texture_1);
-      this.velocities_2_copy = new Abubu.Copy(this.velocities_out_texture_2, this.velocities_texture_2);
-      this.velocities_3_copy = new Abubu.Copy(this.velocities_out_texture_3, this.velocities_texture_3);
-      this.velocities_4_copy = new Abubu.Copy(this.velocities_out_texture_4, this.velocities_texture_4);
+        velocities_1_copy: makeCopySolver('velocities_out_texture_1', 'velocities_texture_1'),
+        velocities_2_copy: makeCopySolver('velocities_out_texture_2', 'velocities_texture_2'),
+        velocities_3_copy: makeCopySolver('velocities_out_texture_3', 'velocities_texture_3'),
+        velocities_4_copy: makeCopySolver('velocities_out_texture_4', 'velocities_texture_4'),
+      };
     }
 
     setupAllSolvers() {
-      this.setupRunSimulationSolvers();
-      this.setupReduceErrorSolvers();
-      this.setupLocalBestUpdateSolvers();
-      this.setupVelocityUpdateSolvers();
-      this.setupPositionUpdateSolvers();
-      this.setupCopySolvers();
-      this.setupErrorSumSolvers();
-    }
+      const shader_map = this.getDefaultShaderMap();
+      const program_map = {};
 
+      this.gl_helper.initDefaultVertexBuffer();
 
-    accumulateError()
-    {
-      for (var i = 0; i < this.errorSumSolvers.length; i++)
-      {
-        this.errorSumSolvers[i].render();
+      for (let key in shader_map) {
+        program_map[key] = this.gl_helper.setupDefault(shader_map[key], this);
       }
+
+      this.program_map = program_map;
     }
 
     updateGlobalBest() {
       const env = this.env;
 
-      const [best_error, best_x_index, best_y_index] = this.reduced_error_2_texture.value.slice(-4, -1);
+      const texture_array = new Float32Array(this.particles_width*this.particles_height*4);
+      this.gl_helper.getFloatTextureArray(this.reduced_error_2_texture, this.particles_width, this.particles_height, texture_array);
+
+      const [best_error, best_x_index, best_y_index] = texture_array.slice(-4, -1);
 
       if (best_error < env.particles.best_error_value) {
         const best_particle_index = 4 * (best_y_index * this.particles_width + best_x_index);
 
-        env.particles.global_bests[0] = this.particles_texture_1.value.slice(best_particle_index, best_particle_index + 4);
-        env.particles.global_bests[1] = this.particles_texture_2.value.slice(best_particle_index, best_particle_index + 4);
-        env.particles.global_bests[2] = this.particles_texture_3.value.slice(best_particle_index, best_particle_index + 4);
-        env.particles.global_bests[3] = this.particles_texture_4.value.slice(best_particle_index, best_particle_index + 4);
+        for (let i = 0; i < 4; ++i) {
+          this.gl_helper.getFloatTextureArray(this['particles_texture_' + (i+1)], this.particles_width, this.particles_height, texture_array);
+          env.particles.global_bests[i] = texture_array.slice(best_particle_index, best_particle_index + 4);
+        }
 
         env.particles.best_error_value = best_error;
       }
     }
 
     runOneIteration() {
-      const env = this.env;
+      const program_map = this.program_map;
 
-      // console.log(env.simulation.align_thresh);
-
-      // let total_error_array = new Float32Array(this.particles_width * this.particles_height * 4);
-      // for (let i = 0; i < this.particles_width * this.particles_height * 4; i += 4)
-      // {
-        // total_error_array[i] = 0.0;
-      // }
-
-      // this.run_simulations_solver.render();
-
-      // console.log(env.simulation.period.length);
-      // console.log(this.run_simulations_solvers);
-      for (let i = 0; i < env.simulation.period.length; i++) {
-
-          // console.log("Running solver...");
-          this.run_simulations_solvers[i].render();
-          // console.log("Solver finished.");
-          // console.log(this.error_textures[i]);
+      for (let i = 0; i < this.env.simulation.period.length; ++i) {
+        program_map.run_simulation(i, i === 0);
       }
 
-      this.accumulateError();
-
-
-
-      this.reduce_error_1_solver.render();
-      this.reduce_error_2_solver.render();
+      program_map.reduce_error_1();
+      program_map.reduce_error_2();
 
       this.updateGlobalBest();
 
-      this.local_best_update_1_solver.render();
-      this.local_best_update_2_solver.render();
-      this.local_best_update_3_solver.render();
-      this.local_best_update_4_solver.render();
+      program_map.local_best_update_1();
+      program_map.local_best_update_2();
+      program_map.local_best_update_3();
+      program_map.local_best_update_4();
 
-      this.local_bests_1_copy.render();
-      this.local_bests_2_copy.render();
-      this.local_bests_3_copy.render();
-      this.local_bests_4_copy.render();
+      program_map.local_bests_1_copy();
+      program_map.local_bests_2_copy();
+      program_map.local_bests_3_copy();
+      program_map.local_bests_4_copy();
 
-      this.local_error_copy.render();
+      program_map.local_error_copy();
 
-      this.velocity_1_solver.render();
-      env.velocity_update.ftinymtState.data = env.velocity_update.stinymtState.value;
-      this.velocity_2_solver.render();
-      env.velocity_update.ftinymtState.data = env.velocity_update.stinymtState.value;
-      this.velocity_3_solver.render();
-      env.velocity_update.ftinymtState.data = env.velocity_update.stinymtState.value;
-      this.velocity_4_solver.render();
-      env.velocity_update.ftinymtState.data = env.velocity_update.stinymtState.value;
+      program_map.velocity_1();
+      program_map.tinymt_copy();
+      program_map.velocity_2();
+      program_map.tinymt_copy();
+      program_map.velocity_3();
+      program_map.tinymt_copy();
+      program_map.velocity_4();
+      program_map.tinymt_copy();
 
-      this.velocities_1_copy.render();
-      this.velocities_2_copy.render();
-      this.velocities_3_copy.render();
-      this.velocities_4_copy.render();
+      program_map.velocities_1_copy();
+      program_map.velocities_2_copy();
+      program_map.velocities_3_copy();
+      program_map.velocities_4_copy();
 
-      this.position_1_solver.render();
-      env.velocity_update.ftinymtState.data = env.velocity_update.stinymtState.value;
-      this.position_2_solver.render();
-      env.velocity_update.ftinymtState.data = env.velocity_update.stinymtState.value;
-      this.position_3_solver.render();
-      env.velocity_update.ftinymtState.data = env.velocity_update.stinymtState.value;
-      this.position_4_solver.render();
-      env.velocity_update.ftinymtState.data = env.velocity_update.stinymtState.value;
+      program_map.position_1();
+      program_map.tinymt_copy();
+      program_map.position_2();
+      program_map.tinymt_copy();
+      program_map.position_3();
+      program_map.tinymt_copy();
+      program_map.position_4();
+      program_map.tinymt_copy();
 
-      this.positions_1_copy.render();
-      this.positions_2_copy.render();
-      this.positions_3_copy.render();
-      this.positions_4_copy.render();
+      program_map.positions_1_copy();
+      program_map.positions_2_copy();
+      program_map.positions_3_copy();
+      program_map.positions_4_copy();
     }
 
     getGlobalBests() {
@@ -942,26 +598,22 @@ define('scripts/pso', [
           }
         }
 
-        this["particles_texture_" + (i+1)] = new Abubu.Float32Texture(this.simulation_lengths[cl_idx], 1, {
-          pairable: true,
-          data: particles_array,
-        });
+        this["final_particles_texture_" + (i+1)] = this.gl_helper.loadFloatTexture(this.simulation_lengths[0], 1, particles_array);
       }
-
-      this.error_textures[cl_idx] = new Abubu.Float32Texture(this.simulation_lengths[cl_idx], 1, {
-        pairable: true,
-      });
     }
 
     runFinalSimulationSolver(cl_idx) {
-      this.setPositionsToGlobalBest(cl_idx);
-      this.setupRunSimulationSolvers();
-      this.run_simulations_solvers[cl_idx].render();
-      const texture_array = this.error_textures[cl_idx].value;
-      const simulation_length = texture_array.length/4;
+      const simsize = this.simulation_lengths[cl_idx];
+      const texsize = simsize*4;
 
-      const simulation_data = new Float32Array(simulation_length);
-      for (let i = 0; i < simulation_length; ++i) {
+      this.setPositionsToGlobalBest(cl_idx);
+      this.program_map.run_final_simulation(cl_idx, simsize);
+
+      const texture_array = new Float32Array(texsize);
+      this.gl_helper.getFloatTextureArray(this.simulation_texture, simsize, 1, texture_array);
+
+      const simulation_data = new Float32Array(simsize);
+      for (let i = 0; i < simsize; ++i) {
         simulation_data[i] = texture_array[4*i+1];
       }
 

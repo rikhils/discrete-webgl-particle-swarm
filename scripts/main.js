@@ -1,11 +1,9 @@
 /* global require */
 require([
-  'libs/Abubu.js',
   'scripts/graph',
   'scripts/interface',
   'scripts/pso',
 ], function(
-  Abubu,
   Graph,
   PsoInterface,
   Pso,
@@ -170,7 +168,6 @@ function plotCL_change(e)
 
     const init_arrays = pso.initializeParticles();
     pso.initializeTextures(data_arrays, init_arrays);
-    // Re-running the setup every time could be replaced by updating the uniforms
     pso.setupAllSolvers();
 
     for (let i = 0; i < 32; ++i) {
@@ -182,39 +179,13 @@ function plotCL_change(e)
     pso_interface.displayResults(bestArr);
     pso_interface.displayError(pso.env.particles.best_error_value);
 
-
     displayGraph(0, Number(pso_interface.data_sample_interval.value));
 
     console.log("Execution time (ms):");
     console.log(Date.now() - start_time);
-
-    // const simulation_data = pso.runFinalSimulationSolver();
-
-    // const align_index = simulation_data.findIndex(number => number > 0.15);
-    // const plotting_sim_data = simulation_data.slice(align_index);
-
-    // const scale = [
-    //   Math.min(...actual_data, ...plotting_sim_data),
-    //   Math.max(...actual_data, ...plotting_sim_data),
-    // ];
-
-    // const num_points = Math.max(actual_data.length, plotting_sim_data.length);
-
-    // graph.clearGraph();
-    // graph.runGraph(actual_data, [1, 0, 0], num_points, scale);
-    // graph.runGraph(plotting_sim_data, [0, 0, 1], num_points, scale);
-
-    // pso_interface.setAxes(0, num_points, scale[0], scale[1]);
-
   };
 
-
-
   function displayGraph(cl_idx, interval) {
-    // const bestArr = pso.getGlobalBests();
-    // pso_interface.displayResults(bestArr);
-    // pso_interface.displayError(pso.env.particles.best_error_value);
-    // pso.setupFinalSimulationSolver(bestArr);
     const simulation_data = pso.runFinalSimulationSolver(cl_idx);
 
     const align_index = simulation_data.findIndex(number => number > 0.15);
@@ -232,9 +203,5 @@ function plotCL_change(e)
     graph.runGraph(plotting_sim_data, [1, 0, 0], num_points, scale);
 
     pso_interface.setAxes(0, num_points * interval, scale[0], scale[1]);
-}
-
-
+  }
 });
-
-

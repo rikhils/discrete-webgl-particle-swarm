@@ -43,7 +43,7 @@ define('scripts/pso', [
       return {
         simulation: {
           dt: 0.02,
-          period: [400.0],
+          period: [],
           stim_start: 2.0,
           stim_end: 7.0,
           stim_mag: 0.1,
@@ -80,7 +80,7 @@ define('scripts/pso', [
       };
     }
 
-    setupEnv(bounds, cls, pre_beats, num_beats, sample_interval) {
+    setupEnv(bounds, input_data, pre_beats, num_beats, sample_interval) {
       this.env = Pso.getEnv();
       const env = this.env;
 
@@ -88,20 +88,8 @@ define('scripts/pso', [
         env.bounds = bounds;
       }
 
-      // if (Number(cl)) {
-      //   env.simulation.period = Number(cl);
-      // }
-
-        if(Number(cls[0]))
-        {
-          env.simulation.period = [];
-        }
-
-      for (var i = 0; i < cls.length; i++) {
-        if(Number(cls[i]))
-        {
-          env.simulation.period.push(Number(cls[i]));
-        }
+      for (const [,cl] of input_data) {
+        env.simulation.period.push(cl);
       }
 
       if (Number(num_beats)) {
@@ -112,8 +100,7 @@ define('scripts/pso', [
         env.simulation.pre_beats = Number(pre_beats);
       }
 
-      if(Number(sample_interval))
-      {
+      if(Number(sample_interval)) {
         env.simulation.sample_interval = Number(sample_interval);
       }
 

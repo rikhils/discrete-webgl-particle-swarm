@@ -8,31 +8,9 @@
   </head>
   <body>
     <div>
-
-      <label for="numCL_select">How many CLs to fit:</label>
-
-      <select name="numCLselector" id="numCL_select">
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-      </select>
-
-      <input type="file" id="my_file" name="data_to_fit">
-      <input type="file" id="my_file_2" name="data_to_fit_2">
-      <input type="file" id="my_file_3" name="data_to_fit_3">
-
-
-      <button name="button" id="PSO_button">Rerun PSO</button>
+      <button name="button" id="PSO_button">Run PSO</button>
       <button name="button" id="disp_params_button">Display Parameter Values</button>
     </div>
-
-    <label for="plot_CL_select">Plotting CL:</label>
-
-    <select name="plot_cl_selector" id="plot_CL_select">
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-    </select>
 
     <div class="flex-container">
       <div id="graph_div">
@@ -151,15 +129,7 @@
       <input id="normalization" type="text">
 
       <br>
-      <span>Cycle length 1 (ms)</span>
-      <input id="data_cl_1" type="text">
-
-      <span>Cycle length 2 (ms)</span>
-      <input id="data_cl_2" type="text">
-
-      <span>Cycle length 3 (ms)</span>
-      <input id="data_cl_3" type="text">
-      </br>
+      <br>
 
       <span>Number of beats</span>
       <input id="data_num_beats" type="text">
@@ -169,8 +139,11 @@
 
       <span>Target Data Sample Interval (ms)</span>
       <input id="data_sample_interval" type="text">
-
     </div>
+
+    <div id="data-section"></div>
+    <button id="add-data">Add data</button>
+    <button id="remove-data">Remove data</button>
 
     <div>
       <span>Fit error:</span>

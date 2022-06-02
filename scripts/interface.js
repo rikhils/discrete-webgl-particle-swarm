@@ -7,9 +7,6 @@ define('scripts/interface', [
   return class PsoInterface {
     static paramList = ['tr', 'tsi', 'twp', 'td', 'tvp', 'tv1m', 'tv2m', 'twm', 'to', 'xk', 'ucsi', 'uc', 'uv'];
 
-
-
-
     constructor() {
       PsoInterface.paramList.forEach(param => {
         this[param + '_val'] = document.getElementById(param + '_val');
@@ -43,13 +40,13 @@ define('scripts/interface', [
       });
 
       this.normalization = document.getElementById('normalization');
-      this.data_cl_1 = document.getElementById('data_cl_1');
-      this.data_cl_2 = document.getElementById('data_cl_2');
-      this.data_cl_3 = document.getElementById('data_cl_3');
       this.data_num_beats = document.getElementById('data_num_beats');
       this.data_pre_beats = document.getElementById('data_pre_beats');
       this.data_sample_interval = document.getElementById('data_sample_interval');
       this.fit_error = document.getElementById('fit_error');
+      this.data_section = document.getElementById('data-section');
+      this.add_button = document.getElementById('add-data');
+      this.remove_button = document.getElementById('remove-data');
 
       this.xmin = document.getElementById('xmin');
       this.x1 = document.getElementById('x1');
@@ -61,6 +58,61 @@ define('scripts/interface', [
       this.y2 = document.getElementById('y2');
       this.y3 = document.getElementById('y3');
       this.ymax = document.getElementById('ymax');
+    }
+
+    async getDataFromInput(element) {
+      const file = element.querySelector('input[type=file]').files[0];
+      const cl = Number(element.querySelector('input[type=text]').value);
+
+      const reader = new FileReader();
+
+      const text = await new Promise((resolve) => {
+        reader.onload = () => {
+          resolve(reader.result);
+        };
+
+        reader.readAsText(file);
+      });
+
+      return [text, cl];
+    }
+
+    async getAllInputData() {
+      const p_result = Array.from(this.data_section.children).map(async (element) => await this.getDataFromInput(element));
+      const result = await Promise.all(p_result);
+      return result;
+    }
+
+    createInputElement() {
+      const elem = document.createElement('div');
+      elem.setAttribute('class', 'data-input');
+
+      const file_in = document.createElement('input');
+      file_in.setAttribute('type', 'file');
+
+      const cl_label = document.createElement('span');
+      cl_label.innerHTML = 'Cycle length (ms):';
+
+      const cl_in = document.createElement('input');
+      cl_in.setAttribute('type', 'text');
+
+      elem.appendChild(file_in);
+      elem.appendChild(cl_label);
+      elem.appendChild(cl_in);
+
+      return elem;
+    }
+
+    addInput() {
+      this.data_section.appendChild(this.createInputElement());
+    }
+
+    removeInput() {
+      const children = this.data_section.children;
+
+      if (children.length > 1) {
+        this.data_section.removeChild(children[children.length-1]);
+      }
     }
 
     displayBounds(env) {

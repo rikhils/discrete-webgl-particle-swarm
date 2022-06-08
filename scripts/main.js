@@ -13,7 +13,7 @@ require([
   const particles_width = 32;
   const particles_height = 32;
 
-  const pso = new Pso(particles_width, particles_height);
+  let pso;
   const graph = new Graph();
   const pso_interface = new PsoInterface();
 
@@ -34,29 +34,29 @@ require([
   };
 
   const run_pso = async () => {
+    pso = new Pso(particles_width, particles_height);
     const input_data = await pso_interface.getAllInputData();
+
+    const raw_input_data = [];
+    const input_cls = [];
+    for (const [raw, cl] of input_data) {
+      raw_input_data.push(raw);
+      input_cls.push(cl);
+    }
 
     const start_time = Date.now();
 
     pso.setupEnv(
       pso_interface.getBounds(),
-      input_data,
+      input_cls,
       pso_interface.data_pre_beats.value,
       pso_interface.data_num_beats.value,
       pso_interface.data_sample_interval.value,
     );
 
-    const init_arrays = pso.initializeParticles();
-    const data_arrays = [];
-    const trimmed_arrays = [];
+    pso.readData(raw_input_data, pso_interface.normalization.value);
 
-    for (const [raw,] of input_data) {
-      const [trimmed, complete] = pso.readData(raw, pso_interface.normalization.value);
-      data_arrays.push(complete);
-      trimmed_arrays.push(trimmed);
-    }
-
-    pso.initializeTextures(data_arrays, init_arrays);
+    pso.initializeTextures();
     pso.setupAllSolvers();
 
     for (let i = 0; i < 32; ++i) {
@@ -68,27 +68,29 @@ require([
     pso_interface.displayResults(bestArr);
     pso_interface.displayError(pso.env.particles.best_error_value);
 
-    displayGraph(0, Number(pso_interface.data_sample_interval.value), trimmed_arrays);
+    displayGraph(0);
 
     console.log("Execution time (ms):");
     console.log(Date.now() - start_time);
   };
 
-  function displayGraph(cl_idx, interval, actual_data) {
+  function displayGraph(cl_idx) {
     const simulation_data = pso.runFinalSimulationSolver(cl_idx);
+    const actual_data = pso.env.simulation.trimmed_data[cl_idx];
 
     const align_index = simulation_data.findIndex(number => number > 0.15);
     const plotting_sim_data = simulation_data.slice(align_index);
 
     const scale = [
-      Math.min(...actual_data[cl_idx], ...plotting_sim_data),
-      Math.max(...actual_data[cl_idx], ...plotting_sim_data),
+      Math.min(...actual_data, ...plotting_sim_data),
+      Math.max(...actual_data, ...plotting_sim_data),
     ];
 
-    const num_points = Math.max(actual_data[cl_idx].length, plotting_sim_data.length);
+    const num_points = Math.max(actual_data.length, plotting_sim_data.length);
+    const interval = Number(pso_interface.data_sample_interval.value);
 
     graph.clearGraph();
-    graph.runGraph(actual_data[cl_idx], [0, 0, 0], num_points, scale);
+    graph.runGraph(actual_data, [0, 0, 0], num_points, scale);
     graph.runGraph(plotting_sim_data, [1, 0, 0], num_points, scale);
 
     pso_interface.setAxes(0, num_points * interval, scale[0], scale[1]);

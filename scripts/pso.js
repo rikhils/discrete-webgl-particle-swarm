@@ -52,6 +52,8 @@ define('scripts/pso', [
           v_init: 1.0,
           w_init: 1.0,
           align_thresh: [],
+          trimmed_data: [],
+          data_arrays: [],
           sample_interval: 1.0,
         },
         particles: {
@@ -80,7 +82,7 @@ define('scripts/pso', [
       };
     }
 
-    setupEnv(bounds, input_data, pre_beats, num_beats, sample_interval) {
+    setupEnv(bounds, input_cls, pre_beats, num_beats, sample_interval) {
       this.env = Pso.getEnv();
       const env = this.env;
 
@@ -88,9 +90,7 @@ define('scripts/pso', [
         env.bounds = bounds;
       }
 
-      for (const [,cl] of input_data) {
-        env.simulation.period.push(cl);
-      }
+      env.simulation.period = input_cls;
 
       if (Number(num_beats)) {
         env.simulation.num_beats = Number(num_beats);
@@ -125,46 +125,52 @@ define('scripts/pso', [
       }
     }
 
-    readData(raw_text, normalize) {
-      const split_data = raw_text.split('\n');
-      const actual_data = split_data.filter(x => !(x.trim() === ""));
+    readData(raw_input_data, normalize) {
+      const trimmed_data = [];
+      const data_arrays = [];
+      const align_thresh = [];
 
       const normalization = Number(normalize) || 1;
-
-      let full_parsed_data = actual_data.map(x => parseFloat(x.trim()));
-      let maxVal = Math.max(...full_parsed_data);
-      let full_normalized_data = full_parsed_data.map(x => (x * (normalization / maxVal)));
-
-      var first_compare_index = full_normalized_data.findIndex(number => number > 0.15);
-
-      const left_trimmed_data = full_normalized_data.slice(first_compare_index);
-
-      const data_length = left_trimmed_data.length;
-      const data_array = new Float32Array(data_length*4);
-
-      // Pad out the extra pixel values. The data could be stored more densely by using the full pixel
-      // value and by using a two-dimensional texture, but for now there is not enough to require that.
-      let p = 0;
-      for (let i = 0; i < data_length; ++i) {
-        data_array[p++] = left_trimmed_data[i];
-        data_array[p++] = 0.0;
-        data_array[p++] = 0.0;
-        data_array[p++] = 0.0;
-      }
-
       const delta = 0.001;
 
-      this.env.simulation.align_thresh.unshift(left_trimmed_data[0]-delta);
+      for (let i = 0; i < raw_input_data.length; ++i) {
+        const raw_text = raw_input_data[i];
 
-      return [left_trimmed_data, data_array];
+        const split_data = raw_text.split('\n');
+        const actual_data = split_data.filter(x => !(x.trim() === ""));
+
+        let full_parsed_data = actual_data.map(x => parseFloat(x.trim()));
+        let maxVal = Math.max(...full_parsed_data);
+        let full_normalized_data = full_parsed_data.map(x => (x * (normalization / maxVal)));
+
+        var first_compare_index = full_normalized_data.findIndex(number => number > 0.15);
+
+        const left_trimmed_data = full_normalized_data.slice(first_compare_index);
+
+        // Pad out the extra pixel values. The data could be stored more densely by using the full pixel
+        // value and by using a two-dimensional texture, but for now there is not enough to require that.
+        const data_length = left_trimmed_data.length;
+        const data_array = new Float32Array(4 * data_length);
+        for (let j = 0; j < data_length; ++j) {
+          data_array[4*j] = left_trimmed_data[j];
+        }
+
+        trimmed_data.push(left_trimmed_data);
+        data_arrays.push(data_array);
+        align_thresh.push(left_trimmed_data[0] - delta);
+      }
+
+      this.env.simulation.data_arrays = data_arrays;
+      this.env.simulation.trimmed_data = trimmed_data;
+      this.env.simulation.align_thresh = align_thresh;
     }
 
     initializeParticles() {
-      const num_particles = this.num_particles;
-      const init_array_1 = new Float32Array(num_particles * 4);
-      const init_array_2 = new Float32Array(num_particles * 4);
-      const init_array_3 = new Float32Array(num_particles * 4);
-      const init_array_4 = new Float32Array(num_particles * 4);
+      const asize = 4 * this.num_particles;
+      const init_array_1 = new Float32Array(asize);
+      const init_array_2 = new Float32Array(asize);
+      const init_array_3 = new Float32Array(asize);
+      const init_array_4 = new Float32Array(asize);
 
       const random_init = (i, j) => {
         const [min, max] = this.env.bounds[i][j];
@@ -172,45 +178,40 @@ define('scripts/pso', [
       };
 
       let p = 0;
-      for (let i = 0; i < num_particles; ++i) {
-        init_array_1[p] = random_init(0, 0);
-        init_array_2[p] = random_init(1, 0);
-        init_array_3[p] = random_init(2, 0);
-        init_array_4[p++] = random_init(3, 0);
+      for (let i = 0; i < asize; i += 4) {
+        init_array_1[i] = random_init(0, 0);
+        init_array_2[i] = random_init(1, 0);
+        init_array_3[i] = random_init(2, 0);
+        init_array_4[i] = random_init(3, 0);
 
-        init_array_1[p] = random_init(0, 1);
-        init_array_2[p] = random_init(1, 1);
-        init_array_3[p] = random_init(2, 1);
-        init_array_4[p++] = 0;
+        init_array_1[i+1] = random_init(0, 1);
+        init_array_2[i+1] = random_init(1, 1);
+        init_array_3[i+1] = random_init(2, 1);
 
-        init_array_1[p] = random_init(0, 2);
-        init_array_2[p] = random_init(1, 2);
-        init_array_3[p] = random_init(2, 2);
-        init_array_4[p++] = 0;
+        init_array_1[i+2] = random_init(0, 2);
+        init_array_2[i+2] = random_init(1, 2);
+        init_array_3[i+2] = random_init(2, 2);
 
-        init_array_1[p] = random_init(0, 3);
-        init_array_2[p] = random_init(1, 3);
-        init_array_3[p] = random_init(2, 3);
-        init_array_4[p++] = 0;
+        init_array_1[i+3] = random_init(0, 3);
+        init_array_2[i+3] = random_init(1, 3);
+        init_array_3[i+3] = random_init(2, 3);
       }
 
       return [init_array_1, init_array_2, init_array_3, init_array_4];
     }
 
-    initializeTextures(data_arrays, init_arrays) {
+    initializeTextures() {
       const gl_helper = this.gl_helper;
       const particles_width = this.particles_width;
       const particles_height = this.particles_height;
-      // const data_length = data_array.length / 4;
-      const [init_array_1, init_array_2, init_array_3, init_array_4] = init_arrays;
       const { num_beats, period, sample_interval } = this.env.simulation;
-      // const simulation_length = Math.ceil(Math.ceil(num_beats * period) / sample_interval);
 
+      const data_arrays = this.env.simulation.data_arrays;
+      const [init_array_1, init_array_2, init_array_3, init_array_4] = this.initializeParticles();
       const zero_array = new Float32Array(particles_width*particles_height*4);
 
       this.simulation_lengths = [];
       this.data_textures = [];
-      this.error_textures = [];
 
       console.log("Period length is "+period.length);
       for (var i = 0; i < period.length; i++) {

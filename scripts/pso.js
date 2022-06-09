@@ -260,7 +260,7 @@ define('scripts/pso', [
       this.local_bests_error_texture_out = gl_helper.loadFloatTexture(particles_width, particles_height, null);
 
       this.error_texture = gl_helper.loadFloatTexture(particles_width, particles_height, null);
-      this.simulation_texture = gl_helper.loadFloatTexture(this.simulation_lengths[0], 1, null);
+      this.simulation_texture = gl_helper.loadFloatTexture(Math.max(...this.simulation_lengths), 1, null);
 
       this.error_sum_texture_0 = gl_helper.loadFloatTexture(particles_width, particles_height, null);
       this.error_sum_texture_1 = gl_helper.loadFloatTexture(particles_width, particles_height, null);
@@ -586,7 +586,7 @@ define('scripts/pso', [
           }
         }
 
-        this["final_particles_texture_" + (i+1)] = this.gl_helper.loadFloatTexture(this.simulation_lengths[0], 1, particles_array);
+        this["final_particles_texture_" + (i+1)] = this.gl_helper.loadFloatTexture(this.simulation_lengths[cl_idx], 1, particles_array);
       }
     }
 

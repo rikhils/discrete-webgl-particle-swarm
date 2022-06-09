@@ -96,9 +96,15 @@ define('scripts/interface', [
       const cl_in = document.createElement('input');
       cl_in.setAttribute('type', 'text');
 
+      const plot_button = document.createElement('button');
+      plot_button.setAttribute('type', 'button');
+      plot_button.setAttribute('class', 'plot-data-button');
+      plot_button.innerHTML = 'Plot';
+
       elem.appendChild(file_in);
       elem.appendChild(cl_label);
       elem.appendChild(cl_in);
+      elem.appendChild(plot_button);
 
       return elem;
     }

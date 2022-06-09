@@ -26,6 +26,15 @@ require([
   pso_interface.add_button.onclick = () => pso_interface.addInput();
   pso_interface.remove_button.onclick = () => pso_interface.removeInput();
 
+  pso_interface.data_section.onclick = (e) => {
+    if (e.target.getAttribute('class') === 'plot-data-button') {
+      const idx = Array.from(pso_interface.data_section.children).indexOf(e.target.parentElement);
+      if (idx !== -1 && pso) {
+        displayGraph(idx);
+      }
+    }
+  };
+
   // Start with a single data file input
   pso_interface.addInput();
 

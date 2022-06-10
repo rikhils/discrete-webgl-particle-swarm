@@ -47,6 +47,8 @@ define('scripts/interface', [
       this.data_section = document.getElementById('data-section');
       this.add_button = document.getElementById('add-data');
       this.remove_button = document.getElementById('remove-data');
+      this.fit_all_button = document.getElementById('fit-all-button');
+      this.fit_none_button = document.getElementById('fit-none-button');
 
       this.xmin = document.getElementById('xmin');
       this.x1 = document.getElementById('x1');
@@ -58,6 +60,15 @@ define('scripts/interface', [
       this.y2 = document.getElementById('y2');
       this.y3 = document.getElementById('y3');
       this.ymax = document.getElementById('ymax');
+    }
+
+    setFitCheckboxes(value) {
+      const fit_checkboxes = document.querySelectorAll('input.fit-checkbox');
+
+      for (const cb of fit_checkboxes) {
+        cb.checked = !value;
+        cb.click();
+      }
     }
 
     async getDataFromInput(element) {

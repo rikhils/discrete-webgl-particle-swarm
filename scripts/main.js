@@ -25,6 +25,8 @@ require([
 
   pso_interface.add_button.onclick = () => pso_interface.addInput();
   pso_interface.remove_button.onclick = () => pso_interface.removeInput();
+  pso_interface.fit_all_button.onclick = () => pso_interface.setFitCheckboxes(true);
+  pso_interface.fit_none_button.onclick = () => pso_interface.setFitCheckboxes(false);
 
   pso_interface.data_section.onclick = (e) => {
     if (e.target.getAttribute('class') === 'plot-data-button') {

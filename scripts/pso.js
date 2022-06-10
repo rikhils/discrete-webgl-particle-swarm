@@ -1,6 +1,5 @@
 /* global define */
 define('scripts/pso', [
-  'libs/Abubu.js',
   'scripts/gl_helper',
   'text!shaders/copy.frag',
   'text!shaders/copy_uint_texture.frag',
@@ -12,7 +11,6 @@ define('scripts/pso', [
   'text!shaders/update_particles.frag',
   'text!shaders/update_local_bests.frag',
 ], function(
-  Abubu,
   GlHelper,
   CopyShader,
   CopyUintShader,
@@ -273,18 +271,49 @@ define('scripts/pso', [
       env.velocity_update.istate  = new Uint32Array(particles_width*particles_height*4);
       env.velocity_update.imat    = new Uint32Array(particles_width*particles_height*4);
 
+      // Modifies the entries of state
+      const next_tmt_state = (mat, state) => {
+        let x = (state[0] & 0x7fffffff) ^ state[1] ^ state[2];
+        let y = state[3];
+
+        x ^= (x << 1);
+        y ^= (y >>> 1) ^ x;
+        state[0] = state[1];
+        state[1] = state[2];
+        state[2] = x ^ (y << 10);
+        state[3] = y;
+
+        state[1] ^= (-(y & 1) >>> 0) & mat[0];
+        state[2] ^= (-(y & 1) >>> 0) & mat[1];
+      };
+
       let p = 0;
       const seed = Date.now();
-      const tm = new Abubu.TinyMT({vmat:0});
+      const mat = [0, 0, 0, seed];
+      const state = [0, 0, 0, 0];
       for (let j = 0; j < particles_height; ++j) {
         for (let i = 0; i < particles_width; ++i) {
-          //  mat1            mat2            seed
-          tm.mat[0] = i ;     tm.mat[1] = j ; tm.mat[3] = seed ;
-          tm.init() ;
+          mat[0] = i;
+          mat[1] = j;
+
+          state[0] = mat[3];
+          state[1] = mat[0];
+          state[2] = mat[1];
+          state[3] = mat[2];
+
+          for (let k = 1; k < 8; ++k) {
+            const a = k & 3;
+            const b = (k-1) & 3;
+            state[a] ^= k + Math.imul(1812433253, (state[b] ^ (state[b] >>> 30)));
+          }
+
+          for (let k = 0; k < 8; ++k) {
+            next_tmt_state(mat, state);
+          }
 
           for (let k = 0; k < 4; ++k) {
-            env.velocity_update.istate[p] = tm.state[k] ;
-            env.velocity_update.imat[p] = tm.mat[k] ;
+            env.velocity_update.istate[p] = state[k];
+            env.velocity_update.imat[p] = mat[k];
             p++;
           }
         }

@@ -28,11 +28,15 @@ require([
   pso_interface.fit_all_button.onclick = () => pso_interface.setFitCheckboxes(true);
   pso_interface.fit_none_button.onclick = () => pso_interface.setFitCheckboxes(false);
 
-  pso_interface.data_section.onclick = (e) => {
+  pso_interface.data_section.onclick = async (e) => {
     if (e.target.getAttribute('class') === 'plot-data-button') {
       const idx = Array.from(pso_interface.data_section.children).indexOf(e.target.parentElement);
-      if (idx !== -1 && pso) {
-        displayGraph(idx);
+      if (idx !== -1) {
+        if (pso) {
+          displayGraph(idx);
+        } else {
+          displayDataGraph(idx);
+        }
       }
     }
   };
@@ -84,6 +88,17 @@ require([
     console.log("Execution time (ms):");
     console.log(Date.now() - start_time);
   };
+
+  async function displayDataGraph(cl_idx) {
+    const input_data = await pso_interface.getAllInputData();
+    const raw_text = input_data[cl_idx][0];
+    const actual_data = raw_text.split('\n').filter(x => !(x.trim() === ""));
+
+    const scale = [Math.min(...actual_data), Math.max(...actual_data)];
+
+    graph.clearGraph();
+    graph.runGraph(actual_data, [0, 0, 0], actual_data.length, scale);
+  }
 
   function displayGraph(cl_idx) {
     const simulation_data = pso.runFinalSimulationSolver(cl_idx);

@@ -62,7 +62,7 @@ canvas {
   margin-left: auto;
 }
 
-.param_div {
+.param-div {
   display: grid;
   grid-template-columns: max-content max-content max-content max-content max-content;
   grid-column-gap: 2.5em;
@@ -71,7 +71,11 @@ canvas {
   margin-bottom: auto;
 }
 
-.param_div input[type=text] {
+.param-div-hidden {
+  display: none;
+}
+
+.param-div input[type=text] {
   width: 5em;
 }
 

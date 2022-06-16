@@ -4,40 +4,50 @@ define('scripts/interface', [
 ) {
   'use strict';
 
+  /* global PsoInterface */
   return class PsoInterface {
-    static paramList = ['tr', 'tsi', 'twp', 'td', 'tvp', 'tv1m', 'tv2m', 'twm', 'to', 'xk', 'ucsi', 'uc', 'uv'];
+    static param_lists = {
+      fk: ['tr', 'tsi', 'twp', 'td', 'tvp', 'tv1m', 'tv2m', 'twm', 'to', 'xk', 'ucsi', 'uc', 'uv'],
+      ms: ['gna', 'gk', 'tclose', 'topen', 'vgate'],
+    }
 
     constructor() {
-      PsoInterface.paramList.forEach(param => {
-        this[param + '_val'] = document.getElementById(param + '_val');
-        this[param + '_min'] = document.getElementById(param + '_min');
-        this[param + '_max'] = document.getElementById(param + '_max');
-        this[param + '_fit'] = document.getElementById(param + '_fit');
+      for (const [model, param_list] of Object.entries(PsoInterface.param_lists)) {
+        const model_elements = {};
 
-        this[param + '_prev_min'] = -1;
-        this[param + '_prev_max'] = -1;
+        for (const param of param_list) {
+          model_elements[param + '_val'] = document.getElementById(param + '_val');
+          model_elements[param + '_min'] = document.getElementById(param + '_min');
+          model_elements[param + '_max'] = document.getElementById(param + '_max');
+          model_elements[param + '_fit'] = document.getElementById(param + '_fit');
 
-        this[param + '_fit'].addEventListener('change', () => {
-          if (this[param + '_fit'].checked) {
-            this[param + '_val'].removeAttribute('readonly');
-            this[param + '_min'].removeAttribute('readonly');
-            this[param + '_max'].removeAttribute('readonly');
+          model_elements[param + '_prev_min'] = -1;
+          model_elements[param + '_prev_max'] = -1;
 
-            this[param + '_min'].value = this[param + '_prev_min'];
-            this[param + '_max'].value = this[param + '_prev_max'];
-          } else {
-            this[param+'_prev_min'] = this[param + '_min'].value;
-            this[param + '_min'].value = this[param + '_val'].value;
+          model_elements[param + '_fit'].addEventListener('change', () => {
+            if (model_elements[param + '_fit'].checked) {
+              model_elements[param + '_val'].removeAttribute('readonly');
+              model_elements[param + '_min'].removeAttribute('readonly');
+              model_elements[param + '_max'].removeAttribute('readonly');
 
-            this[param+'_prev_max'] = this[param + '_max'].value;
-            this[param + '_max'].value = this[param + '_val'].value;
+              model_elements[param + '_min'].value = model_elements[param + '_prev_min'];
+              model_elements[param + '_max'].value = model_elements[param + '_prev_max'];
+            } else {
+              model_elements[param+'_prev_min'] = model_elements[param + '_min'].value;
+              model_elements[param + '_min'].value = model_elements[param + '_val'].value;
 
-            this[param + '_val'].setAttribute('readonly', true);
-            this[param + '_min'].setAttribute('readonly', true);
-            this[param + '_max'].setAttribute('readonly', true);
-          }
-        });
-      });
+              model_elements[param+'_prev_max'] = model_elements[param + '_max'].value;
+              model_elements[param + '_max'].value = model_elements[param + '_val'].value;
+
+              model_elements[param + '_val'].setAttribute('readonly', true);
+              model_elements[param + '_min'].setAttribute('readonly', true);
+              model_elements[param + '_max'].setAttribute('readonly', true);
+            }
+          });
+        }
+
+        this[model] = model_elements;
+      }
 
       this.normalization = document.getElementById('normalization');
       this.data_num_beats = document.getElementById('data_num_beats');
@@ -49,6 +59,7 @@ define('scripts/interface', [
       this.remove_button = document.getElementById('remove-data');
       this.fit_all_button = document.getElementById('fit-all-button');
       this.fit_none_button = document.getElementById('fit-none-button');
+      this.model_select = document.getElementById('model-select');
 
       this.xmin = document.getElementById('xmin');
       this.x1 = document.getElementById('x1');
@@ -60,6 +71,19 @@ define('scripts/interface', [
       this.y2 = document.getElementById('y2');
       this.y3 = document.getElementById('y3');
       this.ymax = document.getElementById('ymax');
+    }
+
+    displayModelParameters() {
+      const selected_id = this.model_select.value + '-parameters';
+      const model_param_divs = document.querySelectorAll('div#parameter-section div.param-div,div.param-div-hidden');
+
+      for (const model_param_div of model_param_divs) {
+        if (model_param_div.id === selected_id) {
+          model_param_div.setAttribute('class', 'param-div');
+        } else {
+          model_param_div.setAttribute('class', 'param-div-hidden');
+        }
+      }
     }
 
     setFitCheckboxes(value) {
@@ -133,32 +157,33 @@ define('scripts/interface', [
     }
 
     displayBounds(env) {
-      const bounds = env.bounds.flat(1);
+      for (const [model, param_list] of Object.entries(PsoInterface.param_lists)) {
+        const bounds = env[model + '_bounds'].flat(1);
 
-      PsoInterface.paramList.forEach((param, idx) => {
-        if (this[param + '_fit'].checked)
-        {
-          const [min, max] = bounds[idx];
-          this[param + '_min'].value = min;
-          this[param + '_max'].value = max;
-        }
-      });
+        param_list.forEach((param, idx) => {
+          if (this[model][param + '_fit'].checked) {
+            const [min, max] = bounds[idx];
+            this[model][param + '_min'].value = min;
+            this[model][param + '_max'].value = max;
+          }
+        });
+      }
 
       this.normalization.value = 1;
     }
 
     displayResults(bestArr) {
-      PsoInterface.paramList.forEach((param, idx) => {
-        this[param + '_val'].value = bestArr[idx];
+      const model = this.model_select.value;
+      PsoInterface.param_lists[model].forEach((param, idx) => {
+        this[model][param + '_val'].value = bestArr[idx];
       });
     }
 
     display_all_params(real_interface)
     {
       var builder = "";
-      PsoInterface.paramList.forEach(param => {
+      PsoInterface.param_lists[this.model_select.value].forEach(param => {
         builder = builder.concat(param + ":\t" + this[param + '_val'].value +"\n");
-        // builder = builder.concat(param + ":\t" + "test" +"\n");
       });
       prompt("(ctrl+c, Enter) to copy:",builder);
     }
@@ -169,15 +194,26 @@ define('scripts/interface', [
     }
 
     getBounds() {
-      const bounds = [[], [], [], []];
+      const bounds = [];
+      const model = this.model_select.value;
+      const param_list = PsoInterface.param_lists[model];
+      const num_colors = Math.ceil(param_list.length/4);
 
-      PsoInterface.paramList.forEach((param, idx) => {
-        bounds[Math.floor(idx/4)].push([Number(this[param + '_min'].value), Number(this[param + '_max'].value)]);
-      });
+      let c, i;
+      for (i = 0; i < param_list.length; ++i) {
+        const param = param_list[i];
+
+        if (i % 4 === 0) {
+          bounds.push([]);
+          c = i/4;
+        }
+
+        bounds[c].push([Number(this[model][param + '_min'].value), Number(this[model][param + '_max'].value)]);
+      }
 
       // Fill out the remaining values
-      for (let i = 0; i < 3; ++i) {
-        bounds[3].push([0, 0]);
+      for (; i % 4 !== 0; ++i) {
+        bounds[c].push([0, 0]);
       }
 
       return bounds;

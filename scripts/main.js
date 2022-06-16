@@ -18,6 +18,7 @@ require([
   const pso_interface = new PsoInterface();
 
   pso_interface.displayBounds(Pso.getEnv());
+  pso_interface.displayModelParameters();
 
   document.getElementById('reset_bounds').onclick = () => {
     pso_interface.displayBounds(Pso.getEnv());
@@ -27,6 +28,7 @@ require([
   pso_interface.remove_button.onclick = () => pso_interface.removeInput();
   pso_interface.fit_all_button.onclick = () => pso_interface.setFitCheckboxes(true);
   pso_interface.fit_none_button.onclick = () => pso_interface.setFitCheckboxes(false);
+  pso_interface.model_select.addEventListener('change', () => pso_interface.displayModelParameters());
 
   pso_interface.data_section.onclick = async (e) => {
     if (e.target.getAttribute('class') === 'plot-data-button') {
@@ -62,6 +64,7 @@ require([
     const start_time = Date.now();
 
     pso.setupEnv(
+      pso_interface.model_select.value,
       pso_interface.getBounds(),
       input_cls,
       pso_interface.data_pre_beats.value,

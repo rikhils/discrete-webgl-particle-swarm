@@ -175,7 +175,9 @@ define('scripts/interface', [
     displayResults(bestArr) {
       const model = this.model_select.value;
       PsoInterface.param_lists[model].forEach((param, idx) => {
-        this[model][param + '_val'].value = bestArr[idx];
+        // this[model][param + '_val'].value = bestArr[idx];
+        this[model][param + '_val'].value = bestArr[idx].toFixed(3);
+
       });
     }
 

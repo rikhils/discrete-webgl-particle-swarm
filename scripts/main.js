@@ -28,7 +28,11 @@ require([
   pso_interface.remove_button.onclick = () => pso_interface.removeInput();
   pso_interface.fit_all_button.onclick = () => pso_interface.setFitCheckboxes(true);
   pso_interface.fit_none_button.onclick = () => pso_interface.setFitCheckboxes(false);
+  pso_interface.plot_from_vals_button.onclick = () => displayGraphFromVals(0);
+
   pso_interface.model_select.addEventListener('change', () => pso_interface.displayModelParameters());
+
+  document.querySelector('button#disp_params_button').onclick = () => pso_interface.display_all_params_test();
 
   pso_interface.data_section.onclick = async (e) => {
     if (e.target.getAttribute('class') === 'plot-data-button') {
@@ -103,6 +107,33 @@ require([
     graph.runGraph(actual_data, [0, 0, 0], actual_data.length, scale);
   }
 
+  function displayGraphFromVals(cl_idx)
+  {
+    let current_vals = pso_interface.get_current_values();
+    const simulation_data = pso.runManualSimulationSolver(cl_idx,current_vals);
+    const actual_data = pso.env.simulation.trimmed_data[cl_idx];
+
+    const align_index = simulation_data.findIndex(number => number > 0.15);
+    const plotting_sim_data = simulation_data.slice(align_index);
+
+    const scale = [
+      Math.min(...actual_data, ...plotting_sim_data),
+      Math.max(...actual_data, ...plotting_sim_data),
+    ];
+
+    const num_points = Math.max(actual_data.length, plotting_sim_data.length);
+    const interval = Number(pso_interface.data_sample_interval.value);
+
+    graph.clearGraph();
+    graph.runGraph(actual_data, [0, 0, 0], num_points, scale);
+    graph.runGraph(plotting_sim_data, [1, 0, 0], num_points, scale);
+
+    pso_interface.setAxes(0, num_points * interval, scale[0], scale[1]);    
+
+
+  }
+
+
   function displayGraph(cl_idx) {
     const simulation_data = pso.runFinalSimulationSolver(cl_idx);
     const actual_data = pso.env.simulation.trimmed_data[cl_idx];
@@ -126,5 +157,5 @@ require([
   }
 
   document.querySelector('button#PSO_button').onclick = run_pso;
-  document.querySelector('button#disp_params_button').onclick = outer_display;
+  // document.querySelector('button#disp_params_button').onclick = outer_display;
 });

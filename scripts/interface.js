@@ -59,6 +59,7 @@ define('scripts/interface', [
       this.remove_button = document.getElementById('remove-data');
       this.fit_all_button = document.getElementById('fit-all-button');
       this.fit_none_button = document.getElementById('fit-none-button');
+      this.plot_from_vals_button = document.getElementById("plot-from-vals-button");
       this.model_select = document.getElementById('model-select');
 
       this.xmin = document.getElementById('xmin');
@@ -181,6 +182,31 @@ define('scripts/interface', [
       });
     }
 
+    display_all_params_test()
+    {
+      var builder = "";
+      const model = this.model_select.value;
+      PsoInterface.param_lists[model].forEach((param,idx) => 
+          {
+            builder = builder.concat(param + ":\t"+ this[model][param + "_val"].value + "\n");
+          }
+        );
+      prompt("(ctrl+c, Enter) to copy:",builder);
+    }
+
+    get_current_values()
+    {
+      var val_arr = [];
+      const model = this.model_select.value;
+      PsoInterface.param_lists[model].forEach((param,idx) => 
+          {
+            val_arr.push(Number(this[model][param + "_val"].value));
+          }
+        );
+      return val_arr;
+    }
+
+
     display_all_params(real_interface)
     {
       var builder = "";
@@ -228,7 +254,7 @@ define('scripts/interface', [
       this.xmin.innerHTML = this.truncateString(xmin);
       this.x1.innerHTML = this.truncateString(xmin + x_quart);
       this.x2.innerHTML = this.truncateString(xmin + 2*x_quart);
-      this.x3.innerHTML = this.truncateString(xmin + 3*x_quart);
+      this.x3.innerHTML = this.truncateString(xmin + 3*x_quart); 
       this.xmax.innerHTML = this.truncateString(xmax);
 
       this.ymin.innerHTML = this.truncateString(ymin);

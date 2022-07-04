@@ -552,11 +552,38 @@ define('scripts/pso', [
       return bestArr;
     }
 
+
+    setPositionsToValues(cl_idx,vals)
+    {
+      const texsize = this.simulation_lengths[cl_idx]*4;
+      
+      this.final_particles_textures = [];
+
+      while(vals.length%4 != 0)
+      {
+        vals.push(0.0);
+      }
+
+      for (let i = 0; i < this.env.bounds.length; ++i) {
+        const particles_array = new Float32Array(texsize);
+
+        for (let j = 0; j < texsize; j += 4) {
+          for (let k = 0; k < 4; ++k) {
+            // particles_array[j+k] = this.env.particles.global_bests[i][k];
+            particles_array[j+k] = vals[i*4+k];
+          }
+        }
+
+        this.final_particles_textures.push(this.gl_helper.loadFloatTexture(this.simulation_lengths[cl_idx], 1, particles_array));
+      }
+
+    }
+
     setPositionsToGlobalBest(cl_idx) {
       const texsize = this.simulation_lengths[cl_idx]*4;
 
       this.final_particles_textures = [];
-
+      
       for (let i = 0; i < this.env.bounds.length; ++i) {
         const particles_array = new Float32Array(texsize);
 
@@ -569,6 +596,28 @@ define('scripts/pso', [
         this.final_particles_textures.push(this.gl_helper.loadFloatTexture(this.simulation_lengths[cl_idx], 1, particles_array));
       }
     }
+
+    runManualSimulationSolver(cl_idx,vals)
+    {
+      const simsize = this.simulation_lengths[cl_idx];
+      const texsize = simsize*4;
+
+      this.setPositionsToValues(cl_idx,vals);
+      this.program_map.run_final_simulation(cl_idx,simsize);
+
+      const texture_array = new Float32Array(texsize);
+      this.gl_helper.getFloatTextureArray(this.simulation_texture, simsize, 1, texture_array);
+
+      const simulation_data = new Float32Array(simsize);
+      for (let i = 0; i < simsize; ++i) {
+        simulation_data[i] = texture_array[4*i+1];
+      }
+
+      return simulation_data;
+
+    }
+
+
 
     runFinalSimulationSolver(cl_idx) {
       const simsize = this.simulation_lengths[cl_idx];

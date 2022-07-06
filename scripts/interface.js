@@ -62,6 +62,11 @@ define('scripts/interface', [
       this.plot_from_vals_button = document.getElementById("plot-from-vals-button");
       this.model_select = document.getElementById('model-select');
 
+      this.default_button_bg = null;
+      this.plotting_idx = -1;
+      this.active_plot_bg = "rgb(0,204,0)";
+
+
       this.xmin = document.getElementById('xmin');
       this.x1 = document.getElementById('x1');
       this.x2 = document.getElementById('x2');
@@ -137,6 +142,17 @@ define('scripts/interface', [
       plot_button.setAttribute('class', 'plot-data-button');
       plot_button.innerHTML = 'Plot';
 
+      if(this.default_button_bg == null)
+      {
+        this.default_button_bg = plot_button.style.backgroundColor;
+      }
+
+      if(this.plotting_idx < 0)
+      {
+        this.plotting_idx = 0;
+        plot_button.style.backgroundColor = this.active_plot_bg;
+      }
+
       elem.appendChild(file_in);
       elem.appendChild(cl_label);
       elem.appendChild(cl_in);
@@ -144,6 +160,23 @@ define('scripts/interface', [
 
       return elem;
     }
+
+    update_plot_idx(new_idx)
+    {
+      if(new_idx != this.plotting_idx)
+      {
+        var tst = Array.from(this.data_section.children);        
+        tst[this.plotting_idx].querySelector('.plot-data-button').style.backgroundColor = this.default_button_bg;
+        tst[new_idx].querySelector('.plot-data-button').style.backgroundColor = this.active_plot_bg;
+        this.plotting_idx = new_idx;
+      }
+    }
+
+    get_plot_idx()
+    {
+      return this.plotting_idx;
+    }
+
 
     addInput() {
       this.data_section.appendChild(this.createInputElement());

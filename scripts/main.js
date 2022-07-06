@@ -28,7 +28,7 @@ require([
   pso_interface.remove_button.onclick = () => pso_interface.removeInput();
   pso_interface.fit_all_button.onclick = () => pso_interface.setFitCheckboxes(true);
   pso_interface.fit_none_button.onclick = () => pso_interface.setFitCheckboxes(false);
-  pso_interface.plot_from_vals_button.onclick = () => displayGraphFromVals(0);
+  pso_interface.plot_from_vals_button.onclick = () => displayGraphFromVals();
 
   pso_interface.model_select.addEventListener('change', () => pso_interface.displayModelParameters());
 
@@ -37,7 +37,9 @@ require([
   pso_interface.data_section.onclick = async (e) => {
     if (e.target.getAttribute('class') === 'plot-data-button') {
       const idx = Array.from(pso_interface.data_section.children).indexOf(e.target.parentElement);
+
       if (idx !== -1) {
+        pso_interface.update_plot_idx(idx);
         if (pso) {
           displayGraph(idx);
         } else {
@@ -107,8 +109,9 @@ require([
     graph.runGraph(actual_data, [0, 0, 0], actual_data.length, scale);
   }
 
-  function displayGraphFromVals(cl_idx)
+  function displayGraphFromVals()
   {
+    var cl_idx = pso_interface.plotting_idx;
     let current_vals = pso_interface.get_current_values();
     const simulation_data = pso.runManualSimulationSolver(cl_idx,current_vals);
     const actual_data = pso.env.simulation.trimmed_data[cl_idx];

@@ -64,7 +64,7 @@ define('scripts/interface', [
 
       this.default_button_bg = null;
       this.plotting_idx = -1;
-      this.active_plot_bg = "rgb(0,204,0)";
+      this.active_plot_bg = "rgb(174,216,230)";
 
 
       this.xmin = document.getElementById('xmin');

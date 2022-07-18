@@ -11,6 +11,7 @@ define('scripts/pso', [
   'text!shaders/update_velocities.frag',
   'text!shaders/update_particles.frag',
   'text!shaders/update_local_bests.frag',
+  'text!shaders/round_float.frag',
 ], function(
   GlHelper,
   CopyShader,
@@ -23,6 +24,7 @@ define('scripts/pso', [
   UpdateVelocitiesShader,
   UpdateParticlesShader,
   UpdateLocalBestsShader,
+  RoundFloatShader,
 ) {
   'use strict';
 

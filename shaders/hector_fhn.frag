@@ -18,7 +18,7 @@ uniform float align_thresh;
 uniform float sample_interval;
 
 float stim_f(const float t) {
-    const float stim_scale = 0.4;
+    const float stim_scale = 0.1;
     const float stim_dur = 10.0;
     const float offset_1 = 7.0;
     const float offset_2 = offset_1 * 0.96;
@@ -55,7 +55,8 @@ void main() {
     // float v = 0.0;
     // float h = h_init;
 
-    float u = 0.0;
+    // float u = 0.0;
+    float u = 0.25;
     float v = 0.05;
 
     // float f, m, thf, ah, bh, stim, stim_step, dv, dh;
@@ -67,8 +68,8 @@ void main() {
     float compare_stride = round(sample_interval / dt);
 
     float error = 0.0;
-    // error = 10000000000.0;
-    error = 100000.0;
+    error = 10000000000.0;
+    // error = 100000.0;
 
     int data_index = 0;
 

@@ -12,6 +12,7 @@ define('scripts/pso', [
   'text!shaders/update_particles.frag',
   'text!shaders/update_local_bests.frag',
   'text!shaders/round_float.frag',
+  'text!shaders/hector_fhn.frag',
 ], function(
   GlHelper,
   CopyShader,
@@ -25,6 +26,7 @@ define('scripts/pso', [
   UpdateParticlesShader,
   UpdateLocalBestsShader,
   RoundFloatShader,
+  HectorFHNShader,
 ) {
   'use strict';
 
@@ -86,6 +88,10 @@ define('scripts/pso', [
         ms_bounds: [
           [[5.0/3.0, 20.0/3.0], [1.0/12.0, 1.0/3.0], [75, 300], [60, 240]],
           [[0.065, 0.26], [0, 0], [0, 0], [0, 0]],
+        ],
+        fhn_bounds: [
+          [[0.0124,0.013],[1.0759,1.08],[0.0072,0.008],[0.5,0.5176]],
+          [[0.185,0.1906],[-0.065,-0.06],[1,1.05],[0,0]],
         ],
         velocity_update: {},
       };
@@ -381,9 +387,27 @@ define('scripts/pso', [
       };
 
       const makeRunSimulationSolver = (final) => {
+
+        let model_frag;
+        switch(String(this.env.simulation.model))
+        {
+          case 'fk':
+            model_frag = RunSimulationShader;
+            break;
+          case 'ms':
+            model_frag = MitchellSchaefferShader;
+            break;
+          case 'fhn':
+            model_frag = HectorFHNShader;
+            break;
+          default:
+            console.log("How could no model be selected oh no!");
+        }
+
         const solver = {
           vert: DefaultVertexShader,
-          frag: this.env.simulation.model === 'ms' ? MitchellSchaefferShader : RunSimulationShader,
+          // frag: this.env.simulation.model === 'fk' ? RunSimulationShader : MitchellSchaefferShader,
+          frag: model_frag,
           uniforms: [
             ['data_texture', 'tex', (cl_idx) => this.data_textures[cl_idx]],
             ['dt', '1f', () => this.env.simulation.dt],

@@ -42,6 +42,7 @@
         <select name="model" id="model-select">
           <option value="fk" selected>Fenton-Karma</option>
           <option value="ms">Mitchell-Schaeffer</option>
+          <option value="fhn">Hector-FHN</option>
         </select>
 
         <button type="button" id="fit-all-button">Fit all</button>
@@ -171,6 +172,59 @@
           <input id="vgate_max" type="text">
           <input id="vgate_fit" type="checkbox" class="fit-checkbox" checked="true">
         </div>
+
+        <div id="fhn-parameters" class="param-div-hidden">
+          <span>Parameter</span>
+          <span>Value</span>
+          <span>Minimum</span>
+          <span>Maximum</span>
+          <span>Fit?</span>
+
+          <span>ALPHA</span>
+          <input id="alpha_val" type="text">
+          <input id="alpha_min" type="text">
+          <input id="alpha_max" type="text">
+          <input id="alpha_fit" type="checkbox" class="fit-checkbox" checked="true">
+
+          <span>BETA</span>
+          <input id="beta_val" type="text">
+          <input id="beta_min" type="text">
+          <input id="beta_max" type="text">
+          <input id="beta_fit" type="checkbox" class="fit-checkbox" checked="true">
+
+          <span>EPSILON</span>
+          <input id="eps_val" type="text">
+          <input id="eps_min" type="text">
+          <input id="eps_max" type="text">
+          <input id="eps_fit" type="checkbox" class="fit-checkbox" checked="true">
+
+          <span>MU</span>
+          <input id="mu_val" type="text">
+          <input id="mu_min" type="text">
+          <input id="mu_max" type="text">
+          <input id="mu_fit" type="checkbox" class="fit-checkbox" checked="true">
+
+          <span>GAMMA</span>
+          <input id="gamma_val" type="text">
+          <input id="gamma_min" type="text">
+          <input id="gamma_max" type="text">
+          <input id="gamma_fit" type="checkbox" class="fit-checkbox" checked="true">
+
+
+          <span>THETA</span>
+          <input id="theta_val" type="text">
+          <input id="theta_min" type="text">
+          <input id="theta_max" type="text">
+          <input id="theta_fit" type="checkbox" class="fit-checkbox" checked="true">
+
+          <span>DELTA</span>
+          <input id="delta_val" type="text">
+          <input id="delta_min" type="text">
+          <input id="delta_max" type="text">
+          <input id="delta_fit" type="checkbox" class="fit-checkbox" checked="true">
+        </div>
+
+
       </div>
     </div>
 

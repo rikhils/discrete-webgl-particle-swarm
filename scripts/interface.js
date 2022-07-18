@@ -9,6 +9,7 @@ define('scripts/interface', [
     static param_lists = {
       fk: ['tr', 'tsi', 'twp', 'td', 'tvp', 'tv1m', 'tv2m', 'twm', 'to', 'xk', 'ucsi', 'uc', 'uv'],
       ms: ['gna', 'gk', 'tclose', 'topen', 'vgate'],
+      fhn:['alpha','beta','eps','mu','gamma','theta','delta'],
     }
 
     constructor() {

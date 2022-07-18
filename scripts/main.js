@@ -139,6 +139,7 @@ require([
 
   function displayGraph(cl_idx) {
     const simulation_data = pso.runFinalSimulationSolver(cl_idx);
+    console.log(simulation_data);
     const actual_data = pso.env.simulation.trimmed_data[cl_idx];
 
     const align_index = simulation_data.findIndex(number => number > 0.15);

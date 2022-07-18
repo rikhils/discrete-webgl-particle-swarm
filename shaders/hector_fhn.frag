@@ -42,12 +42,6 @@ void main() {
     vec4 particles_1 = texture(in_particles_1, cc);
     vec4 particles_2 = texture(in_particles_2, cc);
 
-    float gna = particles_1.r;
-    float gk = particles_1.g;
-    float tclose = particles_1.b;
-    float topen = particles_1.a;
-    float vgate = particles_2.r;
-
     float alpha = particles_1.r;
     float beta = particles_1.g;
     float eps = particles_1.b;
@@ -73,7 +67,8 @@ void main() {
     float compare_stride = round(sample_interval / dt);
 
     float error = 0.0;
-    error = 10000000000.0;
+    // error = 10000000000.0;
+    error = 100000.0;
 
     int data_index = 0;
 
@@ -92,12 +87,18 @@ void main() {
         // bh = f / thf;
 
         stim = 0.0;
-        stim_step = mod(float(step_count), period/dt);
-        if (stim_step < stim_dur/dt) {
-            stim = stim_f(stim_step * dt);
+        // stim_step = mod(float(step_count), period/dt);
+        // if (stim_step < stim_dur/dt) {
+        //     stim = stim_f(stim_step * dt);
+        // }
+
+
+        if(mod(float(step_count),float(num_period)) == 0.0)
+        {
+            u = 0.25;
         }
 
-        du = stim + mu*u*(1.0-u)*(u-alpha)*v;
+        du = stim + mu*u*(1.0-u)*(u-alpha)-u*v;
         dv = eps * ( (beta - u) * (u - gamma) - delta*v - theta );
 
         u += dt * du;
@@ -108,7 +109,7 @@ void main() {
         // v += dv * dt;
         // h += dh * dt;
 
-        if (step_count > pre_pace_steps && !first_upstroke && v > align_thresh) {
+        if (step_count > pre_pace_steps && !first_upstroke && u > align_thresh) {
             first_upstroke = true;
             start_comp = step_count;
             error = 0.0;
@@ -117,11 +118,11 @@ void main() {
         // Measure error
         if (first_upstroke && mod(float(step_count - start_comp), compare_stride) == 0.0) {
             float actual = texelFetch(data_texture, ivec2(data_index++, 0), 0).r;
-            error += (v - actual) * (v - actual);
+            error += (u - actual) * (u - actual);
         }
 
         if (float((step_count - pre_pace_steps) - 1) / float((num_steps - pre_pace_steps) - 1) <= cc.x) {
-            saved_value = v;
+            saved_value = u;
         }
     }
 

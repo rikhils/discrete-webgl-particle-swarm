@@ -1,0 +1,2 @@
+udata = importdata('ap220b_adjusted.dat');
+plot(udata);

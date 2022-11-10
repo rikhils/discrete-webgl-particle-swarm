@@ -15,14 +15,19 @@ define('scripts/gl_helper', [], function() {
       const gl = this.gl;
 
       const shader = gl.createShader(type);
+
       gl.shaderSource(shader, source);
       gl.compileShader(shader);
+
+
 
       if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
         alert('An error occured compiling the shaders: ' + gl.getShaderInfoLog(shader));
         gl.deleteShader(shader);
         return null;
       }
+      console.log("Returning shader:");
+      console.log(shader);
 
       return shader;
     }
@@ -82,7 +87,11 @@ define('scripts/gl_helper', [], function() {
       const fragmentShader = this.loadShader(gl.FRAGMENT_SHADER, fragmentShaderSource);
 
       const shaderProgram = gl.createProgram();
+      console.log("Attaching vertex shader...\n");
       gl.attachShader(shaderProgram, vertexShader);
+      console.log(vertexShader);
+      console.log("Attaching fragment shader...\n");
+      console.log(fragmentShader);
       gl.attachShader(shaderProgram, fragmentShader);
       gl.linkProgram(shaderProgram);
 
@@ -310,6 +319,10 @@ define('scripts/gl_helper', [], function() {
       const gl = this.gl;
 
       const framebuffer = gl.createFramebuffer();
+      // console.log("Vert boy...")
+      // console.log(shader_desc.vert);
+      // console.log("Frag boy...");
+      // console.log(shader_desc.frag);
       const program = this.loadShaderProgram(shader_desc.vert, shader_desc.frag);
       gl.useProgram(program);
 

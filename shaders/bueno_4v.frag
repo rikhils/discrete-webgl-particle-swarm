@@ -17,6 +17,11 @@ uniform float v_init, w_init;
 uniform float align_thresh;
 uniform float sample_interval;
 
+#define thwinf thw
+#define thvinf thvm
+#define thso thw
+#define thsi thso
+
 float stim_f(const float t) {
     const float stim_scale = 0.4;
     const float stim_dur = 10.0;
@@ -88,7 +93,7 @@ void main() {
 
     float tso2  = particles_5.r;
     float uso   = particles_5.g;
-    float us;   = particles_5.b;
+    float us   = particles_5.b;
     float tsi1  = particles_5.a;
     float tsi2  = tsi1;
 
@@ -102,6 +107,11 @@ void main() {
     float winfstar  = particles_7.g;
     float uu        = particles_7.b;
 
+    float kwp   = 5.7;
+    float wcp   = 0.15;
+    float ksi   = 97.8;
+    float sc    = 0.007;
+
 
 /* 
 ################################################################################
@@ -111,6 +121,7 @@ void main() {
 
 
     // Initialize values for the simulation
+    float uo = 0.0;
     float u = 0.0;
     float v = 1.0;
     float w = 1.0;
@@ -160,10 +171,10 @@ void main() {
         ts      = (u >= thw) ? ts2 : ts1;
         to      = (u >= tho) ? to2 : to1;
 
-        twp     = tw1p + (tw2p - tw1p) * (1+tanh((w-wcp)*kwp))/2.0;
-        twm     = tw1m + (tw2m - tw1m) * (1+tanh((u-uwm)*kwm))/2.0;
-        tso     = tso1 + (tso2 - tso1) * (1+tanh((u-uso)*kso))/2.0;
-        tsi     = tsi1 + (tsi2 - tsi1) * (1+tanh((s-sc)*ksi))/2.0;
+        twp     = tw1p + (tw2p - tw1p) * (1.0+tanh((w-wcp)*kwp))/2.0;
+        twm     = tw1m + (tw2m - tw1m) * (1.0+tanh((u-uwm)*kwm))/2.0;
+        tso     = tso1 + (tso2 - tso1) * (1.0+tanh((u-uso)*kso))/2.0;
+        tsi     = tsi1 + (tsi2 - tsi1) * (1.0+tanh((s-sc)*ksi))/2.0;
         
 
         vinf    = (u >= thvinf) ? 0.0 : 1.0;

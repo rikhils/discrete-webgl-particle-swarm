@@ -13,6 +13,7 @@ define('scripts/pso', [
   'text!shaders/update_local_bests.frag',
   'text!shaders/round_float.frag',
   'text!shaders/hector_fhn.frag',
+  'text!shaders/bueno_4v.frag',
 ], function(
   GlHelper,
   CopyShader,
@@ -28,6 +29,7 @@ define('scripts/pso', [
   UpdateLocalBestsShader,
   RoundFloatShader,
   HectorFHNShader,
+  Bueno4vShader,
 ) {
   'use strict';
 
@@ -88,6 +90,10 @@ define('scripts/pso', [
         fhn_bounds: [
           [0.0142, 0.0759, 0.0072, 0.5176, 0.1906, -0.06, 1.0],
           [0.0142, 0.0759, 0.0072, 0.5176, 0.1906, -0.06, 1.0],
+        ],
+        b4v_bounds: [
+          [0.1, 0.5, 1.0, 1.0, 0.01, 15.0, 1.8, 2.0, 1.0, 1.5, 5.0, 5.0, 100.0, 0.05, 5.0, 5.0, 0.1, 0.6, 0.8, 1.0, .1, .005, 0.004, 50.0, .01, 0.4, 1.45],
+          [0.35, 300.0, 1500.0, 15.0, 0.04, 100.0, 2.2, 3.0, 20.0, 3.0, 150.0, 150.0, 1000.0, 0.5, 500.0, 10.0, 1.5, 0.7, 1.0, 4.0, 0.15, 0.25, 0.008, 250.0, .2, 1.0, 1.61],
         ],
         velocity_update: {},
       };
@@ -404,6 +410,9 @@ define('scripts/pso', [
           case 'fhn':
             model_frag = HectorFHNShader;
             break;
+          case 'b4v':
+            model_frag = Bueno4vShader;
+            break;
           default:
             console.log("How could no model be selected oh no!");
         }
@@ -512,6 +521,8 @@ define('scripts/pso', [
       this.gl_helper.initDefaultVertexBuffer();
 
       for (const key in shader_map) {
+        // console.log("Setting up:\n");
+        // console.log(shader_map[key]);
         program_map[key] = this.gl_helper.setupDefault(shader_map[key], this);
       }
 

@@ -8,6 +8,7 @@ define('scripts/interface', [
       fk: ['tr', 'tsi', 'twp', 'td', 'tvp', 'tv1m', 'tv2m', 'twm', 'to', 'xk', 'ucsi', 'uc', 'uv'],
       ms: ['gna', 'gk', 'tclose', 'topen', 'vgate'],
       fhn: ['alpha', 'beta', 'eps', 'mu', 'gamma', 'theta', 'delta'],
+      b4v: ['b4v_thv',  'b4v_tv1m',  'b4v_tv2m',  'b4v_tvp',  'b4v_uwm',  'b4v_tso1',  'b4v_kso',  'b4v_ts1',  'b4v_ts2',  'b4v_ks',  'b4v_tw1m',  'b4v_tw2m',  'b4v_tw1p',  'b4v_tfi',  'b4v_to1',  'b4v_to2',  'b4v_tso2',  'b4v_uso',  'b4v_us' ,  'b4v_tsi1', 'b4v_thw', 'b4v_thvm', 'b4v_tho', 'b4v_kwm', 'b4v_twinf', 'b4v_winfstar', 'b4v_uu'],
     };
 
     constructor() {
@@ -201,11 +202,19 @@ define('scripts/interface', [
       for (const [model, param_list] of Object.entries(PsoInterface.param_lists)) {
         const [lb, ub] = env[model + '_bounds'];
 
+        console.log(JSON.stringify(this['b4v'], null, 4));
+        console.log()
+
+
         param_list.forEach((param, idx) => {
           if (this[model][param + '_fit'].checked) {
+            console.log("Setting this:\t"+param);
             this[model][param + '_min'].value = lb[idx];
             this[model][param + '_max'].value = ub[idx];
+            // this['b4v']['tv1m_min'].value = 44.0;
+            // console.log(param+"_min");
           }
+
         });
       }
 

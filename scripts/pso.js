@@ -265,11 +265,8 @@ define('scripts/pso', [
       this.expanded_error_texture = gl_helper.loadFloatTexture(tex_width, tex_height, null);
       this.simulation_texture = gl_helper.loadFloatTexture(Math.max(...this.simulation_lengths), 1, null);
 
-      this.error_sum_texture_0 = gl_helper.loadFloatTexture(particles_width, particles_height, null);
-      this.error_sum_texture_1 = gl_helper.loadFloatTexture(particles_width, particles_height, null);
-
-      this.reduced_error_1_texture = gl_helper.loadFloatTexture(particles_width, particles_height, null);
-      this.reduced_error_2_texture = gl_helper.loadFloatTexture(particles_width, particles_height, null);
+      this.reduced_error_1_texture = gl_helper.loadFloatTexture(particles_width, 1, null);
+      this.reduced_error_2_texture = gl_helper.loadFloatTexture(1, 1, null);
 
       const env = this.env;
 
@@ -342,7 +339,8 @@ define('scripts/pso', [
             ['cur_error_texture', 'tex', () => this.expanded_error_texture],
           ],
           out: [this.bests_out_textures[num], this.local_bests_error_texture_out],
-          run: this.gl_helper.runBigProgram,
+          run: this.gl_helper.runProgram,
+          dims: [this.tex_width, this.tex_height],
         };
       };
 
@@ -363,7 +361,8 @@ define('scripts/pso', [
             ['omega', '1f', () => this.env.particles.omega],
           ],
           out: [this.velocities_out_textures[num], this.env.velocity_update.stinymtState],
-          run: this.gl_helper.runBigProgram,
+          run: this.gl_helper.runProgram,
+          dims: [this.tex_width, this.tex_height],
         };
       };
 
@@ -381,7 +380,8 @@ define('scripts/pso', [
             ['learning_rate', '1f', () => this.env.particles.learning_rate],
           ],
           out: [this.particles_out_textures[num], this.env.velocity_update.stinymtState],
-          run: this.gl_helper.runBigProgram,
+          run: this.gl_helper.runProgram,
+          dims: [this.tex_width, this.tex_height],
         };
       };
 
@@ -393,7 +393,8 @@ define('scripts/pso', [
             ['original', 'tex', idx === undefined ? () => this[original] : () => this[original][idx]],
           ],
           out: [idx === undefined ? this[copy] : this[copy][idx]],
-          run: this.gl_helper.runBigProgram,
+          run: this.gl_helper.runProgram,
+          dims: [this.tex_width, this.tex_height],
         };
       };
 
@@ -467,6 +468,7 @@ define('scripts/pso', [
           ],
           out: [this.reduced_error_1_texture],
           run: this.gl_helper.runProgram,
+          dims: [this.particles_width, 1],
         },
 
         reduce_error_2: {
@@ -477,6 +479,7 @@ define('scripts/pso', [
           ],
           out: [this.reduced_error_2_texture],
           run: this.gl_helper.runProgram,
+          dims: [1, 1],
         },
 
         expand_error: {
@@ -486,7 +489,8 @@ define('scripts/pso', [
             ['error_texture', 'tex', () => this.error_texture],
           ],
           out: [this.expanded_error_texture],
-          run: this.gl_helper.runBigProgram,
+          run: this.gl_helper.runProgram,
+          dims: [this.tex_width, this.tex_height],
         },
 
         tinymt_copy: {
@@ -496,7 +500,8 @@ define('scripts/pso', [
             ['original', 'tex', () => this.env.velocity_update.stinymtState],
           ],
           out: [this.env.velocity_update.ftinymtState],
-          run: this.gl_helper.runBigProgram,
+          run: this.gl_helper.runProgram,
+          dims: [this.tex_width, this.tex_height],
         },
 
         local_error_copy: makeCopySolver('local_bests_error_texture_out', 'local_bests_error_texture'),
@@ -521,8 +526,6 @@ define('scripts/pso', [
       this.gl_helper.initDefaultVertexBuffer();
 
       for (const key in shader_map) {
-        // console.log("Setting up:\n");
-        // console.log(shader_map[key]);
         program_map[key] = this.gl_helper.setupDefault(shader_map[key], this);
       }
 
@@ -532,10 +535,10 @@ define('scripts/pso', [
     updateGlobalBest() {
       const env = this.env;
 
-      const error_array = new Float32Array(this.particles_width*this.particles_height*4);
-      this.gl_helper.getFloatTextureArray(this.reduced_error_2_texture, this.particles_width, this.particles_height, error_array);
+      const error_array = new Float32Array(4);
+      this.gl_helper.getFloatTextureArray(this.reduced_error_2_texture, 1, 1, error_array);
 
-      const [best_error, best_x_index, best_y_index] = error_array.slice(-4, -1);
+      const [best_error, best_x_index, best_y_index] = error_array.slice(0, 3);
 
       const particles_array = new Float32Array(this.tex_width*this.tex_height*4);
       if (best_error < env.particles.best_error_value) {

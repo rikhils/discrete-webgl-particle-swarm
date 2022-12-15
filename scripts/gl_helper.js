@@ -19,15 +19,11 @@ define('scripts/gl_helper', [], function() {
       gl.shaderSource(shader, source);
       gl.compileShader(shader);
 
-
-
       if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
         alert('An error occured compiling the shaders: ' + gl.getShaderInfoLog(shader));
         gl.deleteShader(shader);
         return null;
       }
-      console.log("Returning shader:");
-      console.log(shader);
 
       return shader;
     }
@@ -87,11 +83,7 @@ define('scripts/gl_helper', [], function() {
       const fragmentShader = this.loadShader(gl.FRAGMENT_SHADER, fragmentShaderSource);
 
       const shaderProgram = gl.createProgram();
-      console.log("Attaching vertex shader...\n");
       gl.attachShader(shaderProgram, vertexShader);
-      console.log(vertexShader);
-      console.log("Attaching fragment shader...\n");
-      console.log(fragmentShader);
       gl.attachShader(shaderProgram, fragmentShader);
       gl.linkProgram(shaderProgram);
 
@@ -201,35 +193,18 @@ define('scripts/gl_helper', [], function() {
       gl.bindFramebuffer(gl.READ_FRAMEBUFFER, null);
     }
 
-    runProgram(gl_helper, framebuffer, program, uniforms, locations, out_textures) {
-      const gl = gl_helper.gl;
-
-      gl.useProgram(program);
-      gl_helper.setUniforms(uniforms, locations);
-
-      const draw_buffers = gl_helper.attachTextures(framebuffer, out_textures);
-
-      gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, framebuffer);
-      gl.drawBuffers(draw_buffers);
-
-      gl_helper.useDefaultVertexBuffer(program);
-
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-
-      gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
-    }
-
-    runBigProgram(gl_helper, framebuffer, program, uniforms, locations, out_textures) {
+    runProgram(gl_helper, framebuffer, program, uniforms, locations, out_textures, dims) {
       const gl = gl_helper.gl;
       const canvas = gl_helper.canvas;
 
       const old_width = canvas.width;
       const old_height = canvas.height;
 
-      canvas.width = 2*old_width;
-      canvas.height = 2*old_height;
-
-      gl.viewport(0, 0, canvas.width, canvas.height);
+      if (dims) {
+        canvas.width = dims[0];
+        canvas.height = dims[1];
+        gl.viewport(0, 0, canvas.width, canvas.height);
+      }
 
       gl.useProgram(program);
       gl_helper.setUniforms(uniforms, locations);
@@ -245,13 +220,14 @@ define('scripts/gl_helper', [], function() {
 
       gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
 
-      canvas.width = old_width;
-      canvas.height = old_height;
-
-      gl.viewport(0, 0, canvas.width, canvas.height);
+      if (dims) {
+        canvas.width = old_width;
+        canvas.height = old_height;
+        gl.viewport(0, 0, canvas.width, canvas.height);
+      }
     }
 
-    runSimulation(gl_helper, framebuffer, program, uniforms, locations, out_textures, cl_idx, clear) {
+    runSimulation(gl_helper, framebuffer, program, uniforms, locations, out_textures, dims, cl_idx, clear) {
       const gl = gl_helper.gl;
 
       gl.useProgram(program);
@@ -283,7 +259,7 @@ define('scripts/gl_helper', [], function() {
       gl.bindFramebuffer(gl.DRAW_FRAMEBUFFER, null);
     }
 
-    runFinal(gl_helper, framebuffer, program, uniforms, locations, out_textures, cl_idx, simulation_length) {
+    runFinal(gl_helper, framebuffer, program, uniforms, locations, out_textures, dims, cl_idx, simulation_length) {
       const gl = gl_helper.gl;
       const canvas = gl_helper.canvas;
 
@@ -319,10 +295,6 @@ define('scripts/gl_helper', [], function() {
       const gl = this.gl;
 
       const framebuffer = gl.createFramebuffer();
-      // console.log("Vert boy...")
-      // console.log(shader_desc.vert);
-      // console.log("Frag boy...");
-      // console.log(shader_desc.frag);
       const program = this.loadShaderProgram(shader_desc.vert, shader_desc.frag);
       gl.useProgram(program);
 
@@ -331,11 +303,13 @@ define('scripts/gl_helper', [], function() {
 
       const out_textures = shader_desc.out;
 
+      const dims = shader_desc.dims;
+
       // The bind is necessary to retain the correct context when the function is called
       const run = shader_desc.run.bind(context);
 
       return (...restArgs) => {
-        run(this, framebuffer, program, uniforms, locations, out_textures, ...restArgs);
+        run(this, framebuffer, program, uniforms, locations, out_textures, dims, ...restArgs);
       };
     }
 

@@ -157,5 +157,5 @@ require([
     pso_interface.setAxes(0, num_points * interval, scale[0], scale[1]);
   }
 
-  document.querySelector('button#PSO_button').onclick = () => run_pso().catch(e => alert(e));
+  document.querySelector('button#PSO_button').onclick = () => run_pso();
 });

@@ -14,6 +14,7 @@ define('scripts/pso', [
   'text!shaders/round_float.frag',
   'text!shaders/hector_fhn.frag',
   'text!shaders/bueno_4v.frag',
+  'text!shaders/update_global_best.frag',
 ], function(
   GlHelper,
   CopyShader,
@@ -30,6 +31,7 @@ define('scripts/pso', [
   RoundFloatShader,
   HectorFHNShader,
   Bueno4vShader,
+  UpdateGlobalBestShader,
 ) {
   'use strict';
 
@@ -225,6 +227,7 @@ define('scripts/pso', [
       const data_arrays = this.env.simulation.data_arrays;
       const init_arrays = this.initializeParticles();
       const zero_array = new Float32Array(tex_width*tex_height*4);
+      const global_best_array = new Float32Array(16);
 
       this.simulation_lengths = [];
       this.data_textures = [];
@@ -238,17 +241,21 @@ define('scripts/pso', [
       this.particles_textures = [];
       this.velocities_textures = [];
       this.bests_textures = [];
+      this.global_best_textures = [];
       this.particles_out_textures = [];
       this.velocities_out_textures = [];
       this.bests_out_textures = [];
+      this.global_best_out_textures = [];
 
       for (const init_array of init_arrays) {
         this.particles_textures.push(gl_helper.loadFloatTexture(tex_width, tex_height, init_array));
         this.velocities_textures.push(gl_helper.loadFloatTexture(tex_width, tex_height, zero_array));
         this.bests_textures.push(gl_helper.loadFloatTexture(tex_width, tex_height, zero_array));
+        this.global_best_textures.push(gl_helper.loadFloatTexture(2, 2, global_best_array));
         this.particles_out_textures.push(gl_helper.loadFloatTexture(tex_width, tex_height, null));
         this.velocities_out_textures.push(gl_helper.loadFloatTexture(tex_width, tex_height, null));
         this.bests_out_textures.push(gl_helper.loadFloatTexture(tex_width, tex_height, null));
+        this.global_best_out_textures.push(gl_helper.loadFloatTexture(2, 2, null));
       }
 
       // The error textures are used to reduce the error quantities of each particles from each
@@ -267,6 +274,15 @@ define('scripts/pso', [
 
       this.reduced_error_1_texture = gl_helper.loadFloatTexture(particles_width, 1, null);
       this.reduced_error_2_texture = gl_helper.loadFloatTexture(1, 1, null);
+
+      // These need to be 2x2 to match the global best texture
+      const best_error_value_array = new Float32Array(16);
+      best_error_value_array[0] = this.env.particles.best_error_value;
+      best_error_value_array[4] = this.env.particles.best_error_value;
+      best_error_value_array[8] = this.env.particles.best_error_value;
+      best_error_value_array[12] = this.env.particles.best_error_value;
+      this.best_error_value_texture = gl_helper.loadFloatTexture(2, 2, best_error_value_array);
+      this.best_error_value_out_texture = gl_helper.loadFloatTexture(2, 2, null);
 
       const env = this.env;
 
@@ -352,12 +368,12 @@ define('scripts/pso', [
             ['positions_texture', 'tex', () => this.particles_textures[num]],
             ['velocities_texture', 'tex', () => this.velocities_textures[num]],
             ['bests_texture', 'tex', () => this.bests_textures[num]],
+            ['global_best_texture', 'tex', () => this.global_best_textures[num]],
             ['itinymtState', 'tex', () => this.env.velocity_update.ftinymtState],
             ['itinymtMat', 'tex', () => this.env.velocity_update.itinymtMat],
             ['chi', '4fv_a', () => [this.env.particles.chi, num*16, 16]],
             ['phi_local', '1f', () => this.env.particles.phi_local],
             ['phi_global', '1f', () => this.env.particles.phi_global],
-            ['global_best', '4fv_a', () => [this.env.particles.global_bests, num*16, 16]],
             ['omega', '1f', () => this.env.particles.omega],
           ],
           out: [this.velocities_out_textures[num], this.env.velocity_update.stinymtState],
@@ -385,7 +401,23 @@ define('scripts/pso', [
         };
       };
 
-      const makeCopySolver = (original, copy, idx) => {
+      const makeGlobalBestUpdateSolver = (num) => {
+        return {
+          vert: DefaultVertexShader,
+          frag: UpdateGlobalBestShader,
+          uniforms: [
+            ['positions_texture', 'tex', () => this.particles_textures[num]],
+            ['reduced_error_2_texture', 'tex', () => this.reduced_error_2_texture],
+            ['best_error_value_texture', 'tex', () => this.best_error_value_texture],
+            ['global_best_texture', 'tex', () => this.global_best_textures[num]],
+          ],
+          out: [this.global_best_out_textures[num], this.best_error_value_out_texture],
+          run: this.gl_helper.runProgram,
+          dims: [2, 2],
+        };
+      };
+
+      const makeCopySolver = (original, copy, idx, width, height) => {
         return {
           vert: DefaultVertexShader,
           frag: CopyShader,
@@ -394,7 +426,7 @@ define('scripts/pso', [
           ],
           out: [idx === undefined ? this[copy] : this[copy][idx]],
           run: this.gl_helper.runProgram,
-          dims: [this.tex_width, this.tex_height],
+          dims: [width || this.tex_width, height || this.tex_height],
         };
       };
 
@@ -505,6 +537,7 @@ define('scripts/pso', [
         },
 
         local_error_copy: makeCopySolver('local_bests_error_texture_out', 'local_bests_error_texture'),
+        best_error_value_copy: makeCopySolver('best_error_value_out_texture', 'best_error_value_texture', undefined, 2, 2),
       };
 
       for (let i = 0; i < this.env.particles.parameter_textures; ++i) {
@@ -514,6 +547,8 @@ define('scripts/pso', [
         shader_map['local_bests_copy_' + i] = makeCopySolver('bests_out_textures', 'bests_textures', i);
         shader_map['positions_copy_' + i] = makeCopySolver('particles_out_textures', 'particles_textures', i);
         shader_map['velocities_copy_' + i] = makeCopySolver('velocities_out_textures', 'particles_textures', i);
+        shader_map['global_best_update_' + i] = makeGlobalBestUpdateSolver(i);
+        shader_map['global_best_copy_' + i] = makeCopySolver('global_best_out_textures', 'global_best_textures', i, 2, 2);
       }
 
       return shader_map;
@@ -535,30 +570,14 @@ define('scripts/pso', [
     updateGlobalBest() {
       const env = this.env;
 
-      const error_array = new Float32Array(4);
-      this.gl_helper.getFloatTextureArray(this.reduced_error_2_texture, 1, 1, error_array);
+      const out_array = new Float32Array(16);
+      this.gl_helper.getFloatTextureArray(this.best_error_value_texture, 2, 2, out_array);
+      env.particles.best_error_value = out_array[0];
 
-      const [best_error, best_x_index, best_y_index] = error_array.slice(0, 3);
-
-      const particles_array = new Float32Array(this.tex_width*this.tex_height*4);
-      if (best_error < env.particles.best_error_value) {
-        const best_particle_index = [
-          4 * (best_y_index * this.tex_width + best_x_index),
-          4 * (best_y_index * this.tex_width + best_x_index + this.particles_width),
-          4 * ((best_y_index + this.particles_width) * this.tex_width + best_x_index),
-          4 * ((best_y_index + this.particles_width) * this.tex_width + best_x_index + this.particles_width),
-        ];
-
-        for (let i = 0; i < this.particles_textures.length; ++i) {
-          this.gl_helper.getFloatTextureArray(this.particles_textures[i], this.tex_width, this.tex_height, particles_array);
-          for (let j = 0; j < 4; ++j) {
-            for (let k = 0; k < 4; ++k) {
-              env.particles.global_bests[16*i+4*j+k] = particles_array[best_particle_index[j]+k];
-            }
-          }
-        }
-
-        env.particles.best_error_value = best_error;
+      env.particles.global_bests = [];
+      for (let t = 0; t < this.particles_textures.length; ++t) {
+        this.gl_helper.getFloatTextureArray(this.global_best_textures[t], 2, 2, out_array);
+        env.particles.global_bests.push(...out_array);
       }
     }
 
@@ -573,6 +592,16 @@ define('scripts/pso', [
       program_map.reduce_error_2();
 
       program_map.expand_error();
+
+      for (let i = 0; i < this.env.particles.parameter_textures; ++i) {
+        program_map['global_best_update_' + i]();
+      }
+
+      for (let i = 0; i < this.env.particles.parameter_textures; ++i) {
+        program_map['global_best_copy_' + i]();
+      }
+
+      program_map.best_error_value_copy();
 
       this.updateGlobalBest();
 
@@ -606,26 +635,13 @@ define('scripts/pso', [
     }
 
     setFinalPosition(sim_length, values) {
-      const final_width = 2*sim_length;
-      const final_height = 2;
-      const final_size = 4 * final_width * final_height;
-
       const num_textures = Math.ceil(values.length / 16);
 
       this.final_particles_textures = [];
 
       for (let t = 0; t < num_textures; ++t) {
-        const particles_array = new Float32Array(final_size);
-
-        for (let i = 0; i < sim_length; ++i) {
-          for (let j = 0; j < 4; ++j) {
-            for (let k = 0; k < 4; ++k) {
-              particles_array[4*(i+j*sim_length)+k] = values[16*t + 4*j + k];
-            }
-          }
-        }
-
-        this.final_particles_textures.push(this.gl_helper.loadFloatTexture(final_width, final_height, particles_array));
+        const particles_array = new Float32Array(values.slice(16*t, 16*(t+1)));
+        this.final_particles_textures.push(this.gl_helper.loadFloatTexture(2, 2, particles_array));
       }
     }
 

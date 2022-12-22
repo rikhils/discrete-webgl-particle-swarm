@@ -52,7 +52,8 @@ require([
   pso_interface.addInput();
 
   const run_pso = async () => {
-    pso = new Pso(particles_width, particles_height);
+    const hyperparams = pso_interface.getHyperparams();
+    pso = new Pso(hyperparams.particle_count);
     const input_data = await pso_interface.getAllInputData();
 
     const raw_input_data = [];
@@ -71,6 +72,7 @@ require([
       pso_interface.data_pre_beats.value,
       pso_interface.data_num_beats.value,
       pso_interface.data_sample_interval.value,
+      hyperparams,
     );
 
     pso.readData(raw_input_data, pso_interface.normalization.value);
@@ -78,7 +80,7 @@ require([
     pso.initializeTextures();
     pso.setupAllSolvers();
 
-    for (let i = 0; i < 32; ++i) {
+    for (let i = 0; i < hyperparams.iteration_count; ++i) {
       console.log(pso.env.particles.best_error_value);
       pso.runOneIteration();
     }

@@ -36,12 +36,22 @@ define('scripts/pso', [
   'use strict';
 
   return class Pso {
-    constructor(particles_width, particles_height) {
-      this.particles_width = particles_width;
-      this.particles_height = particles_height;
+    constructor(particle_count) {
+      let dim;
+      if (particle_count <= 64)
+        dim = 8;
+      else if (particle_count <= 256)
+        dim = 16;
+      else if (particle_count <= 1024)
+        dim = 32;
+      else
+        dim = 64;
 
-      this.tex_width = 2 * particles_width;
-      this.tex_height = 2 * particles_height;
+      this.particles_width = dim;
+      this.particles_height = dim;
+
+      this.tex_width = 2 * dim;
+      this.tex_height = 2 * dim;
 
       const canvas = document.createElement('canvas');
       canvas.width = this.particles_width;
@@ -103,7 +113,7 @@ define('scripts/pso', [
       return env;
     }
 
-    setupEnv(model, bounds, input_cls, pre_beats, num_beats, sample_interval) {
+    setupEnv(model, bounds, input_cls, pre_beats, num_beats, sample_interval, hyperparams) {
       this.env = Pso.getEnv();
       const env = this.env;
 
@@ -125,8 +135,9 @@ define('scripts/pso', [
       // 16 parameters per texture for now
       env.particles.parameter_textures = Math.ceil(bounds[0].length/16);
 
-      const phi = env.particles.phi_global + env.particles.phi_local;
-      const chi = 0.05 * 2 / (phi - 2 + Math.sqrt(phi * (phi - 4)));
+      env.particles.phi_local = hyperparams.phi1;
+      env.particles.phi_global = hyperparams.phi2;
+      const chi = hyperparams.chi;
 
       env.particles.chi = [];
       // The bounds arrays had better be the same length

@@ -94,3 +94,7 @@ canvas {
   justify-content: left;
   align-items: flex-start;
 }
+
+#hyperparams_div input[type=number] {
+  width: 5em;
+}

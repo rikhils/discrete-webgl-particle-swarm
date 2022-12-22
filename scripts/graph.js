@@ -12,8 +12,8 @@ define('scripts/graph', [
   'use strict';
 
   return class Graph {
-    constructor() {
-      this.canvas = document.getElementById('graph_canvas');
+    constructor(canvas) {
+      this.canvas = canvas;
       this.gl = this.canvas.getContext('webgl2');
       this.gl.getExtension('EXT_color_buffer_float');
       this.gl.getExtension('OES_texture_float_linear');

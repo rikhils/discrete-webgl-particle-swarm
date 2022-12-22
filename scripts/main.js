@@ -9,11 +9,12 @@ require([
 ) {
   'use strict';
 
-  const particles_width = 32;
-  const particles_height = 32;
+  const graph_canvas = document.getElementById('graph_canvas');
+  const error_canvas = document.getElementById('error_canvas');
 
   let pso;
-  const graph = new Graph();
+  const graph = new Graph(graph_canvas);
+  const error_graph = new Graph(error_canvas);
   const pso_interface = new PsoInterface();
 
   pso_interface.displayBounds(Pso.getEnv());
@@ -80,14 +81,19 @@ require([
     pso.initializeTextures();
     pso.setupAllSolvers();
 
+    const best_error_list = [];
     for (let i = 0; i < hyperparams.iteration_count; ++i) {
       console.log(pso.env.particles.best_error_value);
       pso.runOneIteration();
+      best_error_list.push(pso.env.particles.best_error_value);
     }
 
     const bestArr = pso.env.particles.global_bests;
     pso_interface.displayResults(bestArr);
     pso_interface.displayError(pso.env.particles.best_error_value);
+
+    error_graph.clearGraph();
+    error_graph.runGraph(best_error_list, [0, 0, 0], best_error_list.length, [Math.min(...best_error_list), Math.max(...best_error_list)]);
 
     displayGraph(0);
 

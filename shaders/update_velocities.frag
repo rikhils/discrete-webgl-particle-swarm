@@ -5,9 +5,8 @@ precision highp int;
 precision highp isampler2D ;
 precision highp usampler2D ;
 
-uniform sampler2D positions_texture, velocities_texture, bests_texture;
+uniform sampler2D positions_texture, velocities_texture, bests_texture, global_best_texture;
 uniform usampler2D  itinymtState, itinymtMat;
-
 
 layout (location = 0) out vec4 new_velocity;
 layout (location = 1) out uvec4 otinymtState;
@@ -15,7 +14,7 @@ layout (location = 1) out uvec4 otinymtState;
 in vec2 cc;
 
 uniform float phi_local, phi_global, omega;
-uniform vec4 chi[4], global_best[4];
+uniform vec4 chi[4];
 
 /*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
  * tinymt.glsl  :   a glsl file to be included the in the shaders
@@ -151,18 +150,18 @@ void main() {
     vec4 position = texture(positions_texture, cc);
     vec4 velocity = texture(velocities_texture, cc);
     vec4 best = texture(bests_texture, cc);
+    vec4 global_best = texture(global_best_texture, cc);
 
     int idx = 0;
     if (cc.x > 0.5) idx += 1;
     if (cc.y > 0.5) idx += 2;
 
     vec4 my_chi = chi[idx];
-    vec4 my_global_best = global_best[idx];
 
     vec4 r_local = vec4(tinymtRand(), tinymtRand(), tinymtRand(), tinymtRand());
     vec4 r_global = vec4(tinymtRand(), tinymtRand(), tinymtRand(), tinymtRand());
 
-    new_velocity = my_chi * (omega * velocity + phi_local * r_local * (best - position) + phi_global * r_global * (my_global_best - position));
+    new_velocity = my_chi * (omega * velocity + phi_local * r_local * (best - position) + phi_global * r_global * (global_best - position));
 
     tinymtReturn();
 }

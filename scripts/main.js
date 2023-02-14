@@ -9,11 +9,12 @@ require([
 ) {
   'use strict';
 
-  const particles_width = 32;
-  const particles_height = 32;
+  const graph_canvas = document.getElementById('graph_canvas');
+  const error_canvas = document.getElementById('error_canvas');
 
   let pso;
-  const graph = new Graph();
+  const graph = new Graph(graph_canvas);
+  const error_graph = new Graph(error_canvas);
   const pso_interface = new PsoInterface();
 
   pso_interface.displayBounds(Pso.getEnv());
@@ -52,7 +53,8 @@ require([
   pso_interface.addInput();
 
   const run_pso = async () => {
-    pso = new Pso(particles_width, particles_height);
+    const hyperparams = pso_interface.getHyperparams();
+    pso = new Pso(hyperparams.particle_count);
     const input_data = await pso_interface.getAllInputData();
 
     const raw_input_data = [];
@@ -71,6 +73,7 @@ require([
       pso_interface.data_pre_beats.value,
       pso_interface.data_num_beats.value,
       pso_interface.data_sample_interval.value,
+      hyperparams,
     );
 
     pso.readData(raw_input_data, pso_interface.normalization.value);
@@ -78,14 +81,19 @@ require([
     pso.initializeTextures();
     pso.setupAllSolvers();
 
-    for (let i = 0; i < 32; ++i) {
+    const best_error_list = [];
+    for (let i = 0; i < hyperparams.iteration_count; ++i) {
       console.log(pso.env.particles.best_error_value);
       pso.runOneIteration();
+      best_error_list.push(pso.env.particles.best_error_value);
     }
 
     const bestArr = pso.env.particles.global_bests;
     pso_interface.displayResults(bestArr);
     pso_interface.displayError(pso.env.particles.best_error_value);
+
+    error_graph.clearGraph();
+    error_graph.runGraph(best_error_list, [0, 0, 0], best_error_list.length, [Math.min(...best_error_list), Math.max(...best_error_list)]);
 
     displayGraph(0);
 
@@ -157,5 +165,5 @@ require([
     pso_interface.setAxes(0, num_points * interval, scale[0], scale[1]);
   }
 
-  document.querySelector('button#PSO_button').onclick = () => run_pso().catch(e => alert(e));
+  document.querySelector('button#PSO_button').onclick = () => run_pso();
 });

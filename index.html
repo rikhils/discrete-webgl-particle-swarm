@@ -22,7 +22,7 @@
           <span id="ymin" class="auto-vertical"></span>
         </div>
 
-        <canvas id="graph_canvas" width=512 height=512></canvas>
+        <canvas id="graph_canvas" width="512" height="512"></canvas>
 
         <div id="xaxis">
           <span id="xmin"></span>
@@ -211,7 +211,6 @@
           <input id="gamma_max" type="text">
           <input id="gamma_fit" type="checkbox" class="fit-checkbox" checked="true">
 
-
           <span>THETA</span>
           <input id="theta_val" type="text">
           <input id="theta_min" type="text">
@@ -225,8 +224,6 @@
           <input id="delta_fit" type="checkbox" class="fit-checkbox" checked="true">
         </div>
 
-
-         
         <div id="b4v-parameters" class="param-div-hidden">
           <span>Parameter</span>
           <span>Value</span>
@@ -239,7 +236,7 @@
           <input id="b4v_thv_min" type="text">
           <input id="b4v_thv_max" type="text">
           <input id="b4v_thv_fit" type="checkbox" class="fit-checkbox" checked="true">
-           
+
            <span>tv1m</span>
           <input id="b4v_tv1m_val" type="text">
           <input id="b4v_tv1m_min" type="text">
@@ -390,16 +387,12 @@
           <input id="b4v_winfstar_max" type="text">
           <input id="b4v_winfstar_fit" type="checkbox" class="fit-checkbox" checked="true">
 
-
           <span>uu</span>
           <input id="b4v_uu_val" type="text">
           <input id="b4v_uu_min" type="text">
           <input id="b4v_uu_max" type="text">
           <input id="b4v_uu_fit" type="checkbox" class="fit-checkbox" checked="true">
-
-                        
         </div>
-
       </div>
     </div>
 
@@ -432,5 +425,36 @@
     <div>
       <button id="reset_bounds">Reset bounds</button>
     </div>
+
+    <div id="hyperparams_div">
+      <div id="particle_count">
+        <span>Particle count:</span>
+        <input type="radio" id="particle_count_64" name="particle_count" value="64">
+        <label for="particle_count_64">64</label>
+
+        <input type="radio" id="particle_count_256" name="particle_count" value="256">
+        <label for="particle_count_256">256</label>
+
+        <input type="radio" id="particle_count_1024" name="particle_count" value="1024" checked>
+        <label for="particle_count_1024">1024</label>
+
+        <input type="radio" id="particle_count_4096" name="particle_count" value="4096">
+        <label for="particle_count_4096">4096</label>
+      </div>
+
+      <label for="hyperparam_iteration_count">Iteration count</label>
+      <input id="hyperparam_iteration_count" type="number" min="0" max="32" value="32" step="1">
+      <br>
+      <label for="hyperparam_phi1">Local uniform maximum</label>
+      <input id="hyperparam_phi1" type="number" min="0" value="2.05" step="0.01">
+      <br>
+      <label for="hyperparam_phi2">Global uniform maximum</label>
+      <input id="hyperparam_phi2" type="number" min="0" value="2.05" step="0.01">
+      <br>
+      <label for="hyperparam_chi">Constriction coefficient</label>
+      <input id="hyperparam_chi" type="number" min="0" value="0.73" step="0.01">
+    </div>
+
+    <canvas id="error_canvas" width="256" height="256"></canvas>
   </body>
 </html>

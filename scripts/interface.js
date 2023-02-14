@@ -302,5 +302,16 @@ define('scripts/interface', [
 
       return str_array[0] + '.' + str_array[1].slice(0, 2);
     }
+
+    getHyperparams() {
+      const hyperparams = {};
+      hyperparams.particle_count = Number(document.querySelector('input[name="particle_count"]:checked').value);
+      hyperparams.iteration_count = Number(document.getElementById('hyperparam_iteration_count').value);
+      hyperparams.phi1 = Number(document.getElementById('hyperparam_phi1').value);
+      hyperparams.phi2 = Number(document.getElementById('hyperparam_phi2').value);
+      hyperparams.chi = Number(document.getElementById('hyperparam_chi').value);
+
+      return hyperparams;
+    }
   };
 });

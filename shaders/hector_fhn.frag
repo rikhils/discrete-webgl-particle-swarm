@@ -17,9 +17,19 @@ uniform float h_init;
 uniform float align_thresh;
 uniform float sample_interval;
 
+// % this function should give stimulus value from time in ms
+// %stimscale = 0.35*180;
+// stimscale = 0.1;
+// stimdur = 10;
+// offset1 = 7;
+// offset2 = offset1*.96;
+// tscale = 0.725;
+// f = @(t) -stimscale*(t/tscale-offset1)./(1+(t/tscale-offset2).^4);
+
+
 float stim_f(const float t) {
-    const float stim_scale = 0.1;
-    const float stim_dur = 10.0;
+    const float stim_scale = 0.1 * 200.0;
+    const float stim_dur = 2.0;
     const float offset_1 = 7.0;
     const float offset_2 = offset_1 * 0.96;
     const float t_scale = 0.725;
@@ -36,7 +46,8 @@ void main() {
     int pre_pace_steps = int(ceil(pre_pace_endtime/dt));
     int num_steps = int(ceil(endtime/dt));
 
-    const float stim_dur = 10.0;
+    // const float stim_dur = 10.0;
+    const float stim_dur = 2.0;
 
     ivec2 tex_size = textureSize(in_particles_1, 0);
     ivec2 idx = ivec2(floor(cc * 0.5 * vec2(tex_size)));
@@ -57,8 +68,10 @@ void main() {
     // float h = h_init;
 
     // float u = 0.0;
-    float u = 0.25;
-    float v = 0.05;
+    // float u = 0.25;
+    // float v = 0.05;
+    float u = 0.0;
+    float v = 0.0;
 
     // float f, m, thf, ah, bh, stim, stim_step, dv, dh;
 
@@ -89,16 +102,16 @@ void main() {
         // bh = f / thf;
 
         stim = 0.0;
-        // stim_step = mod(float(step_count), period/dt);
-        // if (stim_step < stim_dur/dt) {
-        //     stim = stim_f(stim_step * dt);
-        // }
-
-
-        if(mod(float(step_count),float(num_period)) == 0.0)
-        {
-            u = 0.25;
+        stim_step = mod(float(step_count), period/dt);
+        if (stim_step < stim_dur/dt) {
+            stim = stim_f(stim_step * dt);
         }
+
+
+        // if(mod(float(step_count),float(num_period)) == 0.0)
+        // {
+            // u = 0.5;
+        // }
 
         // eps      [.001, 1]
         // alpha    [0.05, 0.6]
@@ -112,8 +125,17 @@ void main() {
         du = stim + mu*u*(1.0-u)*(u-alpha)-u*v;
         dv = eps * ( (beta - u) * (u - gamma) - delta*v - theta );
 
-        u += dt * du;
-        v += dt * dv;
+
+        // du = mu*u*(1.0-u)*(u-alpha)-u*v;
+        // dv = eps * ( (beta - u) * (u - gamma) - delta*v - theta );
+
+
+        // u += dt * du;
+        // v += dt * dv;
+
+        u = u + dt*du;
+        v = v + dt*dv;
+
         // dv = stim + gna * m * m * h * (1.0 - v) - gk * v;
         // dh = ah * (1.0 - h) - bh * h;
 

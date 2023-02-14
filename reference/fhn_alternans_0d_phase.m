@@ -60,15 +60,15 @@ iperiod = round(period/dt);
 
 for ntime=1:nsteps
     
-     if(mod(ntime,iperiod)==0)
+%      if(mod(ntime,iperiod)==0)
 %           u=0.25;
-     end
+%      end
 
       istim=0;
      steps_since_new_cycle = mod(ntime,period/dt);
-      if(steps_since_new_cycle<stimdur/dt)
-          istim = f(steps_since_new_cycle*dt);
-      end
+       if(steps_since_new_cycle<stimdur/dt)
+           istim = f(steps_since_new_cycle*dt);
+       end
 
 %     du=mu*u.*(1-u).*(u-alpha)-u.*v;
     du=istim + mu*u.*(1-u).*(u-alpha)-u.*v;

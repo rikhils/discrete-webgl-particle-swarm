@@ -19,12 +19,14 @@ delta=1;
 
 % this function should give stimulus value from time in ms
 %stimscale = 0.35*180;
-stimscale = 0.1;
-stimdur = 10;
+stimscale = 0.1*200;
+stimdur = 2;
 offset1 = 7;
 offset2 = offset1*.96;
 tscale = 0.725;
 f = @(t) -stimscale*(t/tscale-offset1)./(1+(t/tscale-offset2).^4);
+
+
 
 % % parameter values (rabbit)
 % alpha=0.0258;
@@ -36,9 +38,10 @@ f = @(t) -stimscale*(t/tscale-offset1)./(1+(t/tscale-offset2).^4);
 % delta=1;
 
 % initial values
-u = 0.25;
-%u = 0.0;
-v = 0.05;
+% u = 0.25;
+u = 0.0;
+% v = 0.05;
+v = 0.0;
 
 % numerical parameters
 dt = .1;
@@ -58,14 +61,14 @@ iperiod = round(period/dt);
 for ntime=1:nsteps
     
      if(mod(ntime,iperiod)==0)
-         u=0.25;
+%           u=0.25;
      end
 
-     istim=0;
-%     steps_since_new_cycle = mod(ntime,period/dt);
-%     if(steps_since_new_cycle<stimdur/dt)
-%         istim = f(steps_since_new_cycle*dt);
-%     end
+      istim=0;
+     steps_since_new_cycle = mod(ntime,period/dt);
+      if(steps_since_new_cycle<stimdur/dt)
+          istim = f(steps_since_new_cycle*dt);
+      end
 
 %     du=mu*u.*(1-u).*(u-alpha)-u.*v;
     du=istim + mu*u.*(1-u).*(u-alpha)-u.*v;

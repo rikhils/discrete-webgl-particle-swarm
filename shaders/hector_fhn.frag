@@ -24,7 +24,7 @@ float stim_f(const float t) {
     const float offset_2 = offset_1 * 0.96;
     const float t_scale = 0.725;
 
-    return (-stim_scale * (t/t_scale - offset_1) / (1.0 + pow((t/t_scale - offset_2), 4.0)));
+    return 2.0 * (-stim_scale * (t/t_scale - offset_1) / (1.0 + pow((t/t_scale - offset_2), 4.0)));
 }
 
 void main() {
@@ -99,6 +99,15 @@ void main() {
         {
             u = 0.25;
         }
+
+        // eps      [.001, 1]
+        // alpha    [0.05, 0.6]
+        // beta     [0.2, 2]
+        // gamma    [0.01, 1]
+        // mu       [0.2, 2]
+        // theta    [-0.1, 0.1]
+        // delta    [0.5, 1.5]
+
 
         du = stim + mu*u*(1.0-u)*(u-alpha)-u*v;
         dv = eps * ( (beta - u) * (u - gamma) - delta*v - theta );

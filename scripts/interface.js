@@ -62,6 +62,8 @@ define('scripts/interface', [
       this.plot_from_vals_button = document.getElementById("plot-from-vals-button");
       this.model_select = document.getElementById('model-select');
       this.status_display = document.getElementById('status_display');
+      this.save_params_button = document.getElementById('save_params_button');
+      this.save_run_button = document.getElementById('save_run_button');
 
       this.default_button_bg = null;
       this.plotting_idx = -1;
@@ -78,6 +80,31 @@ define('scripts/interface', [
       this.y2 = document.getElementById('y2');
       this.y3 = document.getElementById('y3');
       this.ymax = document.getElementById('ymax');
+    }
+
+    saveRunDetails() {
+      const model = this.model_select.value;
+      const model_data = [`model, ${model}\n`];
+
+      const param_data = PsoInterface.param_lists[model].map((param) => {
+        return `${param}, ${this[model][param+"_val"].value}\n`;
+      });
+
+      const hyperparam_data = Object.entries(this.getHyperparams()).map(([k, v]) => {
+        return `${k}, ${v}\n`;
+      });
+
+      const other_data = [
+        `normalization, ${this.normalization.value}\n`,
+        `number_beats, ${this.data_num_beats.value}\n`,
+        `number_pre_beats, ${this.data_pre_beats.value}\n`,
+        `data_sample_interval, ${this.data_sample_interval.value}\n`,
+        `fit_error, ${this.fit_error.innerHTML}\n`,
+      ];
+
+      const data = model_data.concat(param_data, hyperparam_data, other_data);
+
+      PsoInterface.saveOutput(data, `pso_run_${Date.now()}.csv`);
     }
 
     saveParams() {

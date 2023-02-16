@@ -32,7 +32,8 @@ require([
 
   pso_interface.model_select.addEventListener('change', () => pso_interface.displayModelParameters());
 
-  document.querySelector('button#disp_params_button').onclick = () => pso_interface.saveParams();
+  pso_interface.save_params_button.onclick = () => pso_interface.saveParams();
+  pso_interface.save_run_button.onclick = () => pso_interface.saveRunDetails();
 
   pso_interface.data_section.onclick = async (e) => {
     if (e.target.getAttribute('class') === 'plot-data-button') {

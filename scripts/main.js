@@ -82,12 +82,23 @@ require([
     pso.setupAllSolvers();
 
     const best_error_list = [];
-    for (let i = 0; i < hyperparams.iteration_count; ++i) {
+    runPsoIterations(0, hyperparams.iteration_count, best_error_list, start_time);
+  };
+
+  async function runPsoIterations(iter, iter_count, best_error_list, start_time) {
+    pso_interface.updateStatusDisplay(iter, iter_count);
+
+    if (iter < iter_count) {
       console.log(pso.env.particles.best_error_value);
       pso.runOneIteration();
       best_error_list.push(pso.env.particles.best_error_value);
+      window.requestAnimationFrame(() => runPsoIterations(iter+1, iter_count, best_error_list, start_time));
+    } else {
+      finalizePso(start_time, best_error_list);
     }
+  }
 
+  async function finalizePso(start_time, best_error_list) {
     const bestArr = pso.env.particles.global_bests;
     pso_interface.displayResults(bestArr);
     pso_interface.displayError(pso.env.particles.best_error_value);
@@ -99,7 +110,7 @@ require([
 
     console.log("Execution time (ms):");
     console.log(Date.now() - start_time);
-  };
+  }
 
   async function displayDataGraph(cl_idx) {
     const input_data = await pso_interface.getAllInputData();

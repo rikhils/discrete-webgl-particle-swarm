@@ -61,6 +61,7 @@ define('scripts/interface', [
       this.fit_none_button = document.getElementById('fit-none-button');
       this.plot_from_vals_button = document.getElementById("plot-from-vals-button");
       this.model_select = document.getElementById('model-select');
+      this.status_display = document.getElementById('status_display');
 
       this.default_button_bg = null;
       this.plotting_idx = -1;
@@ -77,6 +78,14 @@ define('scripts/interface', [
       this.y2 = document.getElementById('y2');
       this.y3 = document.getElementById('y3');
       this.ymax = document.getElementById('ymax');
+    }
+
+    updateStatusDisplay(current, total) {
+      let str = `Iteration: ${current}/${total}`;
+      if (current === total) {
+        str += ' Done!';
+      }
+      this.status_display.innerHTML = str;
     }
 
     displayModelParameters() {

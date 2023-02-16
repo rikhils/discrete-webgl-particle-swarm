@@ -23,8 +23,9 @@ float stim_f(const float t) {
     const float offset_1 = 7.0;
     const float offset_2 = offset_1 * 0.96;
     const float t_scale = 0.725;
+    float a = (t/t_scale - offset_2);
 
-    return ( -stim_scale * ( t / t_scale - offset_1) / (1.0 + pow((t/t_scale - offset_2) , 4.0) ) );
+    return -stim_scale * (t / t_scale - offset_1) / (1.0 + a*a*a*a);
 }
 
 void main() {
@@ -129,8 +130,6 @@ void main() {
             start_comp = step_count;
             error = 0.0;
         }
-
-
 
         // Measure error
         if (first_upstroke && mod(float(step_count - start_comp), compare_stride) == 0.0) {

@@ -159,8 +159,9 @@ require([
     const simulation_data = pso.runFinalSimulationSolver(cl_idx);
     const actual_data = pso.env.simulation.trimmed_data[cl_idx];
 
-    const align_index = simulation_data.findIndex(number => number > 0.15);
-    const plotting_sim_data = simulation_data.slice(align_index);
+    const sim_length = (pso.env.simulation.period[cl_idx] * pso.env.simulation.num_beats) / pso.env.simulation.sample_interval;
+    const align_index = actual_data.findIndex(number => number > 0.15);
+    const plotting_sim_data = simulation_data.slice(-sim_length);
 
     const scale = [
       Math.min(...actual_data, ...plotting_sim_data),
@@ -171,8 +172,8 @@ require([
     const interval = Number(pso_interface.data_sample_interval.value);
 
     graph.clearGraph();
-    graph.runGraph(actual_data, [0, 0, 0], num_points, scale);
-    graph.runGraph(plotting_sim_data, [1, 0, 0], num_points, scale);
+    graph.runGraph(actual_data, [0, 0, 0], num_points, scale, 0);
+    graph.runGraph(plotting_sim_data, [1, 0, 0], num_points, scale, align_index);
 
     pso_interface.setAxes(0, num_points * interval, scale[0], scale[1]);
   }

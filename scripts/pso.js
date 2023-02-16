@@ -77,6 +77,7 @@ define('scripts/pso', [
           align_thresh: [],
           trimmed_data: [],
           data_arrays: [],
+          full_normalized_data: [],
           sample_interval: 1.0,
         },
         particles: {
@@ -163,6 +164,7 @@ define('scripts/pso', [
       const trimmed_data = [];
       const data_arrays = [];
       const align_thresh = [];
+      const all_full_normalized_data = [];
 
       const normalization = Number(normalize) || 1;
       const delta = 0.001;
@@ -192,11 +194,13 @@ define('scripts/pso', [
         trimmed_data.push(left_trimmed_data);
         data_arrays.push(data_array);
         align_thresh.push(left_trimmed_data[0] - delta);
+        all_full_normalized_data.push(full_normalized_data);
       }
 
       this.env.simulation.data_arrays = data_arrays;
       this.env.simulation.trimmed_data = trimmed_data;
       this.env.simulation.align_thresh = align_thresh;
+      this.env.simulation.full_normalized_data = all_full_normalized_data;
     }
 
     initializeParticles() {

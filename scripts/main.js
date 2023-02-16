@@ -28,7 +28,14 @@ require([
   pso_interface.remove_button.onclick = () => pso_interface.removeInput();
   pso_interface.fit_all_button.onclick = () => pso_interface.setFitCheckboxes(true);
   pso_interface.fit_none_button.onclick = () => pso_interface.setFitCheckboxes(false);
-  pso_interface.plot_from_vals_button.onclick = () => displayGraphFromVals();
+  pso_interface.plot_from_vals_button.onclick = () => {
+    if (!pso) {
+      alert('A fit must be created before modifying the parameters');
+      return;
+    }
+
+    displayGraph(pso_interface.plotting_idx, pso_interface.get_current_values());
+  };
 
   pso_interface.model_select.addEventListener('change', () => pso_interface.displayModelParameters());
 
@@ -41,7 +48,7 @@ require([
 
       if (idx !== -1) {
         pso_interface.update_plot_idx(idx);
-        if (pso) {
+        if (pso && idx < pso.env.simulation.period.length) {
           displayGraph(idx);
         } else {
           displayDataGraph(idx).catch(err => alert(err));
@@ -124,39 +131,10 @@ require([
     graph.runGraph(actual_data, [0, 0, 0], actual_data.length, scale);
   }
 
-  function displayGraphFromVals() {
-    if (!pso) {
-      alert('A fit must be created before modifying the parameters');
-      return;
-    }
-
-    const cl_idx = pso_interface.plotting_idx;
-    const current_vals = pso_interface.get_current_values();
-
-    const simulation_data = pso.runFinalSimulationSolver(cl_idx, current_vals);
-    const actual_data = pso.env.simulation.trimmed_data[cl_idx];
-
-    const align_index = simulation_data.findIndex(number => number > 0.15);
-    const plotting_sim_data = simulation_data.slice(align_index);
-
-    const scale = [
-      Math.min(...actual_data, ...plotting_sim_data),
-      Math.max(...actual_data, ...plotting_sim_data),
-    ];
-
-    const num_points = Math.max(actual_data.length, plotting_sim_data.length);
-    const interval = Number(pso_interface.data_sample_interval.value);
-
-    graph.clearGraph();
-    graph.runGraph(actual_data, [0, 0, 0], num_points, scale);
-    graph.runGraph(plotting_sim_data, [1, 0, 0], num_points, scale);
-
-    pso_interface.setAxes(0, num_points * interval, scale[0], scale[1]);
-  }
-
-
-  function displayGraph(cl_idx) {
-    const simulation_data = pso.runFinalSimulationSolver(cl_idx);
+  function displayGraph(cl_idx, current_values) {
+    const simulation_data = current_values ?
+      pso.runFinalSimulationSolver(cl_idx, current_values) :
+      pso.runFinalSimulationSolver(cl_idx);
     const actual_data = pso.env.simulation.trimmed_data[cl_idx];
 
     const sim_length = (pso.env.simulation.period[cl_idx] * pso.env.simulation.num_beats) / pso.env.simulation.sample_interval;
@@ -168,14 +146,13 @@ require([
       Math.max(...actual_data, ...plotting_sim_data),
     ];
 
-    const num_points = Math.max(actual_data.length, plotting_sim_data.length);
     const interval = Number(pso_interface.data_sample_interval.value);
 
     graph.clearGraph();
-    graph.runGraph(actual_data, [0, 0, 0], num_points, scale, 0);
-    graph.runGraph(plotting_sim_data, [1, 0, 0], num_points, scale, align_index);
+    graph.runGraph(actual_data, [0, 0, 0], sim_length, scale, 0);
+    graph.runGraph(plotting_sim_data, [1, 0, 0], sim_length, scale, align_index);
 
-    pso_interface.setAxes(0, num_points * interval, scale[0], scale[1]);
+    pso_interface.setAxes(0, sim_length * interval, scale[0], scale[1]);
   }
 
   document.querySelector('button#PSO_button').onclick = () => run_pso();

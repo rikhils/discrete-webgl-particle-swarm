@@ -80,6 +80,29 @@ define('scripts/interface', [
       this.ymax = document.getElementById('ymax');
     }
 
+    saveParams() {
+      const model = this.model_select.value;
+      const data = PsoInterface.param_lists[model].map((param) => {
+        return `${param}, ${this[model][param+"_val"].value}\n`;
+      });
+
+      PsoInterface.saveOutput(data, `pso_${model}_params_${Date.now()}.csv`);
+    }
+
+    static saveOutput(data, filename) {
+      const file = new Blob(data, { type: 'text/plain' });
+      const e = document.createElement('a');
+      const url = URL.createObjectURL(file);
+      e.href = url;
+      e.download = filename;
+      document.body.appendChild(e);
+      e.click();
+      setTimeout(() => {
+        document.body.removeChild(e);
+        window.URL.revokeObjectURL(url);
+      }, 0);
+    }
+
     updateStatusDisplay(current, total) {
       let str = `Iteration: ${current}/${total}`;
       if (current === total) {
@@ -237,15 +260,6 @@ define('scripts/interface', [
         this[model][param + '_val'].value = bestArr[idx].toFixed(3);
 
       });
-    }
-
-    display_all_params_test() {
-      let builder = "";
-      const model = this.model_select.value;
-      PsoInterface.param_lists[model].forEach((param) => {
-        builder = builder.concat(param + ":\t"+ this[model][param + "_val"].value + "\n");
-      });
-      prompt("(ctrl+c, Enter) to copy:",builder);
     }
 
     get_current_values() {

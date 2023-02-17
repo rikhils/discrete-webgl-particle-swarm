@@ -149,6 +149,12 @@ define('scripts/interface', [
           model_param_div.setAttribute('class', 'param-div-hidden');
         }
       }
+
+      if (this.model_select.value === 'b4v') {
+        this.normalization.value = 1.2;
+      } else {
+        this.normalization.value = 1;
+      }
     }
 
     setFitCheckboxes(value) {

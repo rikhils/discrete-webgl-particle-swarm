@@ -185,10 +185,12 @@ define('scripts/graph', [
      *   [a, b, c, ...] -> [0,a, 1,b, 2,c, ...]
      * and extract other useful information
      */
-    processGraphData(graph_points, color, num_points, scale) {
+    processGraphData(graph_points, color, num_points, scale, offset) {
       const gl = this.gl;
 
       const uniform_values = {};
+
+      offset ||= 0;
 
       uniform_values.color = color;
       uniform_values.num_points = num_points || graph_points.length;
@@ -203,7 +205,7 @@ define('scripts/graph', [
 
       const graph_array = new Float32Array(2 * uniform_values.num_points);
       for (let i = 0; i < uniform_values.num_points; ++i) {
-        graph_array[2*i] = i;
+        graph_array[2*i] = offset + i;
         graph_array[2*i + 1] = graph_points[i];
       }
 
@@ -230,10 +232,10 @@ define('scripts/graph', [
     /*
      * Render the graphing shader program.
      */
-    runGraph(graph_points, color, num_points, scale) {
+    runGraph(graph_points, color, num_points, scale, offset) {
       const gl = this.gl;
 
-      const { graph_buffer, uniform_values } = this.processGraphData(graph_points, color, num_points, scale);
+      const { graph_buffer, uniform_values } = this.processGraphData(graph_points, color, num_points, scale, offset);
 
       // No need to resize the canvas or set the viewport
 

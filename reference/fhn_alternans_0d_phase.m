@@ -38,10 +38,10 @@ f = @(t) -stimscale*(t/tscale-offset1)./(1+(t/tscale-offset2).^4);
 % delta=1;
 
 % initial values
-% u = 0.25;
-u = 0.0;
-% v = 0.05;
-v = 0.0;
+%  u = 0.25;
+ u = 0.0;
+%  v = 0.05;
+ v = 0.0;
 
 % numerical parameters
 dt = .1;
@@ -66,9 +66,9 @@ for ntime=1:nsteps
 
       istim=0;
      steps_since_new_cycle = mod(ntime,period/dt);
-       if(steps_since_new_cycle<stimdur/dt)
-           istim = f(steps_since_new_cycle*dt);
-       end
+        if(steps_since_new_cycle<stimdur/dt)
+            istim = f(steps_since_new_cycle*dt);
+        end
 
 %     du=mu*u.*(1-u).*(u-alpha)-u.*v;
     du=istim + mu*u.*(1-u).*(u-alpha)-u.*v;
@@ -157,8 +157,8 @@ v=vmin:0.01*.5:vmax;
 %[yy,xx]=ndgrid(x,y);
 %[xx,yy]=ndgrid(y,x);
 
-% figure(4),clf
-% hold on
+figure(4),clf
+hold on
 % include nullclines (if you know them)
 % plot(u,(a1/a4)*(a2-u).*(u-a3),'r','linewidth',1)
 % plot(zeros(size(v)),v,'r','linewidth',1)

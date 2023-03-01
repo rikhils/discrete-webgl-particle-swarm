@@ -90,6 +90,18 @@ define('scripts/interface', [
         return `${param}, ${this[model][param+"_val"].value}\n`;
       });
 
+      const min_data = PsoInterface.param_lists[model].map((param) => {
+        return `${param}_min, ${this[model][param+"_min"].value}\n`;
+      });
+
+      const max_data = PsoInterface.param_lists[model].map((param) => {
+        return `${param}_max, ${this[model][param+"_max"].value}\n`;
+      });
+
+      const fit_data = PsoInterface.param_lists[model].map((param) => {
+        return `${param}_fit, ${this[model][param+"_fit"].checked}\n`;
+      });
+
       const hyperparam_data = Object.entries(this.getHyperparams()).map(([k, v]) => {
         return `${k}, ${v}\n`;
       });
@@ -102,7 +114,7 @@ define('scripts/interface', [
         `fit_error, ${this.fit_error.innerHTML}\n`,
       ];
 
-      const data = model_data.concat(param_data, hyperparam_data, other_data);
+      const data = model_data.concat(param_data, min_data, max_data, fit_data, hyperparam_data, other_data);
 
       PsoInterface.saveOutput(data, `pso_run_${Date.now()}.csv`);
     }

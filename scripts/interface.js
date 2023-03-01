@@ -267,17 +267,10 @@ define('scripts/interface', [
       for (const [model, param_list] of Object.entries(PsoInterface.param_lists)) {
         const [lb, ub] = env[model + '_bounds'];
 
-        console.log(JSON.stringify(this['b4v'], null, 4));
-        console.log()
-
-
         param_list.forEach((param, idx) => {
           if (this[model][param + '_fit'].checked) {
-            console.log("Setting this:\t"+param);
             this[model][param + '_min'].value = lb[idx];
             this[model][param + '_max'].value = ub[idx];
-            // this['b4v']['tv1m_min'].value = 44.0;
-            // console.log(param+"_min");
           }
 
         });

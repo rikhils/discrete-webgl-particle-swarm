@@ -247,7 +247,6 @@ define('scripts/pso', [
       this.simulation_lengths = [];
       this.data_textures = [];
 
-      console.log("Period length is "+period.length);
       for (let i = 0; i < period.length; i++) {
         this.simulation_lengths.push(Math.ceil(Math.ceil(num_beats * period[i]) / sample_interval));
         this.data_textures.push(gl_helper.loadFloatTexture(data_arrays[i].length/4, 1, data_arrays[i]));

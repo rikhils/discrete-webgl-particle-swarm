@@ -6,7 +6,7 @@ define('scripts/interface', [
   return class PsoInterface {
     static param_lists = {
       fk: ['tr', 'tsi', 'twp', 'td', 'tvp', 'tv1m', 'tv2m', 'twm', 'to', 'xk', 'ucsi', 'uc', 'uv'],
-      ms: ['gna', 'gk', 'tclose', 'topen', 'vgate'],
+      ms: ['tin', 'tout', 'tclose', 'topen', 'vgate'],
       fhn: ['alpha', 'beta', 'eps', 'mu', 'gamma', 'theta', 'delta'],
       b4v: ['b4v_thv',  'b4v_tv1m',  'b4v_tv2m',  'b4v_tvp',  'b4v_uwm',  'b4v_tso1',  'b4v_kso',  'b4v_ts1',  'b4v_ts2',  'b4v_ks',  'b4v_tw1m',  'b4v_tw2m',  'b4v_tw1p',  'b4v_tfi',  'b4v_to1',  'b4v_to2',  'b4v_tso2',  'b4v_uso',  'b4v_us' ,  'b4v_tsi1', 'b4v_thw', 'b4v_thvm', 'b4v_tho', 'b4v_kwm', 'b4v_twinf', 'b4v_winfstar', 'b4v_uu'],
     };

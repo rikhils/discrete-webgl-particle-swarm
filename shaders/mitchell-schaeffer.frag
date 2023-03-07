@@ -45,16 +45,15 @@ void main() {
     vec4 particles_1 = texelFetch(in_particles_1, idx, 0);
     vec4 particles_2 = texelFetch(in_particles_1, idx + ivec2(tex_size.x/2, 0), 0);
 
-    float gna = particles_1.r;
-    float gk = particles_1.g;
+    float tin = particles_1.r;
+    float tout = particles_1.g;
     float tclose = particles_1.b;
     float topen = particles_1.a;
     float vgate = particles_2.r;
 
     float v = 0.0;
     float h = h_init;
-    float f, m, thf, ah, bh, stim, stim_step, dv, dh;
-    float kappa = 100.0;
+    float jin, jout, stim, stim_step, dv, dh;
 
     float compare_stride = round(sample_interval / dt);
 
@@ -68,13 +67,8 @@ void main() {
 
     // Run the simulation with the current swarm parameters
     for (int step_count = 1; step_count <= num_steps; ++step_count) {
-        m = max(0.0, v);
-        m = min(1.0, m);
-
-        f = 0.5 * (1.0 + tanh(kappa * (v - vgate)));
-        thf = topen + (tclose - topen) * f;
-        ah = (1.0 - f) / thf;
-        bh = f / thf;
+        jin = h * v * v * (1.0 - v) / tin;
+        jout = -v / tout;
 
         stim = 0.0;
         stim_step = mod(float(step_count), period/dt);
@@ -82,8 +76,8 @@ void main() {
             stim = stim_f(stim_step * dt);
         }
 
-        dv = stim + gna * m * m * h * (1.0 - v) - gk * v;
-        dh = ah * (1.0 - h) - bh * h;
+        dv = stim + jin + jout;
+        dh = v < vgate ? (1.0 - h)/topen : -h/tclose;
 
         v += dv * dt;
         h += dh * dt;

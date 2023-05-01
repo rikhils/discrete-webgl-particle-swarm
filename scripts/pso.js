@@ -160,6 +160,15 @@ define('scripts/pso', [
       env.particles.global_bests = env.particles.lower_bounds.map(() => 0);
     }
 
+    normalizeData(parsed_data, normalize) {
+      const min = Math.min(...parsed_data);
+      const max = Math.max(...parsed_data);
+
+      const normalized_data = parsed_data.map(x => (x-min)*(normalize/(max-min)));
+
+      return normalized_data;
+    }
+
     readData(raw_input_data, normalize) {
       const trimmed_data = [];
       const data_arrays = [];
@@ -176,8 +185,7 @@ define('scripts/pso', [
         const actual_data = split_data.filter(x => !(x.trim() === ""));
 
         const full_parsed_data = actual_data.map(x => parseFloat(x.trim()));
-        const maxVal = Math.max(...full_parsed_data);
-        const full_normalized_data = full_parsed_data.map(x => (x * (normalization / maxVal)));
+        const full_normalized_data = this.normalizeData(full_parsed_data, normalization);
 
         const first_compare_index = full_normalized_data.findIndex(number => number > 0.15);
 

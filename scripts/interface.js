@@ -353,15 +353,8 @@ define('scripts/interface', [
       this.ymax.innerHTML = this.truncateString(ymax);
     }
 
-    truncateString(str) {
-      const str_array = String(str).split('.');
-
-      // If there is no decimal, do nothing
-      if (str_array.length <= 1) {
-        return str;
-      }
-
-      return str_array[0] + '.' + str_array[1].slice(0, 2);
+    truncateString(num) {
+      return Number.parseFloat(num).toFixed(2).toString();
     }
 
     getHyperparams() {

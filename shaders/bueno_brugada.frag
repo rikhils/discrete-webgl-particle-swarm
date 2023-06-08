@@ -3,7 +3,7 @@
 precision highp float;
 precision highp int;
 
-uniform sampler2D in_particles_1, in_particles_2;
+uniform sampler2D in_particles_1, in_particles_2, in_particles_3;
 uniform sampler2D data_texture;
 
 layout (location = 0) out vec4 error_texture;
@@ -16,11 +16,6 @@ uniform int num_beats, pre_beats;
 uniform float v_init, w_init;
 uniform float align_thresh;
 uniform float sample_interval;
-
-#define thwinf thw
-#define thvinf thvm
-#define thso thw
-#define thsi thso
 
 float stim_f(const float t) {
     const float stim_scale = 0.4;
@@ -55,52 +50,63 @@ void main() {
     vec4 particles_5 = texelFetch(in_particles_2, idx, 0);
     vec4 particles_6 = texelFetch(in_particles_2, idx + ivec2(tex_size.x/2, 0), 0);
     vec4 particles_7 = texelFetch(in_particles_2, idx + ivec2(0, tex_size.y/2), 0);
+    vec4 particles_8 = texelFetch(in_particles_2, idx + ivec2(tex_size.x/2, tex_size.y/2), 0);
+
+    vec4 particles_9 = texelFetch(in_particles_3, idx, 0);
+    vec4 particles_10 = texelFetch(in_particles_3, idx + ivec2(tex_size.x/2, 0), 0);
 
 
     // 4v params
-    float thv   = particles_1.r;
-    float tv1m  = particles_1.g;
-    float tv2m  = particles_1.b;
-    float tvp   = particles_1.a;
+    float tv1p = particles_1.r;
+    float tv1m = particles_1.g;
+    float tv2m = particles_1.b;
+    float tw1p = particles_1.a;
 
-    float uwm   = particles_2.r;
-    float tso1  = particles_2.g;
-    float kso   = particles_2.b;
-    float ts1   = particles_2.a;
+    float tw2p = particles_2.r;
+    float tw1m = particles_2.g;
+    float tw2m = particles_2.b;
+    float ts1 = particles_2.r;
 
-    float ts2   = particles_3.r;
-    float ks    = particles_3.g;
-    float tw1m  = particles_3.b;
-    float tw2m  = particles_3.a;
+    float ts2 = particles_3.r;
+    float tfi = particles_3.g;
+    float to1 = particles_3.b;
+    float to2 = particles_3.a;
 
-    float tw1p  = particles_4.r;
-    float tw2p  = tw1p;
-    float tfi   = particles_4.g;
-    float to1   = particles_4.b;
-    float to2   = particles_4.a;
+    float tso1 = particles_4.r;
+    float tso2 = particles_4.g;
+    float tsi1 = particles_4.b;
+    float tsi2 = particles_4.a;
 
-    float tso2  = particles_5.r;
-    float uso   = particles_5.g;
-    float us   = particles_5.b;
-    float tsi1  = particles_5.a;
-    float tsi2  = tsi1;
+    float twinf = particles_5.r;
+    float thv = particles_5.g;
+    float thvm = particles_5.b;
+    float thvinf = particles_5.a;
 
-    float thw   = particles_6.r;
-    float thvm  = particles_6.g;
-    float tho   = particles_6.b;
-    float kwm   = particles_6.a;
+    float thw = particles_6.r;
+    float thwinf = particles_6.g;
+    float thso = particles_6.b;
+    float thsi = particles_6.a;
 
-    float twinf     = particles_7.r;
-    float winfstar  = particles_7.g;
-    float uu        = particles_7.b;
+    float tho = particles_7.r;
+    float ths = particles_7.g;
+    float kwp = particles_7.b;
+    float kwm = particles_7.a;
 
-    float kwp   = 5.7;
-    float wcp   = 0.15;
-    float ksi   = 97.8;
-    float sc    = 0.007;
+    float ks = particles_8.r;
+    float kso = particles_8.g;
+    float ksi = particles_8.b;
+    float uwm = particles_8.a;
+
+    float us = particles_9.r;
+    float uo = particles_9.g;
+    float uu = particles_9.b;
+    float uso = particles_9.a;
+
+    float sc = particles_10.r;
+    float wcp = particles_10.g;
+    float winfstar = particles_10.b;
 
     // Initialize values for the simulation
-    float uo = 0.0;
     float u = 0.0;
     float v = 1.0;
     float w = 1.0;
@@ -152,7 +158,7 @@ void main() {
         winf    = (u >= thwinf) ? winfstar : (1.0-u/twinf);
 
         // Gate Evolution
-        dv      = (u >= thv) ? (-(v/tvp)) : ((vinf-v)/tvm);
+        dv      = (u >= thv) ? (-(v/tv1p)) : ((vinf-v)/tvm);
         dw      = (u >= thw) ? (-(w/twp)) : ((winf-w)/twm);
         ds      = ((1.0+tanh((u-us)*ks))/2.0-s)/ts;
 

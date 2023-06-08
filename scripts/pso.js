@@ -14,6 +14,7 @@ define('scripts/pso', [
   'text!shaders/round_float.frag',
   'text!shaders/hector_fhn.frag',
   'text!shaders/bueno_4v.frag',
+  'text!shaders/bueno_brugada.frag',
   'text!shaders/update_global_best.frag',
 ], function(
   GlHelper,
@@ -31,6 +32,7 @@ define('scripts/pso', [
   RoundFloatShader,
   HectorFHNShader,
   Bueno4vShader,
+  BuenoBrugadaShader,
   UpdateGlobalBestShader,
 ) {
   'use strict';
@@ -107,6 +109,10 @@ define('scripts/pso', [
         b4v_bounds: [
           [0.1, 0.5, 1.0, 1.0, 0.01, 15.0, 1.8, 2.0, 1.0, 1.5, 5.0, 5.0, 100.0, 0.05, 5.0, 5.0, 0.1, 0.6, 0.8, 1.0, .1, .005, 0.004, 50.0, .01, 0.4, 1.45],
           [0.35, 300.0, 1500.0, 15.0, 0.04, 100.0, 2.2, 3.0, 20.0, 3.0, 150.0, 150.0, 1000.0, 0.5, 500.0, 10.0, 1.5, 0.7, 1.0, 4.0, 0.15, 0.25, 0.008, 250.0, .2, 1.0, 1.61],
+        ],
+        bb_bounds: [
+          [1.0, 0.5, 1.0, 100.0, 100.0, 5.0, 5.0, 2.0, 1.0, 0.05, 5.0, 5.0, 15.0, 0.1, 1.0, 1.0, 0.001, 0.1, 0.005, 0.001, 0.1, 0.1, 0.1, 0.1, 0.004, 0.1, 1.0, 10.0, 1.0, 1.0, 1.0, 0.01, 0.8, 0.0, 1.45, 0.6, 0.1, 0.1, 0.4],
+          [4.0, 300.0, 1500.0, 1000.0, 300.0, 150.0, 150.0, 3.0, 20.0, 0.5, 500.0, 10.0, 100.0, 1.5, 4.0, 10.0, 0.2, 0.35, 0.25, 5.0, 0.15, 0.2, 0.5, 0.2, 0.008, 0.5, 10.0, 100.0, 10.0, 5.0, 100.0, 0.04, 1.0, 1.0, 1.61, 0.7, 1.0, 1.0, 1.0],
         ],
         velocity_update: {},
       };
@@ -467,6 +473,9 @@ define('scripts/pso', [
             break;
           case 'b4v':
             model_frag = Bueno4vShader;
+            break;
+          case 'bb':
+            model_frag = BuenoBrugadaShader;
             break;
           default:
             console.log("How could no model be selected oh no!");

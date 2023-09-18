@@ -111,8 +111,142 @@ define('scripts/pso', [
           [0.35, 300.0, 1500.0, 15.0, 0.04, 100.0, 2.2, 3.0, 20.0, 3.0, 150.0, 150.0, 1000.0, 0.5, 500.0, 10.0, 1.5, 0.7, 1.0, 4.0, 0.15, 0.25, 0.008, 250.0, .2, 1.0, 1.61],
         ],
         bb_bounds: [
-          [1.0, 0.5, 1.0, 100.0, 100.0, 5.0, 5.0, 2.0, 1.0, 0.05, 5.0, 5.0, 15.0, 0.1, 1.0, 1.0, 0.001, 0.1, 0.005, 0.001, 0.1, 0.1, 0.1, 0.1, 0.004, 0.1, 1.0, 10.0, 1.0, 1.0, 1.0, 0.01, 0.8, 0.0, 1.45, 0.6, 0.1, 0.1, 0.4],
-          [4.0, 300.0, 1500.0, 1000.0, 300.0, 150.0, 150.0, 3.0, 20.0, 0.5, 500.0, 10.0, 100.0, 1.5, 4.0, 10.0, 0.2, 0.35, 0.25, 5.0, 0.15, 0.2, 0.5, 0.2, 0.008, 0.5, 10.0, 100.0, 10.0, 5.0, 100.0, 0.04, 1.0, 1.0, 1.61, 0.7, 1.0, 1.0, 1.0],
+          [ // min bounds
+            // 1.0,   // tv1p
+            // 0.5,   // tv1m
+            // 1.0,   // tv2m
+            5.8024,   // tv1p fixed
+            60.0,   // tv1m fixed
+            50.0,   // tv2m fixed
+
+            40,    // tw1p
+            230,   // tw2p
+            10,    // tw1m
+            20,    // tw2m
+            5,     // ts1
+            70,    // ts2
+
+            // 0.05,  // tfi
+            // 5.0,   // to1
+            // 5.0,   // to2
+            0.05,  // tfi fixed
+            400.0,   // to1 fixed
+            33.0,   // to2 fixed
+
+            150,   // tso1
+            1,     // tso2
+            10,    // tsi1
+            2,     // tsi2
+
+            // 0.001, // twinf
+            // 0.1,   // thv
+            // 0.005, // thvm
+            // 0.001, // thvinf
+            // 0.1,   // thw
+            // 0.1,   // thwinf
+            // 0.1,   // thso
+            // 0.1,   // thsi
+            // 0.004, // tho
+            // 0.1,   // ths
+            0.12, // twinf fixed
+            0.13,   // thv fixed
+            0.006, // thvm fixed
+            2.0, // thvinf fixed
+            0.13,   // thw fixed
+            0.12,   // thwinf fixed
+            0.2,   // thso fixed
+            0.13,   // thsi fixed
+            0.006, // tho fixed
+            0.36,   // ths fixed
+
+            5,     // kwp
+            100,   // kwm
+            5,     // ks
+            1.5,   // kso
+            10,    // ksi
+            0.02,  // uwm
+            0.25,  // us
+
+            // 0.0,   // uo
+            // 1.45,  // uu
+            0.0,   // uo fixed
+            1.0,  // uu fixed
+
+            0.3,   // uso
+            0.6,   // sc
+            0.2,   // wcp
+
+            // 0.4,   // winfstar
+            0.94,   // winfstar fixed
+          ],
+          [ // max bounds
+            // 4.0,    // tv1p
+            // 300.0,  // tv1m
+            // 1500.0, // tv2m
+            5.8024,   // tv1p fixed
+            60.0,   // tv1m fixed
+            50.0,   // tv2m fixed
+
+            80,     // tw1p
+            300,    // tw2p
+            500,    // tw1m
+            40,     // tw2m
+            12,     // ts1
+            90,     // ts2
+
+            // 0.5,    // tfi
+            // 500.0,  // to1
+            // 10.0,   // to2
+            0.05,  // tfi fixed
+            400.0,   // to1 fixed
+            33.0,   // to2 fixed
+
+            200,    // tso1
+            3,      // tso2
+            20,     // tsi1
+            5,      // tsi2
+
+            // 0.2,    // twinf
+            // 0.35,   // thv
+            // 0.25,   // thvm
+            // 5.0,    // thvinf
+            // 0.15,   // thw
+            // 0.2,    // thwinf
+            // 0.5,    // thso
+            // 0.2,    // thsi
+            // 0.008,  // tho
+            // 0.5,    // ths
+            0.12, // twinf fixed
+            0.13,   // thv fixed
+            0.006, // thvm fixed
+            2.0, // thvinf fixed
+            0.13,   // thw fixed
+            0.12,   // thwinf fixed
+            0.2,   // thso fixed
+            0.13,   // thsi fixed
+            0.006, // tho fixed
+            0.36,   // ths fixed
+
+            10,     // kwp
+            150,    // kwm
+            25,     // ks
+            4,      // kso
+            70,     // ksi
+            0.12,   // uwm
+            0.4,    // us
+
+            // 1.0,    // uo
+            // 1.61,   // uu
+            0.0,   // uo fixed
+            1.0,  // uu fixed
+
+            0.65,   // uso
+            0.9,    // sc
+            0.3,    // wcp
+
+            // 1.0,    // winfstar
+            0.94,   // winfstar fixed
+          ],
         ],
         velocity_update: {},
       };
@@ -144,6 +278,7 @@ define('scripts/pso', [
 
       env.particles.phi_local = hyperparams.phi1;
       env.particles.phi_global = hyperparams.phi2;
+      // TODO Elizabeth's Brugada code scales the standard chi value by 0.25, which is worth investigating
       const chi = hyperparams.chi;
 
       env.particles.chi = [];
@@ -256,6 +391,7 @@ define('scripts/pso', [
       const data_arrays = this.env.simulation.data_arrays;
       const init_arrays = this.initializeParticles();
       const zero_array = new Float32Array(tex_width*tex_height*4);
+
       const global_best_array = new Float32Array(16);
 
       this.simulation_lengths = [];

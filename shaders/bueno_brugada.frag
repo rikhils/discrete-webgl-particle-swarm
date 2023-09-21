@@ -146,7 +146,8 @@ void main() {
     for (int step_count = 1; step_count <= num_steps; ++step_count) {
         // Begin 4v update
         tvm     = (u >= thvm) ? tv2m : tv1m;
-        ts      = (u >= thw) ? ts2 : ts1;
+        // ts      = (u >= thw) ? ts2 : ts1;
+        ts      = (u >= ths) ? ts2 : ts1;
         to      = (u >= tho) ? to2 : to1;
 
         twp     = tw1p + (tw2p - tw1p) * (1.0+tanh((w-wcp)*kwp))/2.0;

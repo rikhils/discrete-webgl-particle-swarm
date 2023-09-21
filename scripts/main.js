@@ -114,6 +114,8 @@ require([
     error_graph.clearGraph();
     error_graph.runGraph(best_error_list, [0, 0, 0], best_error_list.length, [Math.min(...best_error_list), Math.max(...best_error_list)]);
 
+    console.log("Best error array:");
+    console.log(best_error_list);
     displayGraph(0);
 
     console.log("Execution time (ms):");

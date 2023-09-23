@@ -265,7 +265,7 @@ define('scripts/pso', [
         env.simulation.num_beats = Number(num_beats);
       }
 
-      if (Number(pre_beats)) {
+      if (!Number.isNaN(Number(pre_beats))) {
         env.simulation.pre_beats = Number(pre_beats);
       }
 

@@ -37,6 +37,8 @@ void main() {
     int pre_pace_steps = int(ceil(pre_pace_endtime/dt));
     int num_steps = int(ceil(endtime/dt));
 
+    int my_save_step = pre_pace_steps + int(round(float(num_beats*num_period)*cc.x));
+
     const float stim_dur = 10.0;
 
     ivec2 tex_size = textureSize(in_particles_1, 0);
@@ -65,7 +67,7 @@ void main() {
     float tw2p = particles_2.r;
     float tw1m = particles_2.g;
     float tw2m = particles_2.b;
-    float ts1 = particles_2.r;
+    float ts1 = particles_2.a;
 
     float ts2 = particles_3.r;
     float tfi = particles_3.g;
@@ -143,7 +145,7 @@ void main() {
     float saved_value = -1.0;
 
     // Run the simulation with the current swarm parameters
-    for (int step_count = 1; step_count <= num_steps; ++step_count) {
+    for (int step_count = 0; step_count < num_steps; ++step_count) {
         // Begin 4v update
         tvm     = (u >= thvm) ? tv2m : tv1m;
         // ts      = (u >= thw) ? ts2 : ts1;
@@ -175,16 +177,16 @@ void main() {
 
         // Apply stimulus
         float stim = 0.0;
-        float stim_step = mod(float(step_count), period/dt);
-        if (stim_step < stim_dur/dt) {
-            stim = stim_f(stim_step * dt);
+        float stim_t = mod(float(step_count)*dt, period);
+        if (stim_t <= stim_dur) {
+            stim = stim_f(stim_t);
         }
 
         u = u - dt*(xfi + xso + xsi - stim);
 
         // End 4v update
 
-        if (step_count > pre_pace_steps && !first_upstroke && u > align_thresh) {
+        if (step_count >= pre_pace_steps && !first_upstroke && u > align_thresh) {
             first_upstroke = true;
             start_comp = step_count;
             error = 0.0;
@@ -196,7 +198,7 @@ void main() {
             error += (u - actual)*(u - actual);
         }
 
-        if (float((step_count - pre_pace_steps) - 1) / float((num_steps - pre_pace_steps) - 1) <= cc.x) {
+        if (step_count < my_save_step) {
             saved_value = u;
         }
     }

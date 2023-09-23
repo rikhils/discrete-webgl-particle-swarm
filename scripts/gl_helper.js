@@ -177,6 +177,7 @@ define('scripts/gl_helper', [], function() {
       gl.readPixels(0, 0, width, height, gl.RGBA_INTEGER, gl.UNSIGNED_INT, array);
 
       gl.bindFramebuffer(gl.READ_FRAMEBUFFER, null);
+      gl.deleteFramebuffer(framebuffer);
     }
 
     getFloatTextureArray(texture, width, height, array) {
@@ -191,6 +192,7 @@ define('scripts/gl_helper', [], function() {
       gl.readPixels(0, 0, width, height, gl.RGBA, gl.FLOAT, array);
 
       gl.bindFramebuffer(gl.READ_FRAMEBUFFER, null);
+      gl.deleteFramebuffer(framebuffer);
     }
 
     runProgram(gl_helper, framebuffer, program, uniforms, locations, out_textures, dims) {

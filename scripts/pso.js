@@ -87,11 +87,12 @@ define('scripts/pso', [
           phi_global: 2.05,
           global_bests: [],
           best_error_value: 1e10,
-          chi: [],
+          scale: [],
           lower_bounds: [],
           upper_bounds: [],
-          learning_rate: 0.1,
-          omega: 0.05,
+          learning_rate: 1.0,
+          omega: 1.0,
+          chi: 0.73,
           parameter_textures: 1,
         },
         fk_bounds: [
@@ -279,20 +280,20 @@ define('scripts/pso', [
       env.particles.phi_local = hyperparams.phi1;
       env.particles.phi_global = hyperparams.phi2;
       // TODO Elizabeth's Brugada code scales the standard chi value by 0.25, which is worth investigating
-      const chi = hyperparams.chi;
+      env.particles.chi = hyperparams.chi;
 
-      env.particles.chi = [];
+      env.particles.scale = [];
       // The bounds arrays had better be the same length
       for (let i = 0; i < bounds[0].length; ++i) {
-        env.particles.chi.push(chi * (bounds[1][i] - bounds[0][i])/2);
+        env.particles.scale.push((bounds[1][i] - bounds[0][i])/2);
       }
 
       env.particles.lower_bounds = bounds[0];
       env.particles.upper_bounds = bounds[1];
 
       // Pad out these arrays so chunks of 16 can always be used as uniforms
-      while (env.particles.chi.length % 16 !== 0) {
-        env.particles.chi.push(0);
+      while (env.particles.scale.length % 16 !== 0) {
+        env.particles.scale.push(0);
         env.particles.lower_bounds.push(0);
         env.particles.upper_bounds.push(0);
       }
@@ -535,10 +536,11 @@ define('scripts/pso', [
             ['global_best_texture', 'tex', () => this.global_best_textures[num]],
             ['itinymtState', 'tex', () => this.env.velocity_update.ftinymtState],
             ['itinymtMat', 'tex', () => this.env.velocity_update.itinymtMat],
-            ['chi', '4fv_a', () => [this.env.particles.chi, num*16, 16]],
+            ['scale', '4fv_a', () => [this.env.particles.scale, num*16, 16]],
             ['phi_local', '1f', () => this.env.particles.phi_local],
             ['phi_global', '1f', () => this.env.particles.phi_global],
             ['omega', '1f', () => this.env.particles.omega],
+            ['chi', '1f', () => this.env.particles.chi],
           ],
           out: [this.velocities_out_textures[num], this.env.velocity_update.stinymtState],
           run: this.gl_helper.runProgram,

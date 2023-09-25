@@ -13,8 +13,8 @@ layout (location = 1) out uvec4 otinymtState;
 
 in vec2 cc;
 
-uniform float phi_local, phi_global, omega;
-uniform vec4 chi[4];
+uniform float phi_local, phi_global, omega, chi;
+uniform vec4 scale[4];
 
 /*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
  * tinymt.glsl  :   a glsl file to be included the in the shaders
@@ -156,12 +156,12 @@ void main() {
     if (cc.x > 0.5) idx += 1;
     if (cc.y > 0.5) idx += 2;
 
-    vec4 my_chi = chi[idx];
+    vec4 my_scale = scale[idx];
 
     vec4 r_local = vec4(tinymtRand(), tinymtRand(), tinymtRand(), tinymtRand());
     vec4 r_global = vec4(tinymtRand(), tinymtRand(), tinymtRand(), tinymtRand());
 
-    new_velocity = my_chi * (omega * velocity + phi_local * r_local * (best - position) + phi_global * r_global * (global_best - position));
+    new_velocity = chi * (omega * velocity + (phi_local * r_local * (best - position) + phi_global * r_global * (global_best - position)));
 
     tinymtReturn();
 }

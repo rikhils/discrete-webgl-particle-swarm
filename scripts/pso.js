@@ -715,7 +715,8 @@ define('scripts/pso', [
         shader_map['position_' + i] = makeParticleUpdateSolver(i);
         shader_map['local_bests_copy_' + i] = makeCopySolver('bests_out_textures', 'bests_textures', i);
         shader_map['positions_copy_' + i] = makeCopySolver('particles_out_textures', 'particles_textures', i);
-        shader_map['velocities_copy_' + i] = makeCopySolver('velocities_out_textures', 'particles_textures', i);
+        // shader_map['velocities_copy_' + i] = makeCopySolver('velocities_out_textures', 'particles_textures', i);
+        shader_map['velocities_copy_' + i] = makeCopySolver('velocities_out_textures', 'velocities_textures', i);
         shader_map['global_best_update_' + i] = makeGlobalBestUpdateSolver(i);
         shader_map['global_best_copy_' + i] = makeCopySolver('global_best_out_textures', 'global_best_textures', i, 2, 2);
       }

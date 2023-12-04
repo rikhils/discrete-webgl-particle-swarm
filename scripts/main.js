@@ -67,9 +67,11 @@ require([
 
     const raw_input_data = [];
     const input_cls = [];
-    for (const [raw, cl] of input_data) {
-      raw_input_data.push(raw);
-      input_cls.push(cl);
+    const datatypes = [];
+    for (const obj of input_data) {
+      raw_input_data.push(obj.data);
+      input_cls.push(obj.cl);
+      datatypes.push(obj.datatype);
     }
 
     const start_time = Date.now();
@@ -84,7 +86,7 @@ require([
       hyperparams,
     );
 
-    pso.readData(raw_input_data, pso_interface.normalization.value);
+    pso.readData(raw_input_data, input_cls, datatypes, pso_interface.normalization.value);
 
     pso.initializeTextures();
     pso.setupAllSolvers();
@@ -122,7 +124,7 @@ require([
 
   async function displayDataGraph(cl_idx) {
     const input_data = await pso_interface.getAllInputData();
-    const raw_text = input_data[cl_idx][0];
+    const raw_text = input_data[cl_idx].data;
     const actual_data = raw_text.split('\n').filter(x => !(x.trim() === ""));
 
     const scale = [Math.min(...actual_data), Math.max(...actual_data)];

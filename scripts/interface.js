@@ -180,12 +180,28 @@ define('scripts/interface', [
     }
 
     async getDataFromInput(element) {
-      const file = element.querySelector('input[type=file]').files[0];
-      const cl = Number(element.querySelector('input[type=text]').value);
+      const cl = Number(element.querySelector('.data-cl-input').value);
+      const apd_only = element.querySelector('.data-apd-checkbox').checked;
 
       if (cl === 0) {
         throw new Error('No CL entered');
       }
+
+      if (apd_only) {
+        const apds = new Float32Array(element.querySelector('.data-apd-input').value.split(','));
+
+        if (apds.length === 0) {
+          throw new Error('No APDs entered');
+        }
+
+        return {
+          datatype: 'apds',
+          data: apds,
+          cl: cl,
+        };
+      }
+
+      const file = element.querySelector('.data-file-input').files[0];
 
       if (!file) {
         throw new Error('No file found');
@@ -205,7 +221,11 @@ define('scripts/interface', [
         }
       });
 
-      return [text, cl];
+      return {
+        datatype: 'trace',
+        data: text,
+        cl: cl,
+      };
     }
 
     async getAllInputData() {
@@ -217,20 +237,39 @@ define('scripts/interface', [
 
     createInputElement() {
       const elem = document.createElement('div');
-      elem.setAttribute('class', 'data-input');
+      elem.classList.add('data-input');
 
       const file_in = document.createElement('input');
       file_in.setAttribute('type', 'file');
+      file_in.classList.add('data-file-input');
 
-      const cl_label = document.createElement('span');
-      cl_label.innerHTML = 'Cycle length (ms):';
+      const apd_label = document.createElement('label');
+      apd_label.innerHTML = 'APDs';
+
+      const apd_input = document.createElement('input');
+      apd_input.setAttribute('type', 'text');
+      apd_input.classList.add('data-apd-input');
+      apd_label.appendChild(apd_input);
+
+      const cl_label = document.createElement('label');
+      cl_label.innerHTML = 'Cycle length (ms)';
 
       const cl_in = document.createElement('input');
       cl_in.setAttribute('type', 'text');
+      cl_in.classList.add('data-cl-input');
+      cl_label.appendChild(cl_in);
+
+      const apd_checkbox_label = document.createElement('label');
+      apd_checkbox_label.innerHTML = 'APD only?';
+
+      const apd_checkbox = document.createElement('input');
+      apd_checkbox.setAttribute('type', 'checkbox');
+      apd_checkbox.classList.add('data-apd-checkbox');
+      apd_checkbox_label.appendChild(apd_checkbox);
 
       const plot_button = document.createElement('button');
       plot_button.setAttribute('type', 'button');
-      plot_button.setAttribute('class', 'plot-data-button');
+      plot_button.classList.add('plot-data-button');
       plot_button.innerHTML = 'Plot';
 
       if (this.default_button_bg === null) {
@@ -243,9 +282,35 @@ define('scripts/interface', [
       }
 
       elem.appendChild(file_in);
+      elem.appendChild(apd_label);
       elem.appendChild(cl_label);
-      elem.appendChild(cl_in);
+      elem.appendChild(apd_checkbox_label);
       elem.appendChild(plot_button);
+
+      const apd_elements = [apd_label];
+      const file_elements = [file_in, plot_button];
+
+      const set_hidden = () => {
+        if (apd_checkbox.checked) {
+          for (const e of apd_elements) {
+            e.classList.remove('data-input-hidden');
+          }
+          for (const e of file_elements) {
+            e.classList.add('data-input-hidden');
+          }
+        } else {
+          for (const e of file_elements) {
+            e.classList.remove('data-input-hidden');
+          }
+          for (const e of apd_elements) {
+            e.classList.add('data-input-hidden');
+          }
+        }
+      };
+
+      apd_checkbox.addEventListener('change', set_hidden);
+
+      set_hidden();
 
       return elem;
     }

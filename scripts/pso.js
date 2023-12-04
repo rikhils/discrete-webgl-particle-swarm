@@ -79,6 +79,7 @@ define('scripts/pso', [
           align_thresh: [],
           trimmed_data: [],
           data_arrays: [],
+          datatypes: [],
           full_normalized_data: [],
           sample_interval: 1.0,
         },
@@ -255,12 +256,11 @@ define('scripts/pso', [
       return env;
     }
 
-    setupEnv(model, bounds, input_cls, pre_beats, num_beats, sample_interval, hyperparams) {
+    setupEnv(model, bounds, pre_beats, num_beats, sample_interval, hyperparams) {
       this.env = Pso.getEnv();
       const env = this.env;
 
       env.simulation.model = model;
-      env.simulation.period = input_cls;
 
       if (Number(num_beats)) {
         env.simulation.num_beats = Number(num_beats);
@@ -311,7 +311,10 @@ define('scripts/pso', [
       return normalized_data;
     }
 
-    readData(raw_input_data, normalize) {
+    readData(raw_input_data, input_cls, datatypes, normalize) {
+      this.env.simulation.period = input_cls;
+      this.env.simulation.datatypes = datatypes;
+
       const trimmed_data = [];
       const data_arrays = [];
       const align_thresh = [];
@@ -321,30 +324,42 @@ define('scripts/pso', [
       const delta = 0.001;
 
       for (let i = 0; i < raw_input_data.length; ++i) {
-        const raw_text = raw_input_data[i];
+        if (datatypes[i] === 'apds') {
+          const data_array = new Float32Array(4 * raw_input_data.length);
+          for (let j = 0; j < raw_input_data.length; ++j) {
+            data_array[4*j] = raw_input_data[j];
+          }
 
-        const split_data = raw_text.split('\n');
-        const actual_data = split_data.filter(x => !(x.trim() === ""));
+          trimmed_data.push(raw_input_data[i]);
+          data_arrays.push(data_array);
+          align_thresh.push(0);
+          all_full_normalized_data.push(raw_input_data[i]);
+        } else if (datatypes[i] === 'trace') {
+          const raw_text = raw_input_data[i];
 
-        const full_parsed_data = actual_data.map(x => parseFloat(x.trim()));
-        const full_normalized_data = this.normalizeData(full_parsed_data, normalization);
+          const split_data = raw_text.split('\n');
+          const actual_data = split_data.filter(x => !(x.trim() === ""));
 
-        const first_compare_index = full_normalized_data.findIndex(number => number > 0.15);
+          const full_parsed_data = actual_data.map(x => parseFloat(x.trim()));
+          const full_normalized_data = this.normalizeData(full_parsed_data, normalization);
 
-        const left_trimmed_data = full_normalized_data.slice(first_compare_index);
+          const first_compare_index = full_normalized_data.findIndex(number => number > 0.15);
 
-        // Pad out the extra pixel values. The data could be stored more densely by using the full pixel
-        // value and by using a two-dimensional texture, but for now there is not enough to require that.
-        const data_length = left_trimmed_data.length;
-        const data_array = new Float32Array(4 * data_length);
-        for (let j = 0; j < data_length; ++j) {
-          data_array[4*j] = left_trimmed_data[j];
+          const left_trimmed_data = full_normalized_data.slice(first_compare_index);
+
+          // Pad out the extra pixel values. The data could be stored more densely by using the full pixel
+          // value and by using a two-dimensional texture, but for now there is not enough to require that.
+          const data_length = left_trimmed_data.length;
+          const data_array = new Float32Array(4 * data_length);
+          for (let j = 0; j < data_length; ++j) {
+            data_array[4*j] = left_trimmed_data[j];
+          }
+
+          trimmed_data.push(left_trimmed_data);
+          data_arrays.push(data_array);
+          align_thresh.push(left_trimmed_data[0] - delta);
+          all_full_normalized_data.push(full_normalized_data);
         }
-
-        trimmed_data.push(left_trimmed_data);
-        data_arrays.push(data_array);
-        align_thresh.push(left_trimmed_data[0] - delta);
-        all_full_normalized_data.push(full_normalized_data);
       }
 
       this.env.simulation.data_arrays = data_arrays;
@@ -633,6 +648,7 @@ define('scripts/pso', [
             ['pre_beats', '1i', () => this.env.simulation.pre_beats],
             ['align_thresh', '1f', (cl_idx) => this.env.simulation.align_thresh[cl_idx]],
             ['sample_interval', '1f', () => this.env.simulation.sample_interval],
+            ['data_type', '1i', (cl_idx) => this.env.simulation.datatypes[cl_idx] === 'apds' ? 1 : 0],
           ],
           out: [final ? this.simulation_texture : this.error_texture],
           run: final ? this.gl_helper.runFinal : this.gl_helper.runSimulation,

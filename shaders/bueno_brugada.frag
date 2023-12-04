@@ -12,7 +12,7 @@ in vec2 cc;
 
 // Simulation parameters
 uniform float dt, period, stim_start, stim_end, stim_mag;
-uniform int num_beats, pre_beats;
+uniform int num_beats, pre_beats, data_type;
 uniform float v_init, w_init;
 uniform float align_thresh;
 uniform float sample_interval;

@@ -269,7 +269,7 @@ void main() {
     {
         // While there are still leftover target APDs we never matched in the
         // simulation, add them as raw error.
-        for(; data_index < data_tex_size; data_index++)
+        for(; data_index < num_data_points; data_index++)
         {
             float missing_APD = texelFetch(data_texture, ivec2(data_index, 0), 0).r;
             error += missing_APD*missing_APD;

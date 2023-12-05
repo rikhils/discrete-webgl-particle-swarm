@@ -104,8 +104,8 @@ void main() {
                 if(!activated && v > APD_thresh)
                 {
                     activated = true;
-                    float x0 = (step_count-1)*dt;
-                    float x1 = step_count*dt;
+                    float x0 = float(step_count-1)*dt;
+                    float x1 = float(step_count)*dt;
 
                     float y0 = prev_v;
                     float y1 = v;
@@ -117,8 +117,8 @@ void main() {
                 {
                     activated = false;
 
-                    float x0 = (step_count-1)*dt;
-                    float x1 = step_count*dt;
+                    float x0 = float(step_count-1)*dt;
+                    float x1 = float(step_count)*dt;
 
                     float y0 = prev_v;
                     float y1 = v;

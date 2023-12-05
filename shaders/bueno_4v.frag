@@ -199,8 +199,8 @@ void main() {
                 if(!activated && u > APD_thresh)
                 {
                     activated = true;
-                    float x0 = (step_count-1)*dt;
-                    float x1 = step_count*dt;
+                    float x0 = float(step_count-1)*dt;
+                    float x1 = float(step_count)*dt;
 
                     float y0 = prev_u;
                     float y1 = u;
@@ -212,8 +212,8 @@ void main() {
                 {
                     activated = false;
 
-                    float x0 = (step_count-1)*dt;
-                    float x1 = step_count*dt;
+                    float x0 = float(step_count-1)*dt;
+                    float x1 = float(step_count)*dt;
 
                     float y0 = prev_u;
                     float y1 = u;

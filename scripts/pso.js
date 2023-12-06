@@ -325,15 +325,17 @@ define('scripts/pso', [
 
       for (let i = 0; i < raw_input_data.length; ++i) {
         if (datatypes[i] === 'apds') {
-          const data_array = new Float32Array(4 * raw_input_data.length);
-          for (let j = 0; j < raw_input_data.length; ++j) {
-            data_array[4*j] = raw_input_data[j];
+          const apd_data = raw_input_data[i];
+
+          const data_array = new Float32Array(4 * apd_data.length);
+          for (let j = 0; j < apd_data.length; ++j) {
+            data_array[4*j] = apd_data[j];
           }
 
-          trimmed_data.push(raw_input_data[i]);
+          trimmed_data.push(apd_data);
           data_arrays.push(data_array);
           align_thresh.push(0);
-          all_full_normalized_data.push(raw_input_data[i]);
+          all_full_normalized_data.push(apd_data);
         } else if (datatypes[i] === 'trace') {
           const raw_text = raw_input_data[i];
 
@@ -731,7 +733,6 @@ define('scripts/pso', [
         shader_map['position_' + i] = makeParticleUpdateSolver(i);
         shader_map['local_bests_copy_' + i] = makeCopySolver('bests_out_textures', 'bests_textures', i);
         shader_map['positions_copy_' + i] = makeCopySolver('particles_out_textures', 'particles_textures', i);
-        // shader_map['velocities_copy_' + i] = makeCopySolver('velocities_out_textures', 'particles_textures', i);
         shader_map['velocities_copy_' + i] = makeCopySolver('velocities_out_textures', 'velocities_textures', i);
         shader_map['global_best_update_' + i] = makeGlobalBestUpdateSolver(i);
         shader_map['global_best_copy_' + i] = makeCopySolver('global_best_out_textures', 'global_best_textures', i, 2, 2);

@@ -136,13 +136,18 @@ require([
     const simulation_data = current_values ?
       pso.runFinalSimulationSolver(cl_idx, current_values) :
       pso.runFinalSimulationSolver(cl_idx);
-    const actual_data = pso.env.simulation.trimmed_data[cl_idx];
 
     const sim_length = (pso.env.simulation.period[cl_idx] * pso.env.simulation.num_beats) / pso.env.simulation.sample_interval;
     const plotting_sim_data = simulation_data.slice(-sim_length);
 
-    const align_thresh = actual_data.find(x => x > 0.15);
-    const align_index = plotting_sim_data.findIndex(x => x > align_thresh);
+    let actual_data = [];
+    let align_index = 0;
+
+    if (pso.env.simulation.datatypes[cl_idx] === 'trace') {
+      actual_data = pso.env.simulation.trimmed_data[cl_idx];
+      const align_thresh = actual_data.find(x => x > 0.15);
+      align_index = plotting_sim_data.findIndex(x => x > align_thresh);
+    }
 
     const scale = [
       Math.min(...actual_data, ...plotting_sim_data),
@@ -152,7 +157,9 @@ require([
     const interval = Number(pso_interface.data_sample_interval.value);
 
     graph.clearGraph();
-    graph.runGraph(actual_data, [0, 0, 0], sim_length, scale, align_index);
+    if (pso.env.simulation.datatypes[cl_idx] === 'trace') {
+      graph.runGraph(actual_data, [0, 0, 0], sim_length, scale, align_index);
+    }
     graph.runGraph(plotting_sim_data, [1, 0, 0], sim_length, scale, 0);
 
     pso_interface.setAxes(0, sim_length * interval, scale[0], scale[1]);

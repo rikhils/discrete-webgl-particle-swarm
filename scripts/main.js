@@ -79,7 +79,6 @@ require([
     pso.setupEnv(
       pso_interface.model_select.value,
       pso_interface.getBounds(),
-      input_cls,
       pso_interface.data_pre_beats.value,
       pso_interface.data_num_beats.value,
       pso_interface.data_sample_interval.value,

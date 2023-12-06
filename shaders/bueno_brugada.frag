@@ -15,7 +15,7 @@ uniform float dt, period, stim_start, stim_end, stim_mag;
 uniform int num_beats, pre_beats, data_type;
 uniform float v_init, w_init;
 uniform float align_thresh;
-uniform float sample_interval;
+uniform float sample_interval, apd_thresh;
 
 float stim_f(const float t) {
     const float stim_scale = 0.4;
@@ -41,16 +41,10 @@ void main() {
 
     const float stim_dur = 10.0;
 
-    // TODO: replace with uniform
-    const float APD_thresh = 0.15;
-
     ivec2 tex_size = textureSize(in_particles_1, 0);
     ivec2 idx = ivec2(floor(cc * 0.5 * vec2(tex_size)));
 
-    // TODO: Is this how this works?
-    ivec2 data_tex_size = textureSize(data_texture,0);
-    int num_data_points = data_tex_size.x;
-
+    int num_data_points = textureSize(data_texture, 0).x;
 
     vec4 particles_1 = texelFetch(in_particles_1, idx, 0);
     vec4 particles_2 = texelFetch(in_particles_1, idx + ivec2(tex_size.x/2, 0), 0);
@@ -64,7 +58,6 @@ void main() {
 
     vec4 particles_9 = texelFetch(in_particles_3, idx, 0);
     vec4 particles_10 = texelFetch(in_particles_3, idx + ivec2(tex_size.x/2, 0), 0);
-
 
     // 4v params
     float tv1p = particles_1.r;
@@ -151,7 +144,7 @@ void main() {
     int data_index = 0;
 
     int start_comp = 0;
-    bool first_upstroke = false;
+    bool first_align_upstroke = false;
     float saved_value = -1.0;
 
     float APD_start, APD_end;
@@ -161,33 +154,31 @@ void main() {
     // Run the simulation with the current swarm parameters
     for (int step_count = 0; step_count < num_steps; ++step_count) {
         // Begin 4v update
-        tvm     = (u >= thvm) ? tv2m : tv1m;
-        // ts      = (u >= thw) ? ts2 : ts1;
-        ts      = (u >= ths) ? ts2 : ts1;
-        to      = (u >= tho) ? to2 : to1;
+        tvm = (u >= thvm) ? tv2m : tv1m;
+        ts = (u >= ths) ? ts2 : ts1;
+        to = (u >= tho) ? to2 : to1;
 
-        twp     = tw1p + (tw2p - tw1p) * (1.0+tanh((w-wcp)*kwp))/2.0;
-        twm     = tw1m + (tw2m - tw1m) * (1.0+tanh((u-uwm)*kwm))/2.0;
-        tso     = tso1 + (tso2 - tso1) * (1.0+tanh((u-uso)*kso))/2.0;
-        tsi     = tsi1 + (tsi2 - tsi1) * (1.0+tanh((s-sc)*ksi))/2.0;
+        twp = tw1p + (tw2p - tw1p) * (1.0+tanh((w-wcp)*kwp))/2.0;
+        twm = tw1m + (tw2m - tw1m) * (1.0+tanh((u-uwm)*kwm))/2.0;
+        tso = tso1 + (tso2 - tso1) * (1.0+tanh((u-uso)*kso))/2.0;
+        tsi = tsi1 + (tsi2 - tsi1) * (1.0+tanh((s-sc)*ksi))/2.0;
 
-        vinf    = (u >= thvinf) ? 0.0 : 1.0;
-        winf    = (u >= thwinf) ? winfstar : (1.0-u/twinf);
+        vinf = (u >= thvinf) ? 0.0 : 1.0;
+        winf = (u >= thwinf) ? winfstar : (1.0-u/twinf);
 
         // Gate Evolution
-        dv      = (u >= thv) ? (-(v/tv1p)) : ((vinf-v)/tvm);
-        dw      = (u >= thw) ? (-(w/twp)) : ((winf-w)/twm);
-        ds      = ((1.0+tanh((u-us)*ks))/2.0-s)/ts;
+        dv = (u >= thv) ? (-(v/tv1p)) : ((vinf-v)/tvm);
+        dw = (u >= thw) ? (-(w/twp)) : ((winf-w)/twm);
+        ds = ((1.0+tanh((u-us)*ks))/2.0-s)/ts;
 
-
-        v       += dt * dv;
-        w       += dt * dw;
-        s       += dt * ds;
+        v += dt * dv;
+        w += dt * dw;
+        s += dt * ds;
 
         // Currents
-        xfi     = (u >= thv) ? -v*(u-thv)*(uu-u)/tfi : 0.0;
-        xso     = (u >= thso) ? 1.0/tso : (u-uo)/to;
-        xsi     = (u >= thsi) ? -w*s/tsi : 0.0;
+        xfi = (u >= thv) ? -v*(u-thv)*(uu-u)/tfi : 0.0;
+        xso = (u >= thso) ? 1.0/tso : (u-uo)/to;
+        xsi = (u >= thsi) ? -w*s/tsi : 0.0;
 
         // Apply stimulus
         float stim = 0.0;
@@ -201,13 +192,10 @@ void main() {
 
         // End 4v update
 
-        if(step_count > pre_pace_steps)
-        {   
+        if (step_count > pre_pace_steps) {
             //APD only mode
-            if(data_type == 1)
-            {
-                if(!activated && u > APD_thresh)
-                {
+            if (data_type == 1) {
+                if (!activated && u > apd_thresh) {
                     activated = true;
                     float x0 = float(step_count-1)*dt;
                     float x1 = float(step_count)*dt;
@@ -216,10 +204,8 @@ void main() {
                     float y1 = u;
 
                     // Linear interpolation of actual crossing of threshold
-                    APD_start = (x0*(y1 - APD_thresh) + x1*(APD_thresh - y0)) / (y1-y0);
-                }
-                else if(activated && u < APD_thresh)
-                {
+                    APD_start = (x0*(y1 - apd_thresh) + x1*(apd_thresh - y0)) / (y1-y0);
+                } else if (activated && u < apd_thresh) {
                     activated = false;
 
                     float x0 = float(step_count-1)*dt;
@@ -229,21 +215,19 @@ void main() {
                     float y1 = u;
 
                     // Linear interpolation of actual crossing of threshold
-                    APD_end = (x0*(y1 - APD_thresh) + x1*(APD_thresh - y0)) / (y1-y0);
+                    APD_end = (x0*(y1 - apd_thresh) + x1*(apd_thresh - y0)) / (y1-y0);
                     float sim_APD = APD_end - APD_start;
                     float target_APD = texelFetch(data_texture, ivec2(data_index++, 0), 0).r;
                     error += (target_APD - sim_APD) * (target_APD - sim_APD);
                 }
             }
             // Curve error only mode
-            else
-            {
-                if (!first_align_upstroke && u > align_thresh)
-                {
+            else {
+                if (!first_align_upstroke && u > align_thresh) {
                     first_align_upstroke = true;
                     start_comp = step_count;
                     error = 0.0;
-                }   
+                }
                 // Measure curve error
                 if (first_align_upstroke && mod(float(step_count - start_comp), compare_stride) == 0.0) {
                     float actual = texelFetch(data_texture, ivec2(data_index++, 0), 0).r;
@@ -265,12 +249,10 @@ void main() {
 
     // If we had missing activations to 2:1 blocking, I'm just adding the
     // missing APDs as raw error, since this is a very bad solution
-    if(data_type == 1)
-    {
+    if (data_type == 1) {
         // While there are still leftover target APDs we never matched in the
         // simulation, add them as raw error.
-        for(; data_index < num_data_points; data_index++)
-        {
+        for (; data_index < num_data_points; data_index++) {
             float missing_APD = texelFetch(data_texture, ivec2(data_index, 0), 0).r;
             error += missing_APD*missing_APD;
         }

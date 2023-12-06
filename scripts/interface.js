@@ -182,6 +182,7 @@ define('scripts/interface', [
     async getDataFromInput(element) {
       const cl = Number(element.querySelector('.data-cl-input').value);
       const apd_only = element.querySelector('.data-apd-checkbox').checked;
+      const thresh = Number(element.querySelector('.data-apd-thresh-input').value);
 
       if (cl === 0) {
         throw new Error('No CL entered');
@@ -198,6 +199,7 @@ define('scripts/interface', [
           datatype: 'apds',
           data: apds,
           cl: cl,
+          apd_thresh: thresh,
         };
       }
 
@@ -251,6 +253,15 @@ define('scripts/interface', [
       apd_input.classList.add('data-apd-input');
       apd_label.appendChild(apd_input);
 
+      const apd_thresh_label = document.createElement('label');
+      apd_thresh_label.innerHTML = 'APD threshold';
+
+      const apd_thresh_input = document.createElement('input');
+      apd_thresh_input.setAttribute('type', 'text');
+      apd_thresh_input.classList.add('data-apd-thresh-input');
+      apd_thresh_label.appendChild(apd_thresh_input);
+      apd_thresh_input.value = String(0.15);
+
       const cl_label = document.createElement('label');
       cl_label.innerHTML = 'Cycle length (ms)';
 
@@ -283,11 +294,12 @@ define('scripts/interface', [
 
       elem.appendChild(file_in);
       elem.appendChild(apd_label);
+      elem.appendChild(apd_thresh_label);
       elem.appendChild(cl_label);
       elem.appendChild(apd_checkbox_label);
       elem.appendChild(plot_button);
 
-      const apd_elements = [apd_label];
+      const apd_elements = [apd_label, apd_thresh_label];
       const file_elements = [file_in, plot_button];
 
       const set_hidden = () => {

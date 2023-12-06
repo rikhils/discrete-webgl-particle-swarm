@@ -80,6 +80,7 @@ define('scripts/pso', [
           trimmed_data: [],
           data_arrays: [],
           datatypes: [],
+          apd_threshs: [],
           full_normalized_data: [],
           sample_interval: 1.0,
         },
@@ -311,9 +312,21 @@ define('scripts/pso', [
       return normalized_data;
     }
 
-    readData(raw_input_data, input_cls, datatypes, normalize) {
+    readData(input_data, normalize) {
+      const raw_input_data = [];
+      const input_cls = [];
+      const datatypes = [];
+      const apd_threshs = [];
+      for (const obj of input_data) {
+        raw_input_data.push(obj.data);
+        input_cls.push(obj.cl);
+        datatypes.push(obj.datatype);
+        apd_threshs.push(obj.apd_thresh || 0);
+      }
+
       this.env.simulation.period = input_cls;
       this.env.simulation.datatypes = datatypes;
+      this.env.simulation.apd_threshs = apd_threshs;
 
       const trimmed_data = [];
       const data_arrays = [];
@@ -614,7 +627,6 @@ define('scripts/pso', [
       };
 
       const makeRunSimulationSolver = (final) => {
-
         let model_frag;
         switch (String(this.env.simulation.model)) {
           case 'fk':
@@ -651,6 +663,7 @@ define('scripts/pso', [
             ['align_thresh', '1f', (cl_idx) => this.env.simulation.align_thresh[cl_idx]],
             ['sample_interval', '1f', () => this.env.simulation.sample_interval],
             ['data_type', '1i', (cl_idx) => this.env.simulation.datatypes[cl_idx] === 'apds' ? 1 : 0],
+            ['apd_thresh', '1f', (cl_idx) => this.env.simulation.apd_threshs[cl_idx]],
           ],
           out: [final ? this.simulation_texture : this.error_texture],
           run: final ? this.gl_helper.runFinal : this.gl_helper.runSimulation,

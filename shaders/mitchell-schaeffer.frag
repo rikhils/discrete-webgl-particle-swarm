@@ -15,7 +15,7 @@ uniform float dt, period, stim_start, stim_end, stim_mag;
 uniform int num_beats, pre_beats, data_type;
 uniform float h_init;
 uniform float align_thresh;
-uniform float sample_interval;
+uniform float sample_interval, apd_thresh;
 
 float stim_f(const float t) {
     const float stim_scale = 0.4;
@@ -39,15 +39,10 @@ void main() {
 
     const float stim_dur = 10.0;
 
-    // TODO: replace with uniform
-    const float APD_thresh = 0.15;
-
-
     ivec2 tex_size = textureSize(in_particles_1, 0);
     ivec2 idx = ivec2(floor(cc * 0.5 * vec2(tex_size)));
 
-    ivec2 data_tex_size = textureSize(data_texture,0);
-    int num_data_points = data_tex_size.x;
+    int num_data_points = textureSize(data_texture, 0).x;
 
     vec4 particles_1 = texelFetch(in_particles_1, idx, 0);
     vec4 particles_2 = texelFetch(in_particles_1, idx + ivec2(tex_size.x/2, 0), 0);
@@ -71,7 +66,7 @@ void main() {
     int data_index = 0;
 
     int start_comp = 0;
-    bool first_upstroke = false;
+    bool first_align_upstroke = false;
     float saved_value = -1.0;
 
     float APD_start, APD_end;
@@ -96,13 +91,10 @@ void main() {
         v += dv * dt;
         h += dh * dt;
 
-        if(step_count > pre_pace_steps)
-        {   
-            //APD only mode
-            if(data_type == 1)
-            {
-                if(!activated && v > APD_thresh)
-                {
+        if (step_count > pre_pace_steps) {
+            // APD only mode
+            if (data_type == 1) {
+                if (!activated && v > apd_thresh) {
                     activated = true;
                     float x0 = float(step_count-1)*dt;
                     float x1 = float(step_count)*dt;
@@ -111,10 +103,8 @@ void main() {
                     float y1 = v;
 
                     // Linear interpolation of actual crossing of threshold
-                    APD_start = (x0*(y1 - APD_thresh) + x1*(APD_thresh - y0)) / (y1-y0);
-                }
-                else if(activated && v < APD_thresh)
-                {
+                    APD_start = (x0*(y1 - apd_thresh) + x1*(apd_thresh - y0)) / (y1-y0);
+                } else if (activated && v < apd_thresh) {
                     activated = false;
 
                     float x0 = float(step_count-1)*dt;
@@ -124,21 +114,19 @@ void main() {
                     float y1 = v;
 
                     // Linear interpolation of actual crossing of threshold
-                    APD_end = (x0*(y1 - APD_thresh) + x1*(APD_thresh - y0)) / (y1-y0);
+                    APD_end = (x0*(y1 - apd_thresh) + x1*(apd_thresh - y0)) / (y1-y0);
                     float sim_APD = APD_end - APD_start;
                     float target_APD = texelFetch(data_texture, ivec2(data_index++, 0), 0).r;
                     error += (target_APD - sim_APD) * (target_APD - sim_APD);
                 }
             }
             // Curve error only mode
-            else
-            {
-                if (!first_align_upstroke && v > align_thresh)
-                {
+            else {
+                if (!first_align_upstroke && v > align_thresh) {
                     first_align_upstroke = true;
                     start_comp = step_count;
                     error = 0.0;
-                }   
+                }
                 // Measure curve error
                 if (first_align_upstroke && mod(float(step_count - start_comp), compare_stride) == 0.0) {
                     float actual = texelFetch(data_texture, ivec2(data_index++, 0), 0).r;
@@ -160,12 +148,10 @@ void main() {
 
     // If we had missing activations to 2:1 blocking, I'm just adding the
     // missing APDs as raw error, since this is a very bad solution
-    if(data_type == 1)
-    {
+    if (data_type == 1) {
         // While there are still leftover target APDs we never matched in the
         // simulation, add them as raw error.
-        for(; data_index < num_data_points; data_index++)
-        {
+        for(; data_index < num_data_points; data_index++) {
             float missing_APD = texelFetch(data_texture, ivec2(data_index, 0), 0).r;
             error += missing_APD*missing_APD;
         }

@@ -65,15 +65,6 @@ require([
     pso = new Pso(hyperparams.particle_count);
     const input_data = await pso_interface.getAllInputData();
 
-    const raw_input_data = [];
-    const input_cls = [];
-    const datatypes = [];
-    for (const obj of input_data) {
-      raw_input_data.push(obj.data);
-      input_cls.push(obj.cl);
-      datatypes.push(obj.datatype);
-    }
-
     const start_time = Date.now();
 
     pso.setupEnv(
@@ -85,7 +76,7 @@ require([
       hyperparams,
     );
 
-    pso.readData(raw_input_data, input_cls, datatypes, pso_interface.normalization.value);
+    pso.readData(input_data, pso_interface.normalization.value);
 
     pso.initializeTextures();
     pso.setupAllSolvers();

@@ -151,12 +151,10 @@ void main() {
 
     // If we had missing activations to 2:1 blocking, I'm just adding the
     // missing APDs as raw error, since this is a very bad solution
-    if (data_type == 1)
-    {
+    if (data_type == 1) {
         // While there are still leftover target APDs we never matched in the
         // simulation, add them as raw error.
-        for (; data_index < num_data_points; data_index++)
-        {
+        for (; data_index < num_data_points; data_index++) {
             float missing_APD = texelFetch(data_texture, ivec2(data_index, 0), 0).r;
             error += missing_APD*missing_APD;
         }

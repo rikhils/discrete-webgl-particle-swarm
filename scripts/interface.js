@@ -7,6 +7,7 @@ define('scripts/interface', [
     static param_lists = {
       fk: ['tr', 'tsi', 'twp', 'td', 'tvp', 'tv1m', 'tv2m', 'twm', 'to', 'xk', 'ucsi', 'uc', 'uv'],
       ms: ['tin', 'tout', 'tclose', 'topen', 'vgate'],
+      mms: ['mms_tin', 'mms_tout', 'mms_tclose', 'mms_topen', 'mms_vgate'],
       fhn: ['alpha', 'beta', 'eps', 'mu', 'gamma', 'theta', 'delta'],
       b4v: ['b4v_thv',  'b4v_tv1m',  'b4v_tv2m',  'b4v_tvp',  'b4v_uwm',  'b4v_tso1',  'b4v_kso',  'b4v_ts1',  'b4v_ts2',  'b4v_ks',  'b4v_tw1m',  'b4v_tw2m',  'b4v_tw1p',  'b4v_tfi',  'b4v_to1',  'b4v_to2',  'b4v_tso2',  'b4v_uso',  'b4v_us' ,  'b4v_tsi1', 'b4v_thw', 'b4v_thvm', 'b4v_tho', 'b4v_kwm', 'b4v_twinf', 'b4v_winfstar', 'b4v_uu'],
       bb: ['bb_tv1p', 'bb_tv1m', 'bb_tv2m', 'bb_tw1p', 'bb_tw2p', 'bb_tw1m', 'bb_tw2m', 'bb_ts1', 'bb_ts2', 'bb_tfi', 'bb_to1', 'bb_to2', 'bb_tso1', 'bb_tso2', 'bb_tsi1', 'bb_tsi2', 'bb_twinf', 'bb_thv', 'bb_thvm', 'bb_thvinf', 'bb_thw', 'bb_thwinf', 'bb_thso', 'bb_thsi', 'bb_tho', 'bb_ths', 'bb_kwp', 'bb_kwm', 'bb_ks', 'bb_kso', 'bb_ksi', 'bb_uwm', 'bb_us', 'bb_uo', 'bb_uu', 'bb_uso', 'bb_sc', 'bb_wcp', 'bb_winfstar'],

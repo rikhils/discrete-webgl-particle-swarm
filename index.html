@@ -45,6 +45,7 @@
         <select name="model" id="model-select">
           <option value="fk" selected>Fenton-Karma</option>
           <option value="ms">Mitchell-Schaeffer</option>
+          <option value="mms">Modified MS</option>
           <option value="fhn">Hector-FHN</option>
           <option value="b4v">Bueno-Orovio</option>
           <option value="bb">Bueno-Orovio Brugada</option>
@@ -176,6 +177,44 @@
           <input id="vgate_min" type="text">
           <input id="vgate_max" type="text">
           <input id="vgate_fit" type="checkbox" class="fit-checkbox" checked="true">
+        </div>
+
+        <div id="mms-parameters" class="param-div-hidden">
+          <span>Parameter</span>
+          <span>Value</span>
+          <span>Minimum</span>
+          <span>Maximum</span>
+          <span>Fit?</span>
+
+          <span>TIN</span>
+          <input id="mms_tin_val" type="text">
+          <input id="mms_tin_min" type="text">
+          <input id="mms_tin_max" type="text">
+          <input id="mms_tin_fit" type="checkbox" class="fit-checkbox" checked="true">
+
+          <span>TOUT</span>
+          <input id="mms_tout_val" type="text">
+          <input id="mms_tout_min" type="text">
+          <input id="mms_tout_max" type="text">
+          <input id="mms_tout_fit" type="checkbox" class="fit-checkbox" checked="true">
+
+          <span>TCLOSE</span>
+          <input id="mms_tclose_val" type="text">
+          <input id="mms_tclose_min" type="text">
+          <input id="mms_tclose_max" type="text">
+          <input id="mms_tclose_fit" type="checkbox" class="fit-checkbox" checked="true">
+
+          <span>TOPEN</span>
+          <input id="mms_topen_val" type="text">
+          <input id="mms_topen_min" type="text">
+          <input id="mms_topen_max" type="text">
+          <input id="mms_topen_fit" type="checkbox" class="fit-checkbox" checked="true">
+
+          <span>VGATE</span>
+          <input id="mms_vgate_val" type="text">
+          <input id="mms_vgate_min" type="text">
+          <input id="mms_vgate_max" type="text">
+          <input id="mms_vgate_fit" type="checkbox" class="fit-checkbox" checked="true">
         </div>
 
         <div id="fhn-parameters" class="param-div-hidden">

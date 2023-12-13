@@ -4,6 +4,7 @@ define('scripts/pso', [
   'text!shaders/copy_uint_texture.frag',
   'text!shaders/default.vert',
   'text!shaders/mitchell-schaeffer.frag',
+  'text!shaders/modified-mitchell-schaeffer.frag',
   'text!shaders/expand_error.frag',
   'text!shaders/run_simulation_0d.frag',
   'text!shaders/reduce_error_s1.frag',
@@ -22,6 +23,7 @@ define('scripts/pso', [
   CopyUintShader,
   DefaultVertexShader,
   MitchellSchaefferShader,
+  ModifiedMsShader,
   ExpandErrorShader,
   RunSimulationShader,
   ReduceErrorS1Shader,
@@ -103,6 +105,10 @@ define('scripts/pso', [
         ],
         ms_bounds: [
           [0.15, 3.0, 75, 60, 0.065],
+          [0.6, 12.0, 300, 240, 0.26],
+        ],
+        mms_bounds: [
+          [0.05, 0.5, 60, 60, 0.065],
           [0.6, 12.0, 300, 240, 0.26],
         ],
         fhn_bounds: [
@@ -634,6 +640,9 @@ define('scripts/pso', [
             break;
           case 'ms':
             model_frag = MitchellSchaefferShader;
+            break;
+          case 'mms':
+            model_frag = ModifiedMsShader;
             break;
           case 'fhn':
             model_frag = HectorFHNShader;

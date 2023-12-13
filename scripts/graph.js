@@ -216,6 +216,27 @@ define('scripts/graph', [
       return { graph_buffer, uniform_values };
     }
 
+    processApdData(apd_start, apd_end, apd_thresh, color, num_points, scale, offset) {
+      const gl = this.gl;
+
+      const uniform_values = {};
+
+      offset ||= 0;
+
+      uniform_values.color = color;
+      uniform_values.num_points = num_points;
+      uniform_values.min_val = scale[0];
+      uniform_values.max_val = scale[1];
+
+      const graph_array = new Float32Array([apd_start, apd_thresh, apd_end, apd_thresh]);
+
+      const graph_buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, graph_buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, graph_array, gl.DYNAMIC_DRAW, 0);
+
+      return { graph_buffer, uniform_values };
+    }
+
     /*
      * Clear the canvas.
      */
@@ -246,6 +267,24 @@ define('scripts/graph', [
       this.useGraphVertexBuffer(program, graph_buffer);
 
       gl.drawArrays(gl.LINE_STRIP, 0, graph_points.length);
+
+      this.runGrid([0.8, 0.8, 0.8]);
+    }
+
+    runApdGraph(apd_start, apd_end, apd_thresh, color, num_points, scale, offset) {
+      const gl = this.gl;
+
+      const { graph_buffer, uniform_values } = this.processApdData(apd_start, apd_end, apd_thresh, color, num_points, scale, offset);
+
+      // No need to resize the canvas or set the viewport
+
+      const { program, uniform_locations, set_uniforms } = this.info;
+      gl.useProgram(program);
+      set_uniforms(uniform_locations, uniform_values);
+
+      this.useGraphVertexBuffer(program, graph_buffer);
+
+      gl.drawArrays(gl.LINES, 0, 2);
 
       this.runGrid([0.8, 0.8, 0.8]);
     }

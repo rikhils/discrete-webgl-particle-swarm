@@ -301,7 +301,7 @@ define('scripts/interface', [
       elem.appendChild(plot_button);
 
       const apd_elements = [apd_label, apd_thresh_label];
-      const file_elements = [file_in, plot_button];
+      const file_elements = [file_in];
 
       const set_hidden = () => {
         if (apd_checkbox.checked) {

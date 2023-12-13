@@ -114,6 +114,9 @@ require([
 
   async function displayDataGraph(cl_idx) {
     const input_data = await pso_interface.getAllInputData();
+    if (input_data[cl_idx].datatype !== 'trace') {
+      return;
+    }
     const raw_text = input_data[cl_idx].data;
     const actual_data = raw_text.split('\n').filter(x => !(x.trim() === ""));
 
@@ -122,6 +125,22 @@ require([
     graph.clearGraph();
     graph.runGraph(actual_data, [0, 0, 0], actual_data.length, scale);
   }
+
+  const apd_start_indices = (data, apd_thresh) => {
+    let in_ap = false;
+    const idxs = [];
+
+    for (let i = 0; i < data.length; ++i) {
+      if (!in_ap && data[i] > apd_thresh) {
+        in_ap = true;
+        idxs.push(i);
+      } else if (in_ap && data[i] < apd_thresh) {
+        in_ap = false;
+      }
+    }
+
+    return idxs;
+  };
 
   function displayGraph(cl_idx, current_values) {
     const simulation_data = current_values ?
@@ -132,9 +151,16 @@ require([
     const plotting_sim_data = simulation_data.slice(-sim_length);
 
     let actual_data = [];
+    let apd_starts = [];
+    let apd_ends = [];
     let align_index = 0;
 
-    if (pso.env.simulation.datatypes[cl_idx] === 'trace') {
+    if (pso.env.simulation.datatypes[cl_idx] === 'apds') {
+      // apd_starts = apd_start_indices(plotting_sim_data, pso.env.simulation.apd_threshs[cl_idx]).map(x => x / pso.env.simulation.sample_interval);
+      apd_starts = apd_start_indices(plotting_sim_data, pso.env.simulation.apd_threshs[cl_idx]);
+      const apds = pso.env.simulation.trimmed_data[cl_idx];
+      apd_ends = apd_starts.map((x, idx) => x + (apds[idx] || 0) / pso.env.simulation.sample_interval);
+    } else {
       actual_data = pso.env.simulation.trimmed_data[cl_idx];
       const align_thresh = actual_data.find(x => x > 0.15);
       align_index = plotting_sim_data.findIndex(x => x > align_thresh);
@@ -148,7 +174,11 @@ require([
     const interval = Number(pso_interface.data_sample_interval.value);
 
     graph.clearGraph();
-    if (pso.env.simulation.datatypes[cl_idx] === 'trace') {
+    if (pso.env.simulation.datatypes[cl_idx] === 'apds') {
+      for (let i = 0; i < apd_starts.length; ++i) {
+        graph.runApdGraph(apd_starts[i], apd_ends[i], pso.env.simulation.apd_threshs[cl_idx], [0, 0, 0], sim_length, scale, 0);
+      }
+    } else {
       graph.runGraph(actual_data, [0, 0, 0], sim_length, scale, align_index);
     }
     graph.runGraph(plotting_sim_data, [1, 0, 0], sim_length, scale, 0);

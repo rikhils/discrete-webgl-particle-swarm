@@ -6,7 +6,7 @@ define('scripts/pso', [
   'text!shaders/mitchell-schaeffer.frag',
   'text!shaders/modified-mitchell-schaeffer.frag',
   'text!shaders/expand_error.frag',
-  'text!shaders/run_simulation_0d.frag',
+  'text!shaders/fenton_karma.frag',
   'text!shaders/reduce_error_s1.frag',
   'text!shaders/reduce_error_s2.frag',
   'text!shaders/update_velocities.frag',
@@ -25,7 +25,7 @@ define('scripts/pso', [
   MitchellSchaefferShader,
   ModifiedMsShader,
   ExpandErrorShader,
-  RunSimulationShader,
+  FentonKarmaShader,
   ReduceErrorS1Shader,
   ReduceErrorS2Shader,
   UpdateVelocitiesShader,
@@ -636,7 +636,7 @@ define('scripts/pso', [
         let model_frag;
         switch (String(this.env.simulation.model)) {
           case 'fk':
-            model_frag = RunSimulationShader;
+            model_frag = FentonKarmaShader;
             break;
           case 'ms':
             model_frag = MitchellSchaefferShader;

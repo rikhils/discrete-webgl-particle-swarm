@@ -61,6 +61,7 @@ void main() {
     int data_index = 0;
 
     int start_comp = 0;
+    int compared_points = 0;
     bool first_align_upstroke = false;
     float saved_value = -1.0;
 
@@ -112,6 +113,7 @@ void main() {
                     float sim_APD = APD_end - APD_start;
                     float target_APD = texelFetch(data_texture, ivec2(data_index++, 0), 0).r;
                     error += (target_APD - sim_APD) * (target_APD - sim_APD);
+                    compared_points += 1;
                 }
             }
             // Curve error only mode
@@ -125,6 +127,7 @@ void main() {
                 if (first_align_upstroke && mod(float(step_count - start_comp), compare_stride) == 0.0) {
                     float actual = texelFetch(data_texture, ivec2(data_index++, 0), 0).r;
                     error += (v - actual)*(v - actual);
+                    compared_points += 1;
                 }
             }
         }
@@ -148,8 +151,9 @@ void main() {
         for(; data_index < num_data_points; data_index++) {
             float missing_APD = texelFetch(data_texture, ivec2(data_index, 0), 0).r;
             error += missing_APD*missing_APD;
+            compared_points += 1;
         }
     }
 
-    error_texture = vec4(error, saved_value, 0, 1.0/period);
+    error_texture = vec4(error, saved_value, 0, compared_points == 0 ? 1.0 : 1.0 / float(compared_points));
 }

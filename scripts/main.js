@@ -17,6 +17,9 @@ require([
   const error_graph = new Graph(error_canvas);
   const pso_interface = new PsoInterface();
 
+  // eslint-disable-next-line no-unused-vars
+  const dump_convergence = false;
+
   pso_interface.displayBounds(Pso.getEnv());
   pso_interface.displayModelParameters();
   pso_interface.displayStimulusParameters();
@@ -131,10 +134,18 @@ require([
   // Start with a single data file input
   pso_interface.addInput();
 
+  let iteration_params = {};
+  let iteration_error = {};
+  let iteration_velocities = {};
+
   const run_pso = async () => {
     const hyperparams = pso_interface.getHyperparams();
     pso = new Pso(hyperparams.particle_count);
     const input_data = await pso_interface.getAllInputData();
+
+    iteration_params = {};
+    iteration_error = {};
+    iteration_velocities = {};
 
     const start_time = Date.now();
 
@@ -163,10 +174,22 @@ require([
     if (iter < iter_count) {
       console.log(pso.env.particles.best_error_value);
       pso.runOneIteration();
+
+      if (dump_convergence) {
+        pso.capture_parameters(iteration_params,iter);
+        pso.capture_error(iteration_error,iter);
+        pso.capture_velocities(iteration_velocities,iter);
+      }
+
       best_error_list.push(pso.env.particles.best_error_value);
       window.requestAnimationFrame(() => runPsoIterations(iter+1, iter_count, best_error_list, start_time));
     } else {
       finalizePso(start_time, best_error_list);
+      if (dump_convergence) {
+        PsoInterface.saveOutput([JSON.stringify(iteration_params)], `convergence_data.json`);
+        PsoInterface.saveOutput([JSON.stringify(iteration_error)], `error_data.json`);
+        PsoInterface.saveOutput([JSON.stringify(iteration_velocities)], `velocity_data.json`);
+      }
     }
   }
 

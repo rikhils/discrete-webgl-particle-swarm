@@ -48,8 +48,10 @@ define('scripts/pso', [
         dim = 16;
       else if (particle_count <= 1024)
         dim = 32;
-      else
+      else if (particle_count <= 4096)
         dim = 64;
+      else
+        dim = 256;
 
       this.particles_width = dim;
       this.particles_height = dim;
@@ -99,14 +101,14 @@ define('scripts/pso', [
           best_error_value: 1e10,
           lower_bounds: [],
           upper_bounds: [],
-          learning_rate: 1.0,
+          learning_rate: 0.05,
           omega: 1.0,
           chi: 0.73,
           parameter_textures: 1,
         },
         fk_bounds: [
-          [25, 10, 50, 0.15, 1, 10, 500, 5, 5, 1, 0.2, 0.1, 0.005],
-          [200, 300, 500, 0.4, 20, 50, 1500, 100, 50, 15, 0.9, 0.1, 0.05],
+          [25, 10, 50, 0.15, 1, 10, 500, 5, 5, 1, 0.2, 0.05, 0.005],
+          [200, 300, 500, 0.4, 20, 50, 1500, 100, 50, 15, 0.9, 0.3, 0.05],
         ],
         ms_bounds: [
           [0.15, 3.0, 75, 60, 0.065],
@@ -794,6 +796,47 @@ define('scripts/pso', [
         this.gl_helper.getFloatTextureArray(this.global_best_textures[t], 2, 2, out_array);
         env.particles.global_bests.push(...out_array);
       }
+    }
+
+    // I am doing this like, just about as inefficiently as possible
+    capture_parameters(param_arrays_map, itr) {
+      const tex_width = this.tex_width;
+      const tex_height = this.tex_height;
+      const asize = 4 * tex_width * tex_height;
+
+      param_arrays_map[itr] = {};
+
+      for (let i = 0; i < this.env.particles.parameter_textures; ++i) {
+        const cur_params = new Float32Array(asize);
+        this.gl_helper.getFloatTextureArray(this.particles_textures[i], tex_width, tex_height, cur_params);
+        param_arrays_map[itr][i] = cur_params;
+      }
+    }
+
+    capture_velocities(vel_arrays_map, itr) {
+      const tex_width = this.tex_width;
+      const tex_height = this.tex_height;
+      const asize = 4 * tex_width * tex_height;
+
+      vel_arrays_map[itr] = {};
+
+      for (let i = 0; i < this.env.particles.parameter_textures; ++i) {
+        const cur_vels = new Float32Array(asize);
+        this.gl_helper.getFloatTextureArray(this.velocities_textures[i], tex_width, tex_height, cur_vels);
+        vel_arrays_map[itr][i] = cur_vels;
+      }
+    }
+
+    capture_error(param_arrays_map, itr) {
+      const tex_width = this.tex_width;
+      const tex_height = this.tex_height;
+      const asize = 4 * tex_width * tex_height;
+
+      param_arrays_map[itr] = {};
+
+      const cur_error = new Float32Array(asize);
+      this.gl_helper.getFloatTextureArray(this.expanded_error_texture, tex_width,tex_height, cur_error);
+      param_arrays_map[itr] = cur_error;
     }
 
     runOneIteration() {

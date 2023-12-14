@@ -183,7 +183,7 @@ define('scripts/interface', [
     async getDataFromInput(element) {
       const cl = Number(element.querySelector('.data-cl-input').value);
       const apd_only = element.querySelector('.data-apd-checkbox').checked;
-      const thresh = Number(element.querySelector('.data-apd-thresh-input').value);
+      const weight = Number(element.querySelector('.data-weight-input').value);
 
       if (cl === 0) {
         throw new Error('No CL entered');
@@ -191,6 +191,7 @@ define('scripts/interface', [
 
       if (apd_only) {
         const apds = new Float32Array(element.querySelector('.data-apd-input').value.split(','));
+        const thresh = Number(element.querySelector('.data-apd-thresh-input').value);
 
         if (apds.length === 0) {
           throw new Error('No APDs entered');
@@ -201,6 +202,7 @@ define('scripts/interface', [
           data: apds,
           cl: cl,
           apd_thresh: thresh,
+          weight: weight,
         };
       }
 
@@ -228,6 +230,7 @@ define('scripts/interface', [
         datatype: 'trace',
         data: text,
         cl: cl,
+        weight: weight,
       };
     }
 
@@ -271,6 +274,15 @@ define('scripts/interface', [
       cl_in.classList.add('data-cl-input');
       cl_label.appendChild(cl_in);
 
+      const weight_label = document.createElement('label');
+      weight_label.innerHTML = 'Weight';
+
+      const weight_in = document.createElement('input');
+      weight_in.setAttribute('type', 'text');
+      weight_in.classList.add('data-weight-input');
+      weight_label.appendChild(weight_in);
+      weight_in.value = "1";
+
       const apd_checkbox_label = document.createElement('label');
       apd_checkbox_label.innerHTML = 'APD only?';
 
@@ -297,6 +309,7 @@ define('scripts/interface', [
       elem.appendChild(apd_label);
       elem.appendChild(apd_thresh_label);
       elem.appendChild(cl_label);
+      elem.appendChild(weight_label);
       elem.appendChild(apd_checkbox_label);
       elem.appendChild(plot_button);
 

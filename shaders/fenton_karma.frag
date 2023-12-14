@@ -15,7 +15,7 @@ uniform float dt, period, stim_start, stim_end, stim_mag;
 uniform int num_beats, pre_beats, data_type;
 uniform float v_init, w_init;
 uniform float align_thresh;
-uniform float sample_interval, apd_thresh;
+uniform float sample_interval, apd_thresh, weight;
 
 float stim_f(const float t) {
     const float stim_scale = 0.4;
@@ -208,5 +208,5 @@ void main() {
     // TODO: Do something similar to above for curve error. Can't be exactly
     // the same, but I need to stop letting it cheat by messing around with
     // the upstroke alignment. This isn't a common issue, but it does exist.
-    error_texture = vec4(error, saved_value, 0, compared_points == 0 ? 1.0 : 1.0 / float(compared_points));
+    error_texture = vec4(error, saved_value, 0, compared_points == 0 ? weight : weight / float(compared_points));
 }

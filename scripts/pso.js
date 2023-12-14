@@ -83,6 +83,7 @@ define('scripts/pso', [
           data_arrays: [],
           datatypes: [],
           apd_threshs: [],
+          weights: [],
           full_normalized_data: [],
           sample_interval: 1.0,
         },
@@ -323,11 +324,13 @@ define('scripts/pso', [
       const input_cls = [];
       const datatypes = [];
       const apd_threshs = [];
+      const weights = [];
       for (const obj of input_data) {
         raw_input_data.push(obj.data);
         input_cls.push(obj.cl);
         datatypes.push(obj.datatype);
         apd_threshs.push(obj.apd_thresh || 0);
+        weights.push(obj.weight);
       }
 
       this.env.simulation.period = input_cls;
@@ -387,6 +390,7 @@ define('scripts/pso', [
       this.env.simulation.trimmed_data = trimmed_data;
       this.env.simulation.align_thresh = align_thresh;
       this.env.simulation.full_normalized_data = all_full_normalized_data;
+      this.env.simulation.weights = weights;
     }
 
     initializeParticles() {
@@ -673,6 +677,7 @@ define('scripts/pso', [
             ['sample_interval', '1f', () => this.env.simulation.sample_interval],
             ['data_type', '1i', (cl_idx) => this.env.simulation.datatypes[cl_idx] === 'apds' ? 1 : 0],
             ['apd_thresh', '1f', (cl_idx) => this.env.simulation.apd_threshs[cl_idx]],
+            ['weight', '1f', (cl_idx) => this.env.simulation.weights[cl_idx]],
           ],
           out: [final ? this.simulation_texture : this.error_texture],
           run: final ? this.gl_helper.runFinal : this.gl_helper.runSimulation,

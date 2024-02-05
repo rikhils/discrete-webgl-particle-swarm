@@ -178,7 +178,7 @@ require([
     error_graph.clearGraph();
     error_graph.runGraph(best_error_list, [0, 0, 0], best_error_list.length, [Math.min(...best_error_list), Math.max(...best_error_list)]);
 
-    displayGraph(0);
+    displayGraph(pso_interface.plotting_idx);
 
     console.log("Execution time (ms):");
     console.log(Date.now() - start_time);

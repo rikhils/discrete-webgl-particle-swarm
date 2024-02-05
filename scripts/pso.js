@@ -70,9 +70,6 @@ define('scripts/pso', [
           model: 'fk',
           dt: 0.02,
           period: [],
-          stim_start: 2.0,
-          stim_end: 7.0,
-          stim_mag: 0.1,
           num_beats: 1,
           pre_beats: 4,
           v_init: 1.0,
@@ -86,6 +83,14 @@ define('scripts/pso', [
           weights: [],
           full_normalized_data: [],
           sample_interval: 1.0,
+        },
+        stimulus: {
+          stim_dur: 10.0,
+          stim_mag: 0.4,
+          stim_biphasic: true,
+          stim_offset_1: 7.0,
+          stim_offset_2: 6.72,
+          stim_t_scale: 0.725,
         },
         particles: {
           phi_local: 2.05,
@@ -264,7 +269,7 @@ define('scripts/pso', [
       return env;
     }
 
-    setupEnv(model, bounds, pre_beats, num_beats, sample_interval, hyperparams) {
+    setupEnv(model, bounds, stimulus_params, pre_beats, num_beats, sample_interval, hyperparams) {
       this.env = Pso.getEnv();
       const env = this.env;
 
@@ -668,9 +673,12 @@ define('scripts/pso', [
             ['data_texture', 'tex', (cl_idx) => this.data_textures[cl_idx]],
             ['dt', '1f', () => this.env.simulation.dt],
             ['period', '1f', (cl_idx) => this.env.simulation.period[cl_idx]],
-            ['stim_start', '1f', () => this.env.simulation.stim_start],
-            ['stim_end', '1f', () => this.env.simulation.stim_end],
-            ['stim_mag', '1f', () => this.env.simulation.stim_mag],
+            ['stim_dur', '1f', () => this.env.stimulus.stim_dur],
+            ['stim_mag', '1f', () => this.env.stimulus.stim_mag],
+            ['stim_biphasic', '1i', () => this.env.stimulus.stim_biphasic],
+            ['stim_offset_1', '1f', () => this.env.stimulus.stim_offset_1],
+            ['stim_offset_2', '1f', () => this.env.stimulus.stim_offset_2],
+            ['stim_t_scale', '1f', () => this.env.stimulus.stim_t_scale],
             ['num_beats', '1i', () => this.env.simulation.num_beats],
             ['pre_beats', '1i', () => this.env.simulation.pre_beats],
             ['align_thresh', '1f', (cl_idx) => this.env.simulation.align_thresh[cl_idx]],

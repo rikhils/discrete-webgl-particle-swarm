@@ -66,6 +66,20 @@ define('scripts/interface', [
       this.status_display = document.getElementById('status_display');
       this.save_params_button = document.getElementById('save_params_button');
       this.save_run_button = document.getElementById('save_run_button');
+      this.stim_biphasic_checkbox = document.getElementById('stim-biphasic');
+      this.stim_square = {
+        section: document.getElementById('stim-square-section'),
+        stim_dur: document.getElementById('stim-dur-square'),
+        stim_mag: document.getElementById('stim-mag-square'),
+      };
+      this.stim_biphasic = {
+        section: document.getElementById('stim-biphasic-section'),
+        stim_dur: document.getElementById('stim-dur-biphasic'),
+        stim_mag: document.getElementById('stim-mag-biphasic'),
+        stim_offset_1: document.getElementById('stim-offset-1-biphasic'),
+        stim_offset_2: document.getElementById('stim-offset-2-biphasic'),
+        stim_t_scale: document.getElementById('stim-t-scale-biphasic'),
+      };
 
       this.default_button_bg = null;
       this.plotting_idx = -1;
@@ -108,6 +122,10 @@ define('scripts/interface', [
         return `${k}, ${v}\n`;
       });
 
+      const stim_data = Object.entries(this.getStimulusParameters()).map(([k, v]) => {
+        return `${k}, ${v}\n`;
+      });
+
       const other_data = [
         `normalization, ${this.normalization.value}\n`,
         `number_beats, ${this.data_num_beats.value}\n`,
@@ -116,7 +134,15 @@ define('scripts/interface', [
         `fit_error, ${this.fit_error.innerHTML}\n`,
       ];
 
-      const data = model_data.concat(param_data, min_data, max_data, fit_data, hyperparam_data, other_data);
+      const data = model_data.concat(
+        param_data,
+        min_data,
+        max_data,
+        fit_data,
+        hyperparam_data,
+        stim_data,
+        other_data,
+      );
 
       PsoInterface.saveOutput(data, `pso_run_${Date.now()}.csv`);
     }
@@ -150,6 +176,16 @@ define('scripts/interface', [
         str += ' Done!';
       }
       this.status_display.innerHTML = str;
+    }
+
+    displayStimulusParameters() {
+      if (this.stim_biphasic_checkbox.checked) {
+        this.stim_square.section.classList.add('data-input-hidden');
+        this.stim_biphasic.section.classList.remove('data-input-hidden');
+      } else {
+        this.stim_square.section.classList.remove('data-input-hidden');
+        this.stim_biphasic.section.classList.add('data-input-hidden');
+      }
     }
 
     displayModelParameters() {
@@ -426,6 +462,24 @@ define('scripts/interface', [
       }
 
       return [lb, ub];
+    }
+
+    getStimulusParameters() {
+      return this.stim_biphasic_checkbox.checked ? {
+        stim_dur: Number(this.stim_biphasic.stim_dur.value),
+        stim_mag: Number(this.stim_biphasic.stim_mag.value),
+        stim_biphasic: true,
+        stim_offset_1: Number(this.stim_biphasic.stim_offset_1.value),
+        stim_offset_2: Number(this.stim_biphasic.stim_offset_2.value),
+        stim_t_scale: Number(this.stim_biphasic.stim_t_scale.value),
+      } : {
+        stim_dur: Number(this.stim_square.stim_dur.value),
+        stim_mag: Number(this.stim_square.stim_mag.value),
+        stim_biphasic: false,
+        stim_offset_1: 0.0,
+        stim_offset_2: 0.0,
+        stim_t_scale: 0.0,
+      };
     }
 
     setAxes(xmin, xmax, ymin, ymax) {

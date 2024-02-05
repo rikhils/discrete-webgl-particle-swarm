@@ -702,6 +702,36 @@
     <button id="add-data">Add data</button>
     <button id="remove-data">Remove data</button>
 
+    <div id="stim-section" class="data_div">
+      <input id="stim-biphasic" type="checkbox">
+      <label for="stim-biphasic">Biphasic stimulus</label>
+
+      <div id="stim-square-section">
+        <label for="stim-dur-square">Stimulus duration</label>
+        <input id="stim-dur-square" type="text" value="2">
+
+        <label for="stim-mag-square">Stimulus magnitude</label>
+        <input id="stim-mag-square" type="text" value="0.2">
+      </div>
+
+      <div id="stim-biphasic-section" class="data-input-hidden">
+        <label for="stim-dur-biphasic">Stimulus duration</label>
+        <input id="stim-dur-biphasic" type="text" value="10">
+
+        <label for="stim-mag-biphasic">Stimulus magnitude</label>
+        <input id="stim-mag-biphasic" type="text" value="0.4">
+
+        <label for="stim-offset-1-biphasic">Stimulus offset 1</label>
+        <input id="stim-offset-1-biphasic" type="text" value="7">
+
+        <label for="stim-offset-2-biphasic">Stimulus offset 2</label>
+        <input id="stim-offset-2-biphasic" type="text" value="6.72">
+
+        <label for="stim-t-scale-biphasic">Stimulus timescale</label>
+        <input id="stim-t-scale-biphasic" type="text" value="0.725">
+      </div>
+    </div>
+
     <div>
       <span>Fit error:</span>
       <span id="fit_error"></span>

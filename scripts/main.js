@@ -19,6 +19,7 @@ require([
 
   pso_interface.displayBounds(Pso.getEnv());
   pso_interface.displayModelParameters();
+  pso_interface.displayStimulusParameters();
 
   document.getElementById('reset_bounds').onclick = () => {
     pso_interface.displayBounds(Pso.getEnv());
@@ -38,6 +39,7 @@ require([
   };
 
   pso_interface.model_select.addEventListener('change', () => pso_interface.displayModelParameters());
+  pso_interface.stim_biphasic_checkbox.addEventListener('change', () => pso_interface.displayStimulusParameters());
 
   pso_interface.save_params_button.onclick = () => pso_interface.saveParams();
   pso_interface.save_run_button.onclick = () => pso_interface.saveRunDetails();
@@ -70,6 +72,7 @@ require([
     pso.setupEnv(
       pso_interface.model_select.value,
       pso_interface.getBounds(),
+      pso_interface.getStimulusParameters(),
       pso_interface.data_pre_beats.value,
       pso_interface.data_num_beats.value,
       pso_interface.data_sample_interval.value,

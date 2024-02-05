@@ -11,21 +11,22 @@ layout (location = 0) out vec4 error_texture;
 in vec2 cc;
 
 // Simulation parameters
-uniform float dt, period, stim_start, stim_end, stim_mag;
+uniform float dt, period;
 uniform int num_beats, pre_beats, data_type;
 uniform float v_init, w_init;
 uniform float align_thresh;
 uniform float sample_interval, apd_thresh, weight;
+uniform float stim_dur, stim_mag, stim_offset_1, stim_offset_2, stim_t_scale;
+uniform bool stim_biphasic;
 
-float stim_f(const float t) {
-    const float stim_scale = 0.4;
-    const float stim_dur = 10.0;
-    const float offset_1 = 7.0;
-    const float offset_2 = offset_1 * 0.96;
-    const float t_scale = 0.725;
-    float a = (t/t_scale - offset_2);
+float biphasic_stim_f(const float t) {
+    float a = (t/stim_t_scale - stim_offset_2);
 
-    return -stim_scale * (t / t_scale - offset_1) / (1.0 + a*a*a*a);
+    return -stim_mag * (t / stim_t_scale - stim_offset_1) / (1.0 + a*a*a*a);
+}
+
+float square_stim_f(const float t) {
+    return stim_mag;
 }
 
 void main() {
@@ -38,8 +39,6 @@ void main() {
     int num_steps = int(ceil(endtime/dt));
 
     int my_save_step = pre_pace_steps + int(round(float(num_beats*num_period)*cc.x));
-
-    const float stim_dur = 10.0;
 
     ivec2 tex_size = textureSize(in_particles_1, 0);
     ivec2 idx = ivec2(floor(cc * 0.5 * vec2(tex_size)));
@@ -181,11 +180,14 @@ void main() {
         xso = (u >= thso) ? 1.0/tso : (u-uo)/to;
         xsi = (u >= thsi) ? -w*s/tsi : 0.0;
 
-        // Apply stimulus
         float stim = 0.0;
         float stim_t = mod(float(step_count)*dt, period);
-        if (stim_t <= stim_dur) {
-            stim = stim_f(stim_t);
+        if (stim_t < stim_dur) {
+            if (stim_biphasic) {
+                stim = biphasic_stim_f(stim_t);
+            } else {
+                stim = square_stim_f(stim_t);
+            }
         }
 
         float prev_u = u;

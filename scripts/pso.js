@@ -97,7 +97,6 @@ define('scripts/pso', [
           phi_global: 2.05,
           global_bests: [],
           best_error_value: 1e10,
-          scale: [],
           lower_bounds: [],
           upper_bounds: [],
           learning_rate: 1.0,
@@ -295,18 +294,11 @@ define('scripts/pso', [
       // TODO Elizabeth's Brugada code scales the standard chi value by 0.25, which is worth investigating
       env.particles.chi = hyperparams.chi;
 
-      env.particles.scale = [];
-      // The bounds arrays had better be the same length
-      for (let i = 0; i < bounds[0].length; ++i) {
-        env.particles.scale.push((bounds[1][i] - bounds[0][i])/2);
-      }
-
       env.particles.lower_bounds = bounds[0];
       env.particles.upper_bounds = bounds[1];
 
       // Pad out these arrays so chunks of 16 can always be used as uniforms
-      while (env.particles.scale.length % 16 !== 0) {
-        env.particles.scale.push(0);
+      while (env.particles.lower_bounds.length % 16 !== 0) {
         env.particles.lower_bounds.push(0);
         env.particles.upper_bounds.push(0);
       }
@@ -581,7 +573,6 @@ define('scripts/pso', [
             ['global_best_texture', 'tex', () => this.global_best_textures[num]],
             ['itinymtState', 'tex', () => this.env.velocity_update.ftinymtState],
             ['itinymtMat', 'tex', () => this.env.velocity_update.itinymtMat],
-            ['scale', '4fv_a', () => [this.env.particles.scale, num*16, 16]],
             ['phi_local', '1f', () => this.env.particles.phi_local],
             ['phi_global', '1f', () => this.env.particles.phi_global],
             ['omega', '1f', () => this.env.particles.omega],

@@ -41,8 +41,77 @@ require([
   pso_interface.model_select.addEventListener('change', () => pso_interface.displayModelParameters());
   pso_interface.stim_biphasic_checkbox.addEventListener('change', () => pso_interface.displayStimulusParameters());
 
-  pso_interface.save_params_button.onclick = () => pso_interface.saveParams();
-  pso_interface.save_run_button.onclick = () => pso_interface.saveRunDetails();
+  const save_output = (data, filename) => {
+    const file = new Blob(data, { type: 'text/plain' });
+    const e = document.createElement('a');
+    const url = URL.createObjectURL(file);
+    e.href = url;
+    e.download = filename;
+    document.body.appendChild(e);
+    e.click();
+    setTimeout(() => {
+      document.body.removeChild(e);
+      window.URL.revokeObjectURL(url);
+    }, 0);
+  };
+
+  pso_interface.save_params_button.onclick = () => {
+    const model = pso.env.simulation.model;
+    const global_bests = pso.env.particles.global_bests;
+    const params = PsoInterface.param_lists[model];
+
+    const params_obj = {};
+    for (let i = 0; i < params.length; ++i) {
+      params_obj[params[i]] = global_bests[i];
+    }
+
+    save_output([JSON.stringify(params_obj, null, 2)], `pso_${model}_params_${Date.now()}.json`);
+  };
+
+  pso_interface.save_run_button.onclick = () => {
+    const details_obj = {
+      'simulation': (({
+        model,
+        dt,
+        period,
+        num_beats,
+        pre_beats,
+        datatypes,
+        weights,
+        sample_interval,
+      }) => ({
+        model,
+        dt,
+        period,
+        num_beats,
+        pre_beats,
+        datatypes,
+        weights,
+        sample_interval,
+      }))(pso.env.simulation),
+      'stimulus': pso.env.stimulus,
+      'particles': pso.env.particles,
+    };
+
+    const params = PsoInterface.param_lists[pso.env.simulation.model];
+
+    const params_obj = {};
+    const lower_bounds_obj = {};
+    const upper_bounds_obj = {};
+
+    for (let i = 0; i < params.length; ++i) {
+      const param = params[i];
+      params_obj[param] = pso.env.particles.global_bests[i];
+      lower_bounds_obj[param] = pso.env.particles.lower_bounds[i];
+      upper_bounds_obj[param] = pso.env.particles.upper_bounds[i];
+    }
+
+    details_obj.particles.global_bests = params_obj;
+    details_obj.particles.lower_bounds = lower_bounds_obj;
+    details_obj.particles.upper_bounds = upper_bounds_obj;
+
+    save_output([JSON.stringify(details_obj, null, 2)], `pso_run_${Date.now()}.json`);
+  };
 
   pso_interface.data_section.onclick = async (e) => {
     if (e.target.getAttribute('class') === 'plot-data-button') {

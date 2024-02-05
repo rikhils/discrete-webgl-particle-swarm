@@ -286,6 +286,8 @@ define('scripts/pso', [
         env.simulation.sample_interval = Number(sample_interval);
       }
 
+      env.stimulus = stimulus_params;
+
       // 16 parameters per texture for now
       env.particles.parameter_textures = Math.ceil(bounds[0].length/16);
 

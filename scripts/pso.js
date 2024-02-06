@@ -85,6 +85,7 @@ define('scripts/pso', [
           weights: [],
           full_normalized_data: [],
           sample_interval: 1.0,
+          normalization: 1.0,
         },
         stimulus: {
           stim_dur: 10.0,
@@ -347,6 +348,7 @@ define('scripts/pso', [
       const all_full_normalized_data = [];
 
       const normalization = Number(normalize) || 1;
+      this.env.simulation.normalization = normalization;
       const delta = 0.001;
 
       for (let i = 0; i < raw_input_data.length; ++i) {

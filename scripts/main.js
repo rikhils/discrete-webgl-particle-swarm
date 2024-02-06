@@ -82,6 +82,7 @@ require([
         datatypes,
         weights,
         sample_interval,
+        normalization,
       }) => ({
         model,
         dt,
@@ -91,6 +92,7 @@ require([
         datatypes,
         weights,
         sample_interval,
+        normalization,
       }))(pso.env.simulation),
       'stimulus': pso.env.stimulus,
       'particles': pso.env.particles,

@@ -131,23 +131,26 @@ define('scripts/pso', [
             // 1.0,   // tv1p
             // 0.5,   // tv1m
             // 1.0,   // tv2m
-            5.8024,   // tv1p fixed
+            // 5.8024,   // tv1p fixed
+            // 60.0,   // tv1m fixed
+            // 50.0,   // tv2m fixed
+
+            5.0,   // tv1p
             60.0,   // tv1m fixed
             50.0,   // tv2m fixed
-
             40,    // tw1p
-            230,   // tw2p
+            150,   // tw2p
             10,    // tw1m
             20,    // tw2m
             5,     // ts1
-            70,    // ts2
+            50,    // ts2
 
             // 0.05,  // tfi
             // 5.0,   // to1
             // 5.0,   // to2
             0.05,  // tfi fixed
             400.0,   // to1 fixed
-            33.0,   // to2 fixed
+            20.0,   // to2 fixed
 
             150,   // tso1
             1,     // tso2
@@ -199,7 +202,7 @@ define('scripts/pso', [
             // 4.0,    // tv1p
             // 300.0,  // tv1m
             // 1500.0, // tv2m
-            5.8024,   // tv1p fixed
+            10.0,   // tv1p
             60.0,   // tv1m fixed
             50.0,   // tv2m fixed
 
@@ -207,20 +210,20 @@ define('scripts/pso', [
             300,    // tw2p
             500,    // tw1m
             40,     // tw2m
-            12,     // ts1
+            15,     // ts1
             90,     // ts2
 
             // 0.5,    // tfi
             // 500.0,  // to1
             // 10.0,   // to2
-            0.05,  // tfi fixed
-            400.0,   // to1 fixed
-            33.0,   // to2 fixed
+            0.1,  // tfi fixed
+            500.0,   // to1 fixed
+            35.0,   // to2 fixed
 
             200,    // tso1
             3,      // tso2
             20,     // tsi1
-            5,      // tsi2
+            10,      // tsi2
 
             // 0.2,    // twinf
             // 0.35,   // thv
@@ -256,7 +259,7 @@ define('scripts/pso', [
             0.0,   // uo fixed
             1.0,  // uu fixed
 
-            0.65,   // uso
+            0.75,   // uso
             0.9,    // sc
             0.3,    // wcp
 

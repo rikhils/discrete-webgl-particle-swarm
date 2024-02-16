@@ -188,9 +188,9 @@ require([
     } else {
       finalizePso(start_time, best_error_list);
       if (dump_convergence) {
-        PsoInterface.saveOutput([JSON.stringify(iteration_params)], `convergence_data.json`);
-        PsoInterface.saveOutput([JSON.stringify(iteration_error)], `error_data.json`);
-        PsoInterface.saveOutput([JSON.stringify(iteration_velocities)], `velocity_data.json`);
+        save_output([JSON.stringify(iteration_params)], `convergence_data.json`);
+        save_output([JSON.stringify(iteration_error)], `error_data.json`);
+        save_output([JSON.stringify(iteration_velocities)], `velocity_data.json`);
       }
     }
   }

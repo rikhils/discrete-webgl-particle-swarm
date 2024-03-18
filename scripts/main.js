@@ -94,8 +94,8 @@ require([
         sample_interval,
         normalization,
       }))(pso.env.simulation),
-      'stimulus': pso.env.stimulus,
-      'particles': pso.env.particles,
+      'stimulus': structuredClone(pso.env.stimulus),
+      'particles': structuredClone(pso.env.particles),
     };
 
     const params = PsoInterface.param_lists[pso.env.simulation.model];

@@ -17,8 +17,8 @@ require([
   const error_graph = new Graph(error_canvas);
   const pso_interface = new PsoInterface();
 
-  // eslint-disable-next-line no-unused-vars
   const dump_convergence = false;
+  const save_error = false;
 
   pso_interface.displayBounds(Pso.getEnv());
   pso_interface.displayModelParameters();
@@ -187,6 +187,12 @@ require([
       window.requestAnimationFrame(() => runPsoIterations(iter+1, iter_count, best_error_list, start_time));
     } else {
       finalizePso(start_time, best_error_list);
+
+      if (save_error) {
+        const filename = `pso_error_${pso.env.simulation.model}_${pso.particles_width*pso.particles_height}_${iter_count}_${Date.now()}.txt`;
+        save_output([best_error_list.join('\n')], filename);
+      }
+
       if (dump_convergence) {
         save_output([JSON.stringify(iteration_params)], `convergence_data.json`);
         save_output([JSON.stringify(iteration_error)], `error_data.json`);

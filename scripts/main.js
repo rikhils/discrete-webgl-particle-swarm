@@ -174,7 +174,6 @@ require([
     pso_interface.updateStatusDisplay(iter, iter_count);
 
     if (iter < iter_count) {
-      console.log(pso.env.particles.best_error_value);
       pso.runOneIteration();
 
       if (dump_convergence) {
@@ -211,8 +210,7 @@ require([
 
     displayGraph(pso_interface.plotting_idx);
 
-    console.log("Execution time (ms):");
-    console.log(Date.now() - start_time);
+    console.log(`Execution time (ms): ${Date.now()-start_time}`);
   }
 
   async function displayDataGraph(cl_idx) {

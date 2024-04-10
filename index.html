@@ -43,102 +43,151 @@
       <div id="parameter-section">
         <label for="model-select">Model:</label>
         <select name="model" id="model-select">
-          <option value="fk" selected>Fenton-Karma</option>
-          <option value="ms">Mitchell-Schaeffer</option>
-          <option value="mms">Modified MS</option>
-          <option value="fhn">Hector-FHN</option>
-          <option value="b4v">Bueno-Orovio</option>
-          <option value="bb">Bueno-Orovio Brugada</option>
+          <option value="dm" selected>Discrete Model</option>
         </select>
 
         <button type="button" id="fit-all-button">Fit all</button>
         <button type="button" id="fit-none-button">Fit none</button>
         <button type="button" id="plot-from-vals-button">Plot from values</button>
 
-        <div id="fk-parameters" class="param-div">
+        <div id="dm-parameters" class="param-div">
           <span>Parameter</span>
           <span>Value</span>
           <span>Minimum</span>
           <span>Maximum</span>
           <span>Fit?</span>
 
-          <span>TR</span>
-          <input id="tr_val" type="text">
-          <input id="tr_min" type="text">
-          <input id="tr_max" type="text">
-          <input id="tr_fit" type="checkbox" class="fit-checkbox" checked="true">
+          <span>dm_A_0</span>
+          <input id="dm_A_0_val" type="text">
+          <input id="dm_A_0_min" type="text">
+          <input id="dm_A_0_max" type="text">
+          <input id="dm_A_0_fit" type="checkbox" class="fit-checkbox" checked="true">
 
-          <span>TSI</span>
-          <input id="tsi_val" type="text">
-          <input id="tsi_min" type="text">
-          <input id="tsi_max" type="text">
-          <input id="tsi_fit" type="checkbox" class="fit-checkbox" checked="true">
+          <span>dm_D_0</span>
+          <input id="dm_D_0_val" type="text">
+          <input id="dm_D_0_min" type="text">
+          <input id="dm_D_0_max" type="text">
+          <input id="dm_D_0_fit" type="checkbox" class="fit-checkbox" checked="true">
 
-          <span>TWP</span>
-          <input id="twp_val" type="text">
-          <input id="twp_min" type="text">
-          <input id="twp_max" type="text">
-          <input id="twp_fit" type="checkbox" class="fit-checkbox" checked="true">
+          <span>dm_tau_0</span>
+          <input id="dm_tau_0_val" type="text">
+          <input id="dm_tau_0_min" type="text">
+          <input id="dm_tau_0_max" type="text">
+          <input id="dm_tau_0_fit" type="checkbox" class="fit-checkbox" checked="true">
 
-          <span>TD</span>
-          <input id="td_val" type="text">
-          <input id="td_min" type="text">
-          <input id="td_max" type="text">
-          <input id="td_fit" type="checkbox" class="fit-checkbox" checked="true">
+          <span>dm_A_1</span>
+          <input id="dm_A_1_val" type="text">
+          <input id="dm_A_1_min" type="text">
+          <input id="dm_A_1_max" type="text">
+          <input id="dm_A_1_fit" type="checkbox" class="fit-checkbox" checked="true">
 
-          <span>TVP</span>
-          <input id="tvp_val" type="text">
-          <input id="tvp_min" type="text">
-          <input id="tvp_max" type="text">
-          <input id="tvp_fit" type="checkbox" class="fit-checkbox" checked="true">
+          <span>dm_D_1</span>
+          <input id="dm_D_1_val" type="text">
+          <input id="dm_D_1_min" type="text">
+          <input id="dm_D_1_max" type="text">
+          <input id="dm_D_1_fit" type="checkbox" class="fit-checkbox" checked="true">
 
-          <span>TV1M</span>
-          <input id="tv1m_val" type="text">
-          <input id="tv1m_min" type="text">
-          <input id="tv1m_max" type="text">
-          <input id="tv1m_fit" type="checkbox" class="fit-checkbox" checked="true">
+          <span>dm_tau_1</span>
+          <input id="dm_tau_1_val" type="text">
+          <input id="dm_tau_1_min" type="text">
+          <input id="dm_tau_1_max" type="text">
+          <input id="dm_tau_1_fit" type="checkbox" class="fit-checkbox" checked="true">
 
-          <span>TV2M</span>
-          <input id="tv2m_val" type="text">
-          <input id="tv2m_min" type="text">
-          <input id="tv2m_max" type="text">
-          <input id="tv2m_fit" type="checkbox" class="fit-checkbox" checked="true">
+          <span>dm_gamma</span>
+          <input id="dm_gamma_val" type="text">
+          <input id="dm_gamma_min" type="text">
+          <input id="dm_gamma_max" type="text">
+          <input id="dm_gamma_fit" type="checkbox" class="fit-checkbox" checked="true">
 
-          <span>TWM</span>
-          <input id="twm_val" type="text">
-          <input id="twm_min" type="text">
-          <input id="twm_max" type="text">
-          <input id="twm_fit" type="checkbox" class="fit-checkbox" checked="true">
+          <span>dm_sigma</span>
+          <input id="dm_sigma_val" type="text">
+          <input id="dm_sigma_min" type="text">
+          <input id="dm_sigma_max" type="text">
+          <input id="dm_sigma_fit" type="checkbox" class="fit-checkbox" checked="true">
 
-          <span>TO</span>
-          <input id="to_val" type="text">
-          <input id="to_min" type="text">
-          <input id="to_max" type="text">
-          <input id="to_fit" type="checkbox" class="fit-checkbox" checked="true">
+          <span>dm_tau_q</span>
+          <input id="dm_tau_q_val" type="text">
+          <input id="dm_tau_q_min" type="text">
+          <input id="dm_tau_q_max" type="text">
+          <input id="dm_tau_q_fit" type="checkbox" class="fit-checkbox" checked="true">
 
-          <span>XK</span>
-          <input id="xk_val" type="text">
-          <input id="xk_min" type="text">
-          <input id="xk_max" type="text">
-          <input id="xk_fit" type="checkbox" class="fit-checkbox" checked="true">
+          <span>dm_alpha</span>
+          <input id="dm_alpha_val" type="text">
+          <input id="dm_alpha_min" type="text">
+          <input id="dm_alpha_max" type="text">
+          <input id="dm_alpha_fit" type="checkbox" class="fit-checkbox" checked="true">
 
-          <span>UCSI</span>
-          <input id="ucsi_val" type="text">
-          <input id="ucsi_min" type="text">
-          <input id="ucsi_max" type="text">
-          <input id="ucsi_fit" type="checkbox" class="fit-checkbox" checked="true">
+          <span>dm_beta</span>
+          <input id="dm_beta_val" type="text">
+          <input id="dm_beta_min" type="text">
+          <input id="dm_beta_max" type="text">
+          <input id="dm_beta_fit" type="checkbox" class="fit-checkbox" checked="true">
 
-          <span>UC</span>
-          <input id="uc_val" type="text">
-          <input id="uc_min" type="text">
-          <input id="uc_max" type="text">
-          <input id="uc_fit" type="checkbox" class="fit-checkbox" checked="true">
+          <span>dm_l_c</span>
+          <input id="dm_l_c_val" type="text">
+          <input id="dm_l_c_min" type="text">
+          <input id="dm_l_c_max" type="text">
+          <input id="dm_l_c_fit" type="checkbox" class="fit-checkbox" checked="true">
 
-          <span>UV</span>
-          <input id="uv_val" type="text">
-          <input id="uv_min" type="text">
-          <input id="uv_max" type="text">
-          <input id="uv_fit" type="checkbox" class="fit-checkbox" checked="true">
+          <span>dm_rho</span>
+          <input id="dm_rho_val" type="text">
+          <input id="dm_rho_min" type="text">
+          <input id="dm_rho_max" type="text">
+          <input id="dm_rho_fit" type="checkbox" class="fit-checkbox" checked="true">
+
+          <span>dm_tau_u</span>
+          <input id="dm_tau_u_val" type="text">
+          <input id="dm_tau_u_min" type="text">
+          <input id="dm_tau_u_max" type="text">
+          <input id="dm_tau_u_fit" type="checkbox" class="fit-checkbox" checked="true">
+
+          <span>dm_nu</span>
+          <input id="dm_nu_val" type="text">
+          <input id="dm_nu_min" type="text">
+          <input id="dm_nu_max" type="text">
+          <input id="dm_nu_fit" type="checkbox" class="fit-checkbox" checked="true">
+
+          <span>dm_c_0h</span>
+          <input id="dm_c_0h_val" type="text">
+          <input id="dm_c_0h_min" type="text">
+          <input id="dm_c_0h_max" type="text">
+          <input id="dm_c_0h_fit" type="checkbox" class="fit-checkbox" checked="true">
+
+          <span>dm_theta</span>
+          <input id="dm_theta_val" type="text">
+          <input id="dm_theta_min" type="text">
+          <input id="dm_theta_max" type="text">
+          <input id="dm_theta_fit" type="checkbox" class="fit-checkbox" checked="true">
+
+          <span>dm_eta</span>
+          <input id="dm_eta_val" type="text">
+          <input id="dm_eta_min" type="text">
+          <input id="dm_eta_max" type="text">
+          <input id="dm_eta_fit" type="checkbox" class="fit-checkbox" checked="true">
+
+          <span>dm_kappa</span>
+          <input id="dm_kappa_val" type="text">
+          <input id="dm_kappa_min" type="text">
+          <input id="dm_kappa_max" type="text">
+          <input id="dm_kappa_fit" type="checkbox" class="fit-checkbox" checked="true">
+
+          <span>dm_tau_c</span>
+          <input id="dm_tau_c_val" type="text">
+          <input id="dm_tau_c_min" type="text">
+          <input id="dm_tau_c_max" type="text">
+          <input id="dm_tau_c_fit" type="checkbox" class="fit-checkbox" checked="true">
+
+          <span>dm_epsilon</span>
+          <input id="dm_epsilon_val" type="text">
+          <input id="dm_epsilon_min" type="text">
+          <input id="dm_epsilon_max" type="text">
+          <input id="dm_epsilon_fit" type="checkbox" class="fit-checkbox" checked="true">
+
+          <span>dm_c_0c</span>
+          <input id="dm_c_0c_val" type="text">
+          <input id="dm_c_0c_min" type="text">
+          <input id="dm_c_0c_max" type="text">
+          <input id="dm_c_0c_fit" type="checkbox" class="fit-checkbox" checked="true">
         </div>
 
         <div id="ms-parameters" class="param-div-hidden">

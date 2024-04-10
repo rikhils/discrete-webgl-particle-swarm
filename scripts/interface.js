@@ -5,7 +5,30 @@ define('scripts/interface', [
 
   return class PsoInterface {
     static param_lists = {
-      fk: ['tr', 'tsi', 'twp', 'td', 'tvp', 'tv1m', 'tv2m', 'twm', 'to', 'xk', 'ucsi', 'uc', 'uv'],
+      dm: [
+        'dm_A_0',
+        'dm_D_0',
+        'dm_tau_0',
+        'dm_A_1',
+        'dm_D_1',
+        'dm_tau_1',
+        'dm_gamma',
+        'dm_sigma',
+        'dm_tau_q',
+        'dm_alpha',
+        'dm_beta',
+        'dm_l_c',
+        'dm_rho',
+        'dm_tau_u',
+        'dm_nu',
+        'dm_c_0h',
+        'dm_theta',
+        'dm_eta',
+        'dm_kappa',
+        'dm_tau_c',
+        'dm_epsilon',
+        'dm_c_0c'
+    ],
       ms: ['tin', 'tout', 'tclose', 'topen', 'vgate'],
       mms: ['mms_tin', 'mms_tout', 'mms_tclose', 'mms_topen', 'mms_vgate'],
       fhn: ['alpha', 'beta', 'eps', 'mu', 'gamma', 'theta', 'delta'],
@@ -376,7 +399,7 @@ define('scripts/interface', [
 
     displayError(error) {
       // this.fit_error.innerHTML = this.truncateString(error);
-      this.fit_error.innerHTML = (Number.parseFloat(error).toPrecision(4)).toString();
+      this.fit_error.innerHTML = String(error);
     }
 
     getBounds() {

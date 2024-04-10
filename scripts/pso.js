@@ -6,6 +6,7 @@ define('scripts/pso', [
   'text!shaders/mitchell-schaeffer.frag',
   'text!shaders/modified-mitchell-schaeffer.frag',
   'text!shaders/expand_error.frag',
+  'text!shaders/discrete_model.frag',
   'text!shaders/fenton_karma.frag',
   'text!shaders/reduce_error_s1.frag',
   'text!shaders/reduce_error_s2.frag',
@@ -25,6 +26,7 @@ define('scripts/pso', [
   MitchellSchaefferShader,
   ModifiedMsShader,
   ExpandErrorShader,
+  DiscreteModelShader,
   FentonKarmaShader,
   ReduceErrorS1Shader,
   ReduceErrorS2Shader,
@@ -69,7 +71,7 @@ define('scripts/pso', [
     static getEnv() {
       const env = {
         simulation: {
-          model: 'fk',
+          model: 'dm',
           dt: 0.02,
           period: [],
           num_beats: 1,
@@ -107,9 +109,9 @@ define('scripts/pso', [
           chi: 0.73,
           parameter_textures: 1,
         },
-        fk_bounds: [
-          [25, 10, 50, 0.15, 1, 10, 500, 5, 5, 1, 0.2, 0.05, 0.005],
-          [200, 300, 900, 0.4, 20, 50, 1500, 100, 50, 15, 0.9, 0.3, 0.05],
+        dm_bounds: [
+          [150.0, 20.0, 40.0, 0.0, 40.0, 400.0, 0.0005, 0.4, 60.0, 0.018, 2.5, 70.125, 0.25, 150.0, 0.3, 37.5, 15.0, 0.075, 0.075, 225.0, 1.5, 21.0],
+          [250.0, 60.0, 80.0, 10.0, 80.0, 600.0, 0.002, 0.6, 100.0, 0.054, 7.5, 117.875, 0.75, 250.0, 0.5, 62.5, 25.0, 0.125, 0.125, 375.0, 2.5, 35.0],
         ],
         ms_bounds: [
           [0.15, 3.0, 75, 60, 0.065],
@@ -644,8 +646,8 @@ define('scripts/pso', [
       const makeRunSimulationSolver = (final) => {
         let model_frag;
         switch (String(this.env.simulation.model)) {
-          case 'fk':
-            model_frag = FentonKarmaShader;
+          case 'dm':
+            model_frag = DiscreteModelShader;
             break;
           case 'ms':
             model_frag = MitchellSchaefferShader;

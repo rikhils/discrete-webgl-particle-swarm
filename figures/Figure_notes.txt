@@ -1,9 +1,0 @@
-
-
-There is no data for 16384x8 Matlab code, as my laptop froze when I tried to do
-that and I had to emergency reboot it.
-
-All WebGL data is average of 50 runs.
-
-Matlab data is all average of 5 runs, excpet for 1024x8, which is average of 50.
-The Matlab 1024 x 8 is also actually 1000 x 8 because I'm dumb.

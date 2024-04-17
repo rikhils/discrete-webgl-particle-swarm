@@ -18,15 +18,15 @@ uniform float align_thresh;
 uniform float sample_interval, apd_thresh, weight;
 uniform float stim_dur, stim_mag, stim_offset_1, stim_offset_2, stim_t_scale;
 uniform bool stim_biphasic;
-
+ 
 void main() {
     // PSO derived parameters
-    int num_period = int(ceil(period/dt));
-    int total_beats = pre_beats + num_beats;
-    float endtime = ceil(float(total_beats)*period);
-    float pre_pace_endtime = ceil(float(pre_beats)*period);
-    int pre_pace_steps = int(ceil(pre_pace_endtime/dt));
-    int num_steps = int(ceil(endtime/dt));
+    // int num_period = int(ceil(period/dt));
+    // int total_beats = pre_beats + num_beats;
+    // float endtime = ceil(float(total_beats)*period);
+    // float pre_pace_endtime = ceil(float(pre_beats)*period);
+    // int pre_pace_steps = int(ceil(pre_pace_endtime/dt));
+    // int num_steps = int(ceil(endtime/dt));
 
     ivec2 tex_size = textureSize(in_particles_1, 0);
     ivec2 idx = ivec2(floor(cc * 0.5 * vec2(tex_size)));
@@ -45,7 +45,8 @@ void main() {
     float init_l = 67.791;
     float init_b = 117.09;
 
-    float target_apd = 226.2196678887523;
+    // float target_apd = texelFetch(data_texture, ivec2(0, 0), 0).r;
+    // float target_apd = 226.2196678887523;
 
     // Initialize parameters
     float A_0 = particles_1.r;
@@ -95,9 +96,12 @@ void main() {
     float c;
 
     float error = 0.0;
+    float min_temp_error = 10000000000.0;
+    float temp_error;
+    float apd_target_j;
 
     // Create APD array
-    float apd_array[50];
+    float apd_array[4];
 
     // Set initial conditions
     float a_n = init_apd;
@@ -153,10 +157,28 @@ void main() {
         b_n = b_n1;
 
         // Store APD
-        apd_array[i] = a_n1;
+        //Only if last 4 beats
+        if (i >= num_beats - 4) {
+            apd_array[i - (num_beats - 4)] = a_n1;
+        }
+        // apd_array[i] = a_n1;
     }
 
-    error = abs(apd_array[num_beats - 1] - target_apd);
+    // error = abs(apd_array[num_beats - 1] - target_apd);
+    for (int i = 0; i < 4; i++) {
+        // error += abs(apd_array[i] - texelFetch(data_texture, ivec2(i, 0), 0).r);
+        temp_error = 0.0;
+        for (int j = 0; j < 4; j++) {
+            apd_target_j = texelFetch(data_texture, ivec2(j, 0), 0).r;
+            temp_error += abs((apd_array[(i + j) % 4] - apd_target_j)/ apd_target_j);
+        }
+        if (temp_error < min_temp_error) {
+            min_temp_error = temp_error;
+        }
+    }
+
+    error = min_temp_error;
+
 
     //write to texture
     error_texture = vec4(error, 0.0, 0.0, 1.0);

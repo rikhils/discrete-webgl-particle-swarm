@@ -327,36 +327,19 @@ define('scripts/pso', [
     }
 
     readData(input_data, normalize) {
-      const raw_input_data = [];
       const input_cls = [];
       const datatypes = [];
       const apd_threshs = [];
       const weights = [];
-      for (const obj of input_data) {
-        raw_input_data.push(obj.data);
-        input_cls.push(obj.cl);
-        datatypes.push(obj.datatype);
-        apd_threshs.push(obj.apd_thresh || 0);
-        weights.push(obj.weight);
-      }
-
-      this.env.simulation.period = input_cls;
-      this.env.simulation.datatypes = datatypes;
-      this.env.simulation.apd_threshs = apd_threshs;
-
-      const trimmed_data = [];
       const data_arrays = [];
+      const trimmed_data = [];
       const align_thresh = [];
       const all_full_normalized_data = [];
 
-      const normalization = Number(normalize) || 1;
-      this.env.simulation.normalization = normalization;
-      const delta = 0.001;
-
-      for (let i = 0; i < raw_input_data.length; ++i) {
-        if (datatypes[i] === 'apds') {
-          const apd_data = raw_input_data[i];
-
+      for (const obj of input_data) {
+        if (obj.datatype === 'apds') {
+          const apd_data = obj.data;
+          
           const data_array = new Float32Array(4 * apd_data.length);
           for (let j = 0; j < apd_data.length; ++j) {
             data_array[4*j] = apd_data[j];
@@ -366,39 +349,45 @@ define('scripts/pso', [
           data_arrays.push(data_array);
           align_thresh.push(0);
           all_full_normalized_data.push(apd_data);
-        } else if (datatypes[i] === 'trace') {
-          const raw_text = raw_input_data[i];
 
-          const split_data = raw_text.split('\n');
-          const actual_data = split_data.filter(x => !(x.trim() === ""));
+          input_cls.push(obj.cl);
+          datatypes.push(obj.datatype);
+          apd_threshs.push(obj.apd_thresh || 0);
+          weights.push(obj.weight);
 
-          const full_parsed_data = actual_data.map(x => parseFloat(x.trim()));
-          const full_normalized_data = this.normalizeData(full_parsed_data, normalization);
+        } else if (obj.datatype === 'trace') {
+          for (let i = 0; i < obj.data.length; i++) {
+            const  apd_data = obj.data[i];
 
-          const first_compare_index = full_normalized_data.findIndex(number => number > 0.15);
+            const data_array = new Float32Array(4 * apd_data.length);
+            for (let j = 0; j < apd_data.length; ++j) {
+              data_array[4*j] = apd_data[j];
+            }
 
-          const left_trimmed_data = full_normalized_data.slice(first_compare_index);
+            trimmed_data.push(apd_data);
+            data_arrays.push(data_array);
+            align_thresh.push(0);
+            all_full_normalized_data.push(apd_data);
 
-          // Pad out the extra pixel values. The data could be stored more densely by using the full pixel
-          // value and by using a two-dimensional texture, but for now there is not enough to require that.
-          const data_length = left_trimmed_data.length;
-          const data_array = new Float32Array(4 * data_length);
-          for (let j = 0; j < data_length; ++j) {
-            data_array[4*j] = left_trimmed_data[j];
+            input_cls.push(obj.cl[i]);
+            datatypes.push('apds');
+            apd_threshs.push(obj.apd_thresh || 0);
+            weights.push(obj.weight);
           }
-
-          trimmed_data.push(left_trimmed_data);
-          data_arrays.push(data_array);
-          align_thresh.push(left_trimmed_data[0] - delta);
-          all_full_normalized_data.push(full_normalized_data);
         }
       }
+      
+      this.env.simulation.period = input_cls;
+      this.env.simulation.datatypes = datatypes;
+      this.env.simulation.apd_threshs = apd_threshs;
 
       this.env.simulation.data_arrays = data_arrays;
       this.env.simulation.trimmed_data = trimmed_data;
       this.env.simulation.align_thresh = align_thresh;
       this.env.simulation.full_normalized_data = all_full_normalized_data;
       this.env.simulation.weights = weights;
+
+      debugger;
     }
 
     initializeParticles() {

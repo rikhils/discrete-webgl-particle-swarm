@@ -172,16 +172,16 @@ define('scripts/interface', [
       const apd_only = element.querySelector('.data-apd-checkbox').checked;
       const weight = Number(element.querySelector('.data-weight-input').value);
 
-      if (cl === 0) {
-        throw new Error('No CL entered');
-      }
-
       if (apd_only) {
         const apds = new Float32Array(element.querySelector('.data-apd-input').value.split(','));
         const thresh = Number(element.querySelector('.data-apd-thresh-input').value);
 
         if (apds.length === 0) {
           throw new Error('No APDs entered');
+        }
+
+        if (cl === 0) {
+          throw new Error('No CL entered');
         }
 
         return {
@@ -213,10 +213,27 @@ define('scripts/interface', [
         }
       });
 
+      const rows = text.split('\n');
+      const cl_array = [];
+      const apds_array = [];
+
+      for (const row of rows) {
+        const values = row.split(',');
+        console.log(values);
+        const cl = Number(values[0]);
+        if (!cl) {
+          continue;
+        }
+        const apds = new Float32Array(values.slice(1, 5));
+
+        cl_array.push(cl);
+        apds_array.push(apds);
+      }
+
       return {
         datatype: 'trace',
-        data: text,
-        cl: cl,
+        data: apds_array,
+        cl: cl_array,
         weight: weight,
       };
     }
@@ -271,7 +288,7 @@ define('scripts/interface', [
       weight_in.value = "1";
 
       const apd_checkbox_label = document.createElement('label');
-      apd_checkbox_label.innerHTML = 'APD only?';
+      apd_checkbox_label.innerHTML = 'Manual Input?';
 
       const apd_checkbox = document.createElement('input');
       apd_checkbox.setAttribute('type', 'checkbox');
